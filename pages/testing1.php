@@ -8,7 +8,7 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <title>Testing3</title>
-        <script src="validation.js" defer></script>
+        <script src="js/validation.js" defer></script>
 
     </head>
 
@@ -55,7 +55,7 @@
             ?>
 
             <h1>Login</h1>
-            <form method="post" action="login.php">
+            <form method="post" action="backend/login.php">
             <label for="email">Email:</label>
                 <input type="email" id="email" name="email">
                 <span id="email_error1" style="color:red;"></span>
