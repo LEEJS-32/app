@@ -1,0 +1,49 @@
+* {
+    font-family: 'Nunito', sans-serif;
+    font-size: 25px;
+    margin: 0;
+}
+
+header {
+    
+}
+
+nav{
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 10%;
+    background-color: aqua;
+}
+
+.nav-bar ul{
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav div ul li {
+    list-style: none;
+    margin: 0 15px;
+
+}
+
+nav div ul li a {
+    text-decoration: none;
+}
+
+.other button {
+    all: unset;
+    cursor: pointer;
+}
+
+.logo {
+    background-color: green;
+}
+
+.other {
+    background-color: yellow;    
+}
+
+.nav-bar {
+    background-color: red;
+}
