@@ -6,7 +6,7 @@
         content="IE=edge">
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
-        <title>Header</title>
+        <!-- <title>Header</title> -->
         <link rel="stylesheet" href="css/style.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
