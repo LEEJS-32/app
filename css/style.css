@@ -1,18 +1,21 @@
 * {
-    font-family: 'Nunito', sans-serif;
-    font-size: 25px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 21px;
     margin: 0;
+    
 }
 
 header {
-    
+    align-items: center;
 }
 
 nav{
     display: flex;
     justify-content: space-between;
-    padding: 20px 10%;
-    background-color: aqua;
+    padding: 20px 8%;
+    align-items: center;
+    font-weight: 500;
+    /* background-color: aqua; */
 }
 
 .nav-bar ul{
@@ -24,11 +27,11 @@ nav{
 nav div ul li {
     list-style: none;
     margin: 0 15px;
-
 }
 
 nav div ul li a {
     text-decoration: none;
+    color: black;
 }
 
 .other button {
@@ -37,13 +40,21 @@ nav div ul li a {
 }
 
 .logo {
-    background-color: green;
+    /* background-color: green; */
 }
 
 .other {
-    background-color: yellow;    
+    /* background-color: yellow;     */
+}
+
+.other button {
+    margin: 0px 10px;
+}
+
+.other button i {
+    font-size: 27px;
 }
 
 .nav-bar {
-    background-color: red;
+    /* background-color: red; */
 }
