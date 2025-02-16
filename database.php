@@ -24,16 +24,49 @@ else {
     echo "Error creating database: " . $conn->error;
 }
 
+// create connection
+$conn = new mysqli($servername, $username, $password, $database);
+
 #table:users
-$sql_table = "CREATE TABLE if not exists USERS (
+// SQL to create users table
+$sql_create_users_table = "CREATE TABLE if not exists USERS (
 name VARCHAR(100) NOT NULL,
 email VARCHAR(100) UNIQUE NOT NULL PRIMARY KEY,
 password VARCHAR(255) NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 
-$conn = new mysqli($servername, $username, $password, $database);
-$result_table = $conn->query($sql_table);
-if ($result_table == TRUE) {
-    echo "Table created successfully<br>";
+if ($conn->query($sql_create_users_table) === TRUE) {
+    echo "Table users created successfully\n";
+} else {
+    echo "Error creating users table: " . $conn->error . "\n";
 }
+
+#table:products
+// SQL to create products table
+$sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    category VARCHAR(50),
+    image_url VARCHAR(255),
+    status ENUM('active', 'inactive', 'discontinued') DEFAULT 'active',
+    discount DECIMAL(5, 2) DEFAULT 0.00,
+    brand VARCHAR(50),
+    rating DECIMAL(3, 2) DEFAULT 0.00,
+    reviews_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)";
+
+if ($conn->query($sql_create_products_table) === TRUE) {
+    echo "Table products created successfully\n";
+} else {
+    echo "Error creating products table: " . $conn->error . "\n";
+}
+
+
+$conn->close();
+?>
