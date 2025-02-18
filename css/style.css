@@ -1,11 +1,11 @@
 * {
     font-family: 'Montserrat', sans-serif;
-    font-size: 21px;
     margin: 0;
     
 }
 
 header {
+    font-size: 19px;
     align-items: center;
 }
 
@@ -14,7 +14,7 @@ nav{
     justify-content: space-between;
     padding: 20px 8%;
     align-items: center;
-    font-weight: 500;
+    font-weight: 550;
     /* background-color: aqua; */
 }
 

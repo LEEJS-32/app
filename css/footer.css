@@ -1,0 +1,54 @@
+footer {
+    bottom: 0;
+    /* background-color: aqua; */
+    font-size: 15px;
+    font-weight: 400;
+}
+
+
+.footer {
+    padding:20px 9% 30px 9%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.copyright {
+    /* background-color: aliceblue; */
+    text-align: center;
+    padding: 12px;
+}
+
+.footer-logo {
+    width: 180px;
+    height: 50px;
+}
+
+.div1 p{
+    padding-top: 10px;
+}
+
+.div2 ul li, .div3 ul li, .div4 ul li{
+    text-decoration: none;
+    list-style: none;
+    padding: 12px 0;
+}
+
+.title {
+    font-size: 17.5px;
+    font-weight: 550;
+}
+
+.div1 ul {
+    list-style: none; /* Removes default bullet points */
+    padding: 0; /* Removes default padding */
+    margin: 0; /* Removes default margin */
+    display: flex; /* Optional: makes icons inline */
+    gap: 15px; /* Adds space between icons */
+}
+
+.div1 ul li {
+    left: 0;
+    font-size: 28px;
+    padding: 24px 12px;
+
+}
