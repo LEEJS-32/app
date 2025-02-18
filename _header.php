@@ -8,24 +8,26 @@
         content="width=device-width, initial-scale=1.0">
         <!-- <title>Header</title> -->
         <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="css/logo.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
     
     <header>
         <nav>
             <div class="logo">
-            <img src="" alt="logo.jpg" class="logo">
+            <img src="img/logo.png" alt="img/logo.png" class="logo">
             </div>
         
             <div class="nav-bar">
             <ul>
-                <li><a href="">home</a></li>
-                <li><a href="">about us</a></li>
-                <li><a href="">products</a></li>
-                <li><a href="">contact</a></li>
+                <li><a href="">Home</a></li>
+                <li><a href="">About us</a></li>
+                <li><a href="">Products</a></li>
+                <li><a href="">Contact</a></li>
             </ul>
             </div>
 

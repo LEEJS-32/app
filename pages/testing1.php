@@ -23,7 +23,7 @@
 
         <main>
             <h1>Sign Up</h1>
-            <form method="post" action="signup.php" onsubmit="return validateForm()">
+            <form method="post" action="../backend/signup.php" onsubmit="return validateForm()">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name">
                 <span id="name_error1" style="color:red;"></span>
@@ -55,7 +55,7 @@
             ?>
 
             <h1>Login</h1>
-            <form method="post" action="backend/login.php">
+            <form method="post" action="../backend/login.php">
             <label for="email">Email:</label>
                 <input type="email" id="email" name="email">
                 <span id="email_error1" style="color:red;"></span>

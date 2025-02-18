@@ -76,6 +76,7 @@ if ($conn->query($sql_create_products_table) === TRUE) {
     echo "Error creating products table: " . $conn->error . "<br>";
 }
 
+<<<<<<< HEAD
 // Add columns if they don't exist
 $columns_to_add = [
     'weight DECIMAL(10, 2)',
@@ -93,6 +94,75 @@ foreach ($columns_to_add as $column) {
     } else {
         echo "Error adding column $column: " . $conn->error . "<br>";
     }
+=======
+# Table: SHOPPING CART
+$sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (
+    cart_id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (email) REFERENCES USERS(email) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+)";
+
+if ($conn->query($sql_create_cart_table) === TRUE) {
+    echo "Table shopping_cart created successfully<br>";
+} else {
+    echo "Error creating shopping_cart table: " . $conn->error . "<br>";
+}
+
+# Table: ORDERS
+$sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(100) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    FOREIGN KEY (email) REFERENCES USERS(email) ON DELETE CASCADE
+)";
+
+if ($conn->query($sql_create_orders_table) === TRUE) {
+    echo "Table orders created successfully<br>";
+} else {
+    echo "Error creating orders table: " . $conn->error . "<br>";
+}
+
+# Table: ORDER ITEMS
+$sql_create_order_items_table = "CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+)";
+
+if ($conn->query($sql_create_order_items_table) === TRUE) {
+    echo "Table order_items created successfully<br>";
+} else {
+    echo "Error creating order_items table: " . $conn->error . "<br>";
+}
+
+# Table: PAYMENTS
+$sql_create_payments_table = "CREATE TABLE IF NOT EXISTS payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    payment_method ENUM('Credit Card', 'PayPal', 'Bank Transfer') NOT NULL,
+    payment_status ENUM('Pending', 'Completed', 'Failed') DEFAULT 'Pending',
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (email) REFERENCES USERS(email) ON DELETE CASCADE
+)";
+
+if ($conn->query($sql_create_payments_table) === TRUE) {
+    echo "Table payments created successfully<br>";
+} else {
+    echo "Error creating payments table: " . $conn->error . "<br>";
+>>>>>>> 0c799ac016a73e93a44ed7e737fa1f17553bdfde
 }
 
 $conn->close();
