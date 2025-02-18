@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #drop_zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            width: 100%;
+            height: 200px;
+            text-align: center;
+            line-height: 200px;
+            color: #ccc;
+            font-size: 20px;
+        }
+        #drop_zone.dragover {
+            border-color: #000;
+            color: #000;
+        }
+        .image-preview {
+            display: inline-block;
+            margin: 10px;
+        }
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+        }
+    </style>
     <script>
         $(document).ready(function() {
             function calculateDiscountedPrice() {
@@ -56,13 +80,47 @@
             });
 
             $("#image_url").change(function() {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $("#imagePreview").attr("src", e.target.result);
-                    $("#imagePreview").show();
-                }
-                reader.readAsDataURL(this.files[0]);
+                handleFiles(this.files);
             });
+
+            // Drag and drop functionality
+            var dropZone = $('#drop_zone');
+            var fileInput = $('#image_url');
+
+            dropZone.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.addClass('dragover');
+            });
+
+            dropZone.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.removeClass('dragover');
+            });
+
+            dropZone.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.removeClass('dragover');
+                var files = e.originalEvent.dataTransfer.files;
+                fileInput[0].files = files;
+                handleFiles(files);
+            });
+
+            function handleFiles(files) {
+                $('#imagePreview').empty();
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = $('<img>').attr('src', e.target.result);
+                        var preview = $('<div>').addClass('image-preview').append(img);
+                        $('#imagePreview').append(preview);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
         });
     </script>
 </head>
@@ -95,8 +153,9 @@
         </select><br><br>
 
         <label for="image_url">Image URL:</label><br>
-        <input type="file" id="image_url" name="image_url" accept="image/*"><br><br>
-        <img id="imagePreview" src="#" alt="Image Preview" style="display: none; max-width: 200px; max-height: 200px;"><br><br>
+        <input type="file" id="image_url" name="image_url[]" accept="image/*" multiple style="display: none;"><br><br>
+        <div id="drop_zone">Drag and drop images here</div>
+        <div id="imagePreview"></div><br><br>
 
         <label for="status">Status:</label><br>
         <select id="status" name="status">
@@ -155,7 +214,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $description = $_POST['description'];
@@ -176,20 +234,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Calculate discounted price
     $discounted_price = $price - ($price * ($discount / 100));
 
-    // Handle file upload
-    $image_url = "";
-    if (isset($_FILES['image_url']) && $_FILES['image_url']['error'] == 0) {
-        $target_dir = "../../img/";
-        $target_file = $target_dir . basename($_FILES["image_url"]["name"]);
-        if (move_uploaded_file($_FILES["image_url"]["tmp_name"], $target_file)) {
-            $image_url = $target_file;
-        } else {
-            echo "Sorry, there was an error uploading your file.";
+    // Handle file uploads
+    $image_urls = [];
+    $target_dir = "../../img/";
+    foreach ($_FILES['image_url']['name'] as $key => $name) {
+        if ($_FILES['image_url']['error'][$key] == 0) {
+            $target_file = $target_dir . basename($name);
+            if (move_uploaded_file($_FILES['image_url']['tmp_name'][$key], $target_file)) {
+                $image_urls[] = $target_file;
+            } else {
+                echo "Sorry, there was an error uploading your file: $name<br>";
+            }
         }
     }
 
+    // Convert image URLs array to JSON
+    $image_urls_json = json_encode($image_urls);
+
     $sql = "INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at)
-            VALUES ('$name', '$description', '$price', '$stock', '$category', '$image_url', '$status', '$discount', '$discounted_price', '$weight', '$length', '$width', '$height', '$brand', '$color', '$rating', '$reviews_count', NOW(), NOW())";
+            VALUES ('$name', '$description', '$price', '$stock', '$category', '$image_urls_json', '$status', '$discount', '$discounted_price', '$weight', '$length', '$width', '$height', '$brand', '$color', '$rating', '$reviews_count', NOW(), NOW())";
 
     if ($conn->query($sql) === TRUE) {
         echo "New product added successfully";
