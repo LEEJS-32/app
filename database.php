@@ -76,7 +76,6 @@ if ($conn->query($sql_create_products_table) === TRUE) {
     echo "Error creating products table: " . $conn->error . "<br>";
 }
 
-<<<<<<< HEAD
 // Add columns if they don't exist
 $columns_to_add = [
     'weight DECIMAL(10, 2)',
@@ -94,7 +93,8 @@ foreach ($columns_to_add as $column) {
     } else {
         echo "Error adding column $column: " . $conn->error . "<br>";
     }
-=======
+}
+
 # Table: SHOPPING CART
 $sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -162,7 +162,7 @@ if ($conn->query($sql_create_payments_table) === TRUE) {
     echo "Table payments created successfully<br>";
 } else {
     echo "Error creating payments table: " . $conn->error . "<br>";
->>>>>>> 0c799ac016a73e93a44ed7e737fa1f17553bdfde
+
 }
 
 $conn->close();
