@@ -68,7 +68,7 @@
 </head>
 <body>
     <h1>Add New Product</h1>
-    <form action="adminProduct.php" method="POST" enctype="multipart/form-data">
+    <form action="adminCreateProduct.php" method="POST" enctype="multipart/form-data">
         <label for="name">Product Name:</label><br>
         <input type="text" id="name" name="name" required><br><br>
 
@@ -179,7 +179,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Handle file upload
     $image_url = "";
     if (isset($_FILES['image_url']) && $_FILES['image_url']['error'] == 0) {
-        $target_dir = "uploads/";
+        $target_dir = "../../img/";
         $target_file = $target_dir . basename($_FILES["image_url"]["name"]);
         if (move_uploaded_file($_FILES["image_url"]["tmp_name"], $target_file)) {
             $image_url = $target_file;
