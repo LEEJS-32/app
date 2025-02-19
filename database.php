@@ -165,5 +165,5 @@ if ($conn->query($sql_create_payments_table) === TRUE) {
 
 }
 
-$conn->close();
+//$conn->close();
 ?>
