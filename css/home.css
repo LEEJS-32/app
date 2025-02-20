@@ -20,7 +20,7 @@ h1 pre {
 }
 
 .intro-left {
-    padding: 20px 0 20px 2% ;
+    padding: 10px 0 20px 2% ;
     /* background-color: rgb(231, 231, 231); */
     width: 35%;
     height: 78vh;
@@ -77,9 +77,56 @@ h3 {
 
 }
 
-.img-intro {
-    width: 500px;
-    height: 500px;
+.img-intro1 {
+    width: 400px;
+    height: 78vh;
     object-fit: cover;
-
+    border-radius: 15px;
+    z-index: 1;
 }
+
+.img-intro2 {
+    margin-top: 50px;
+    right: 8%;
+    position: absolute;
+    width: 500px;
+    height: 28vh;
+    object-fit: cover;
+    border-radius: 15px;
+    outline:5px solid white;
+    z-index: 2;
+}
+
+.intro-right {
+    padding: 25px 3%;
+    /* background-color: rgb(231, 231, 231); */
+    width: 65%;
+    height: 78vh;
+    
+}
+
+.slot {
+    position: absolute;
+    right: 8%;
+    top: 55vh;
+    /* background-color: aqua; */
+    height: 308px;
+    width: 362px;
+}
+
+.tag {
+    text-align: left;
+    padding: 30px 0;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.year {
+    padding-top: 5px;
+}
+
+.tag i {
+    font-size: 20px;
+}
+
+

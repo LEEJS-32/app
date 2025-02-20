@@ -40,7 +40,24 @@
             </div>
 
             <div class="intro-right">
-                <img src="../img/intro.jpeg" class="img-intro">
+                <img src="../img/intro.jpeg" class="img-intro1">
+                <img src="../img/intro_img_2.jpeg" class="img-intro2">
+                <div class="slot">
+                    <div class="tag">
+                        <h4> # Spring Sales </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
+                        <p class="year">July 2025</p>
+                    </div>
+                    <hr>
+                    <div class="tag">
+                        <h4> # New Arrivals </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
+                        <p class="year">June 2025</p>
+                    </div>
+                    <hr>
+                    <div class="tag">
+                        <h4> # New Arrivals </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
+                        <p class="year">May 2025</p>
+                    </div>
+                </div>
             </div>
         </main>
 
