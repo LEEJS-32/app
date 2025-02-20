@@ -231,6 +231,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rating = $_POST['rating'];
     $reviews_count = $_POST['reviews_count'];
 
+    // image_url also used the $name variable
+    // so we need to store the $name variable in another variable
+    $product_name = $name;
+
     // Calculate discounted price
     $discounted_price = $price - ($price * ($discount / 100));
 
@@ -251,14 +255,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Convert image URLs array to JSON
     $image_urls_json = json_encode($image_urls);
 
-    $sql = "INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at)
-            VALUES ('$name', '$description', '$price', '$stock', '$category', '$image_urls_json', '$status', '$discount', '$discounted_price', '$weight', '$length', '$width', '$height', '$brand', '$color', '$rating', '$reviews_count', NOW(), NOW())";
+    // Prepare and bind
+    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    if (!$stmt) {
+        echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+    }
+    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $weight, $length, $width, $height, $brand, $color, $rating, $reviews_count);
 
-    if ($conn->query($sql) === TRUE) {
+    // Execute the statement
+    if ($stmt->execute()) {
         echo "New product added successfully";
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        echo "Error: " . $stmt->error;
     }
+
+    // Close the statement
+    $stmt->close();
 }
 
 $conn->close();
