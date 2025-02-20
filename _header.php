@@ -15,16 +15,16 @@
         <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
-    <body>
+    
     <header>
         <nav>
             <div class="logo">
-            <img src="img/logo4.png" alt="img/logo.png" class="logo">
+            <img src="../img/logo4.png" alt="img/logo.png" class="logo">
             </div>
         
             <div class="nav-bar">
             <ul>
-                <li><a href="">Home</a></li>
+                <li><a href="/pages/home.php">Home</a></li>
                 <li><a href="">About us</a></li>
                 <li><a href="">Products</a></li>
                 <li><a href="">Contact</a></li>

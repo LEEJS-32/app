@@ -1,5 +1,7 @@
 footer {
+
     bottom: 0;
+    width: 100%;
     /* background-color: aqua; */
     font-size: 15px;
     font-weight: 400;
@@ -7,7 +9,7 @@ footer {
 
 
 .footer {
-    padding:20px 9% 30px 9%;
+    padding:20px 8% 30px 8%;
     display: flex;
     justify-content: space-between;
 }

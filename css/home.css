@@ -1,0 +1,85 @@
+.main {
+    margin: 0;
+    left: 0;
+    padding:0 8%;
+}
+
+h2 pre {
+    font-size: 32.5px;
+}
+
+h1 pre {
+    font-size: 60px;
+    padding: 5px 0;
+}
+
+.intro {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3.3%;
+}
+
+.intro-left {
+    padding: 20px 0 20px 2% ;
+    /* background-color: rgb(231, 231, 231); */
+    width: 35%;
+    height: 78vh;
+    
+}
+
+h3 {
+    padding-top: 25px;
+}
+
+.intro-big-content {
+    padding-top: 35%;
+}
+
+.intro-des {
+    padding: 20px 0;
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.shop-now {
+    display: flex;
+    align-items: center;
+}
+
+.shop-now-btn {
+    display: flex; /* Enables flexbox */
+    align-items: center; /* Vertically centers items */
+    justify-content: center; /* Horizontally centers items */
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+    padding: 15px 15px 15px 20px;
+    background-color: black;
+    border-radius: 50px;
+    color: white;
+    vertical-align: center;
+    cursor: pointer;
+
+}
+
+.shop-now-btn i {
+    display: flex;
+    font-size: 20px;
+}
+
+.view-cat-link {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+    margin-left: 25px;
+    text-decoration: underline;
+    color: black;
+
+}
+
+.img-intro {
+    width: 500px;
+    height: 500px;
+    object-fit: cover;
+
+}

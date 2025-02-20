@@ -20,7 +20,7 @@
         <hr>
         <div class="footer">
             <div class="div1">
-                <img src="img/logo4.png" alt="img/logo4.png" class="footer-logo">
+                <img src="../img/logo4.png" alt="img/logo4.png" class="footer-logo">
                 <p>Discover premium-quality furniture that<br>
                 blends style and functionality. We offer a<br>
                 wide range of masterpieces to transform<br>
@@ -66,5 +66,5 @@
         </div>
     </footer>
 
-</body>
+
 </html>
