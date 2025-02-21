@@ -9,7 +9,7 @@ footer {
 
 
 .footer {
-    padding:20px 8% 30px 8%;
+    padding:20px 8% 5px 8%;
     display: flex;
     justify-content: space-between;
 }
@@ -27,6 +27,7 @@ footer {
 
 .div1 p{
     padding-top: 10px;
+    line-height: 1.5;
 }
 
 .div2 ul li, .div3 ul li, .div4 ul li{
