@@ -36,9 +36,10 @@ h3 {
 }
 
 .intro-des {
-    padding: 20px 0;
+    padding: 10px 0 20px 0;
     font-size: 17px;
-    font-weight: 400;
+    font-weight: 450;
+    line-height: 25px;
 }
 
 .shop-now {
@@ -105,28 +106,40 @@ h3 {
     
 }
 
-.slot {
+.intro-right-bottom {
     position: absolute;
-    right: 8%;
-    top: 55vh;
+    top: 56vh;
+    right: 0;
+    width: 22%;
+    height: 32vh;
+    margin-right: 8%;
     /* background-color: aqua; */
-    height: 308px;
-    width: 362px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.slot {
+    display: flex;
+    justify-content: space-between;
+    /* background-color: red; */
 }
 
 .tag {
-    text-align: left;
-    padding: 30px 0;
-    font-size: 15px;
-    font-weight: 500;
+    padding-top: 11.5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.year {
-    padding-top: 5px;
+.tag p {
+    padding-top: 10px;
 }
 
-.tag i {
-    font-size: 20px;
+.icon-right {
+    font-size: 50px;
+    padding: 10px;
+    /* background-color: aliceblue; */
 }
 
 

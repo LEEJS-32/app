@@ -34,7 +34,7 @@
                 
                 <p class="intro-des">Crafting stylish and comfortable furniture with passion, making your house feel like home.</p>
                 <div class="shop-now">
-                    <button class="shop-now-btn">Shop Now&nbsp;<i class='bx bx-right-arrow-alt'></i></button>
+                    <button class="shop-now-btn">Shop Now&nbsp;&nbsp;<i class='bx bx-right-arrow-alt'></i></button>
                     <a href="" class="view-cat-link">View All Categories</a>
                 </div>
             </div>
@@ -42,21 +42,32 @@
             <div class="intro-right">
                 <img src="../img/intro.jpeg" class="img-intro1">
                 <img src="../img/intro_img_2.jpeg" class="img-intro2">
+                
+            </div>
+            
+            <div class="intro-right-bottom">
                 <div class="slot">
                     <div class="tag">
-                        <h4> # Spring Sales </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
-                        <p class="year">July 2025</p>
+                        <h4># Mid-Year Sales</h4>
+                        <p>June 2025<p>
                     </div>
-                    <hr>
+                    <div class="icon-right"><i class='bx bx-chevron-right'></i></div>
+                </div>
+                <hr>
+                <div class="slot">
                     <div class="tag">
-                        <h4> # New Arrivals </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
-                        <p class="year">June 2025</p>
+                        <h4># New Arrivals</h4>
+                        <p>July 2025<p>
                     </div>
-                    <hr>
+                    <div class="icon-right"><i class='bx bx-chevron-right'></i></div>
+                </div>
+                <hr>
+                <div class="slot">
                     <div class="tag">
-                        <h4> # New Arrivals </h4><div class="icon"><i class='bx bx-chevron-right'></i></div>
-                        <p class="year">May 2025</p>
+                        <h4># Mothers' Day Offers</h4>
+                        <p>August 2025<p>
                     </div>
+                    <div class="icon-right"><i class='bx bx-chevron-right'></i></div>
                 </div>
             </div>
         </main>
