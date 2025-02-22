@@ -37,6 +37,9 @@
                 <span id="pwd_error1" style="color:red;"></span>
                 <span id="pwd_error2" style="color:red;"></span>
                 <br><br>
+                <input type="checkbox" id="remember" name="remember"><label for="remember">Remember Me</label>
+                <a href="" class="forgot">Forgot Password?</a>
+                <br><br>
                 <button type="submit">Submit</button>
                 <button type="reset">Cancel</button>
             </form>
