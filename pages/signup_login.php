@@ -8,12 +8,11 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <title>Testing3</title>
-        <script src="js/validation.js" defer></script>
+        <script src="../js/validation.js" defer></script>
 
     </head>
 
     <body>
-        <header></header>
         <?php
         if (isset($_SESSION['error_exist'])) {
             echo "<p style='color:red;'>".$_SESSION['error_exist']."</p>";

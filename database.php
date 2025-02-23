@@ -33,17 +33,41 @@ if ($conn->connect_error) {
 }
 
 // Create users table
-$sql_create_users_table = "CREATE TABLE if not exists USERS (
+$sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
+    user_id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
+    status ENUM('active', 'blocked') NOT NULL DEFAULT 'active',
+    preference TEXT null,
+    gender ENUM('male', 'female') NULL,
+    phonenum VARCHAR(20) NULL,  
+    photo VARCHAR(255) NULL,  
+    reward_pt FLOAT DEFAULT 0, 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id)
 )";
 
 if ($conn->query($sql_create_users_table) === TRUE) {
     echo "Table users created successfully<br>";
 } else {
     echo "Error creating users table: " . $conn->error . "<br>";
+}
+
+// Create token table
+$sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
+    token_id VARCHAR(100) PRIMARY KEY, 
+    expire DATETIME NOT NULL, 
+    user_id INT NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);";
+
+if ($conn->query($sql_create_token_table) === TRUE) {
+    echo "Table token created successfully<br>";
+} else {
+    echo "Error creating token table: " . $conn->error . "<br>";
 }
 
 // Create products table

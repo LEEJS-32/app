@@ -1,0 +1,37 @@
+.section1 {
+    height: 100vh;
+    /* background-color: aqua; */
+}
+
+#next-section {
+    height: 100vh;
+    /* background-color: red; */
+}
+
+/* .timeline {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    background: #ccc;
+    height: 100%;
+} */
+
+/* Step circles */
+/* .step {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 3px solid #007bff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-weight: bold;
+    line-height: 25px;
+} */
+
+/* Step positions */
+/* .step1 { top: 10%; }
+.step2 { bottom: 10%; } */
