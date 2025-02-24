@@ -62,22 +62,24 @@
         </form>
     </div>
 
-    <div id="next-section">
+    <div id="next-section" class="section">
         <div class="timeline"></div>
         <div class="step step2">2</div>
-        <h2>Second Form Section</h2>
-        <form method="post">
-            <label for="hobby">Hobby:</label>
-            <input type="text" id="hobby" name="hobby">
-            <br><br>
-
-            <label for="interest">Interest:</label>
-            <input type="text" id="interest" name="interest">
-            <br><br>
-
-            <button type="submit">Submit Final Form</button>
-        </form>
+        <h2>Step 2: Select Your Favorite Furniture Styles</h2>
+        <div class="furniture-options">
+            <div class="furniture-option" onclick="toggleSelection(this)">Modern</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Minimalist</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Classic</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Muji</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Japandi</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Bohemian</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Vintage</div>
+            <div class="furniture-option" onclick="toggleSelection(this)">Asian Decor</div>
+        </div>
+        <br><br>
+        <button type="button" onclick="submitForm()">Submit All</button>
     </div>
+
 
 
 
