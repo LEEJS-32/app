@@ -14,6 +14,10 @@
             document.getElementById("next-section").style.display = "block"; // Show next form
             document.getElementById("next-section").scrollIntoView({ behavior: "smooth" }); // Scroll to it
         }
+
+        function toggleSelection(option) {
+            option.classList.toggle("selected");
+        }
     </script>
 
     <?php

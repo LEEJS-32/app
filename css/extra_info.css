@@ -35,3 +35,25 @@
 /* Step positions */
 /* .step1 { top: 10%; }
 .step2 { bottom: 10%; } */
+
+.furniture-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.furniture-option {
+    padding: 10px 20px;
+    border: 2px solid #007bff;
+    border-radius: 20px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.3s;
+}
+
+.furniture-option.selected {
+    background: #007bff;
+    color: white;
+}
