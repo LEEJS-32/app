@@ -37,7 +37,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
 $email = $_SESSION['email'];
 $name = $_SESSION['name'];
 ?>
-<form method="post" action="../backend/extra_info.php">
+<form method="post" action="../backend/extra_info_process.php">
     <div class="wrapper">
         <div class="container">
             <!-- Section 1: Basic Info -->
