@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <?php
-    require 'database.php';
+    require '../database.php';
 
     session_start();
     if ($_SERVER["REQUEST_METHOD"] == "POST") {

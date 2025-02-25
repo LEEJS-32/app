@@ -26,7 +26,7 @@ $postcode = $_POST['postcode'] ?? null;
 $preference = $_POST['preference'] ?? null;
 
 $stmt = $conn->prepare("UPDATE users SET gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE email=?");
-$stmt->bind_param("ssss",  $gender, $phonenum, $preference, $dob, $occupation, $email);
+$stmt->bind_param("ssssss",  $gender, $phonenum, $preference, $dob, $occupation, $email);
 
 // Execute SQL query
 if ($stmt->execute()) {
