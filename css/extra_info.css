@@ -1,40 +1,39 @@
-.section1 {
-    height: 100vh;
-    /* background-color: aqua; */
+
+
+.wrapper {
+    overflow: hidden;
+    width: 100%;
 }
 
-#next-section {
-    height: 100vh;
-    /* background-color: red; */
+.container {
+    display: flex;
+    width: 300%; /* Three sections */
+    transition: transform 0.5s ease-in-out;
 }
 
-/* .timeline {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 5px;
-    background: #ccc;
-    height: 100%;
-} */
+.section {
+    width: 33.33%;
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-/* Step circles */
-/* .step {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    border: 3px solid #007bff;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    font-weight: bold;
-    line-height: 25px;
-} */
+.furniture-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 
-/* Step positions */
-/* .step1 { top: 10%; }
-.step2 { bottom: 10%; } */
+.furniture-option {
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.selected {
+    background-color: #007bff;
+    color: white;
+}
 
 .furniture-options {
     display: flex;
@@ -56,4 +55,9 @@
 .furniture-option.selected {
     background: #007bff;
     color: white;
+}
+
+.section {
+    height: 100vh;
+    width: 100%;
 }
