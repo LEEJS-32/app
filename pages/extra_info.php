@@ -22,7 +22,7 @@
             selectedStyles.push(option.textContent);
         });
 
-        document.getElementById("selectedStyles").value = selectedStyles.join(",");
+        document.getElementById("preference").value = selectedStyles.join(",");
     }
     </script>
 </head>
@@ -97,7 +97,7 @@ $name = $_SESSION['name'];
                     <div class="furniture-option" onclick="toggleSelection(this)">Vintage</div>
                     <div class="furniture-option" onclick="toggleSelection(this)">Asian Decor</div>
                 </div>
-                <input type="hidden" id="selectedStyles" name="furniture_styles">
+                <input type="hidden" id="preference" name="preference">
                 <br><br>
                 <button type="button" onclick="switchSection(1)">Back</button>
                 <button type="submit">Done</button>
