@@ -35,8 +35,16 @@
             <button class="search"><i class='bx bx-search'></i></button>
             <button class="cart"><i class='bx bx-shopping-bag'></i></button>
             <button class="user"><i class='bx bx-user' ></i></button>
+            <ul class="profile-dropdown-list">
+                <li>My Profile</li>
+                <li>Order</li>
+                <li>Rewards</li>
+                <li>Log out</li>
+            </ul>
             </div>
+            
         </nav>
+
         
     </header>
 </html>

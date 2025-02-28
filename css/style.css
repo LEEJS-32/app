@@ -12,7 +12,7 @@ header {
 nav{
     display: flex;
     justify-content: space-between;
-    padding: 20px 8%;
+    padding: 20px 8.5%;
     align-items: center;
     font-weight: 520;
     /* background-color: aqua; */
@@ -57,4 +57,23 @@ nav div ul li a {
 
 .nav-bar {
     /* background-color: red; */
+}
+
+.profile-dropdown-list {
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+    padding: 0;
+    right: 0;
+    margin-right: 9%;
+    z-index: 5;
+    margin-top: 12px;
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    width: 10%;
+    color: black;
+    font-size: 15px;
+}
+
+.profile-dropdown-list li {
+    padding: 10px 0;
 }
