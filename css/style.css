@@ -59,11 +59,12 @@ nav div ul li a {
     /* background-color: red; */
 }
 
-.profile-dropdown-list {
+.profile-dropdown-list{
     position: absolute;
     background-color: rgb(255, 255, 255);
     padding: 0;
     right: 0;
+    margin: 0;
     margin-right: 9%;
     z-index: 5;
     margin-top: 12px;
@@ -72,8 +73,26 @@ nav div ul li a {
     width: 10%;
     color: black;
     font-size: 15px;
+    display: none;
+}
+
+.profile-dropdown-list.active {
+    display: block; /* Show when active */
 }
 
 .profile-dropdown-list li {
-    padding: 10px 0;
+    cursor: pointer;
+    width: 100%;
+    padding-left: 15px;
+    margin: 0; /* Ensure no unwanted margin */
 }
+
+.profile-dropdown-list li a {
+    padding:10px 0;
+    text-decoration: none;
+    color: black;
+    display: block; /* Ensure it fills the li */
+    width: 100%; /* Stretch across full width */
+    /* background-color: aqua; */
+}
+

@@ -14,6 +14,8 @@
 
     <body>
         <?php
+        $_SESSION['role'] = "member"; 
+
         if (isset($_SESSION['error_exist'])) {
             echo "<p style='color:red;'>".$_SESSION['error_exist']."</p>";
             unset($_SESSION['error_exist']); 
@@ -57,7 +59,7 @@
             ?>
 
             <h1>Login</h1>
-            <form method="post" action="../backend/login.php">
+            <form method="post" action="../backend/login.php" onsubmit="return validateForm()">
             <label for="email">Email:</label>
                 <input type="email" id="email" name="email">
                 <span id="email_error1" style="color:red;"></span>

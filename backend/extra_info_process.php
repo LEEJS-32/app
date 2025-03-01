@@ -1,5 +1,6 @@
 <?php
 session_start();
+include '../_base.php';
 if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
     header("Location: /pages/signup_login.php");
     exit();
@@ -14,16 +15,16 @@ $database = "TESTING1";
 
 $conn = new mysqli($servername, $username, $password, $database);
 
-$gender = $_POST['gender'] ?? null;
-$phonenum = $_POST['phonenum'] ?? null;
-$dob = $_POST['dob'] ?? null;
-$occupation = $_POST['occupation'] ?? null;
-$address1 = $_POST['address-line1'] ?? null;
-$address2 = $_POST['address-line2'] ?? null;
-$city = $_POST['city'] ?? null;
-$country = $_POST['country'] ?? null;
-$postcode = $_POST['postcode'] ?? null;
-$preference = $_POST['preference'] ?? null;
+$gender = post('gender') ?? null;
+$phonenum = post('phonenum') ?? null;
+$dob = post('dob') ?? null;
+$occupation = post('occupation') ?? null;
+$address1 = post('address-line1') ?? null;
+$address2 = post('address-line2') ?? null;
+$city = post('city') ?? null;
+$country = post('country') ?? null;
+$postcode = post('postcode') ?? null;
+$preference = post('preference') ?? null;
 
 $stmt = $conn->prepare("UPDATE users SET gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE email=?");
 $stmt->bind_param("ssssss",  $gender, $phonenum, $preference, $dob, $occupation, $email);
@@ -31,7 +32,7 @@ $stmt->bind_param("ssssss",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
-    // header("Location: success_page.php"); // Redirect to a success page
+    redirect("../pages/signup_login.php"); // Redirect to a success page
 } else {
     echo "Error: " . $stmt->error;
 }

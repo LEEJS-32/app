@@ -35,18 +35,18 @@
             <div class="div2">
                 <ul>
                     <li class="title">Company</li>
-                    <li>About Us</li>
-                    <li>FAQ</li>
-                    <li>Contact Us</li>
-                    <li>Privacy</li>
+                    <li><a href="">About Us</a></li>
+                    <li><a href="">FAQ</a></li>
+                    <li><a href="">Contact Us</a></li>
+                    <li><a href="">Privacy</a></li>
                 </ul>
             </div>
             <div class="div3">
                 <ul>
-                    <li class="title">Customer Services</li>
-                    <li>My Profile</li>
-                    <li>Track Your Order</li>
-                    <li>Return</li>
+                    <li class="title">Customer Services</a></li>
+                    <li><a href="">My Profile</a></li>
+                    <li><a href="">Track Your Order</a></li>
+                    <li><a href="">Return</a></li>
                 </ul>
             </div>
             <div class="div4">

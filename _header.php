@@ -15,7 +15,24 @@
         <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
-    
+
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.querySelector(".profile-dropdown-list");
+            dropdown.classList.toggle("active");
+        }
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", function (event) {
+            const userButton = document.querySelector(".user");
+            const dropdown = document.querySelector(".profile-dropdown-list");
+
+            if (!userButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.remove("active");
+            }
+        });
+    </script>
+
     <header>
         <nav>
             <div class="logo">
@@ -34,12 +51,12 @@
             <div class="other">
             <button class="search"><i class='bx bx-search'></i></button>
             <button class="cart"><i class='bx bx-shopping-bag'></i></button>
-            <button class="user"><i class='bx bx-user' ></i></button>
+            <button class="user" onclick="toggleDropdown()"><i class='bx bx-user' ></i></button>
             <ul class="profile-dropdown-list">
-                <li>My Profile</li>
-                <li>Order</li>
-                <li>Rewards</li>
-                <li>Log out</li>
+                <li><a href="">My Profile</a></li>
+                <li><a href="">Order</a></li>
+                <li><a href="">Rewards</a></li>
+                <li><a href="">Log out</a></li>
             </ul>
             </div>
             
@@ -47,4 +64,5 @@
 
         
     </header>
+
 </html>

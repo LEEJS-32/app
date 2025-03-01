@@ -16,7 +16,7 @@
         $result_check_exist = $conn->query($sql_check_exist);
         if ($result_check_exist->num_rows > 0) {
             $_SESSION['error_exist'] = "Record exists.";
-            header("Location: ../pages/signup_login.php");
+            redirect("../pages/signup_login.php");
             exit();
         } 
         else {
@@ -26,7 +26,7 @@
                 echo "Signup successful<br>";
                 $_SESSION['email'] = $email;
                 $_SESSION['name'] = $name;
-                header("Location: ../pages/extra_info.php");
+                redirect("../pages/extra_info.php");
             }
         }
     }
