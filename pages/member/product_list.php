@@ -2,6 +2,14 @@
 session_start();
 include '../../database.php'; // Adjust the path based on your folder structure
 
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
+    die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
+}
+
+$user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['name'];
+
 // Check if database connection is successful
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);
@@ -25,6 +33,13 @@ if (!$result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <style>
+        .header {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            text-align: center;
+        }
         .product {
             border: 1px solid #ddd;
             padding: 15px;
@@ -55,7 +70,13 @@ if (!$result) {
     </style>
 </head>
 <body>
-    <h2>Product List</h2>
+
+    <!-- Show logged-in user info -->
+    <div class="header">
+        <h2>Product List</h2>
+        <p><strong>User ID:</strong> <?php echo htmlspecialchars($user_id); ?></p>
+        <p><strong>User Name:</strong> <?php echo htmlspecialchars($user_name); ?></p>
+    </div>
 
     <?php
     // Debugging: Check number of products found
