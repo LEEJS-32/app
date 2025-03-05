@@ -1,6 +1,8 @@
 <?php
 session_start();
-include '../../database.php';
+require '../../db/db_connect.php';
+include '../../_header.php';
+// include '../../database.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
     die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
@@ -8,10 +10,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['name'];
-
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
-}
 
 // Fetch products from the database
 $sql = "SELECT * FROM products WHERE status = 'active'";
@@ -35,6 +33,11 @@ if (isset($_SESSION['cart_message'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <style>
+        body {
+            font-size: 20px;
+            font-family:'Times New Roman', Times, serif;
+        }
+
         .header {
             background-color: #f8f9fa;
             padding: 10px;

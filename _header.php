@@ -7,8 +7,8 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <!-- <title>Header</title> -->
-        <link rel="stylesheet" href="css/style.css">
-        <link rel="stylesheet" href="css/logo.css">
+        <link rel="stylesheet" href="\css\style.css">
+        <link rel="stylesheet" href="\css\logo.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
     <header>
         <nav>
             <div class="logo">
-            <img src="../img/logo4.png" alt="img/logo.png" class="logo">
+            <img src="/img/logo4.png" alt="img/logo.png" class="logo">
             </div>
         
             <div class="nav-bar">
