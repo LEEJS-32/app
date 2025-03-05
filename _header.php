@@ -7,7 +7,7 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <!-- <title>Header</title> -->
-        <link rel="stylesheet" href="\css\style.css">
+        <link rel="stylesheet" href="\css\header.css">
         <link rel="stylesheet" href="\css\logo.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,7 +53,7 @@
             <button class="cart"><i class='bx bx-shopping-bag'></i></button>
             <button class="user" onclick="toggleDropdown()"><i class='bx bx-user' ></i></button>
             <ul class="profile-dropdown-list">
-                <li><a href="">My Profile</a></li>
+                <li><a href="/pages/member/profile.php">My Profile</a></li>
                 <li><a href="">Order</a></li>
                 <li><a href="">Rewards</a></li>
                 <li><a href="">Log out</a></li>

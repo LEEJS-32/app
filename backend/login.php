@@ -34,13 +34,15 @@
                 $_SESSION['email'] = $email;
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['name'] = $user['name'];
+                $_SESSION['role'] = $role;
 
                 // Redirect to product_list.php after login
                 if ($role == "member") {
                     redirect("../pages/member/product_list.php");
                     exit();
                 } else {
-                    echo "{$email}: Logged in";
+                    redirect("/../pages/member/profile.php");
+                    exit();
                 }
             } else {
                 echo "Incorrect password.";

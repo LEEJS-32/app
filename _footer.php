@@ -7,7 +7,7 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <!-- <title>Header</title> -->
-        <link rel="stylesheet" href="css/footer.css">
+        <link rel="stylesheet" href="/css/footer.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
         <hr>
         <div class="footer">
             <div class="div1">
-                <img src="../img/logo4.png" alt="img/logo4.png" class="footer-logo">
+                <img src="/img/logo4.png" alt="img/logo4.png" class="footer-logo">
                 <p>Discover premium-quality furniture that<br>
                 blends style and functionality. We offer a<br>
                 wide range of masterpieces to transform<br>

@@ -45,7 +45,7 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
     phonenum VARCHAR(20) NULL,
     dob DATE NULL,
     occupation VARCHAR(255),  
-    photo VARCHAR(255) NULL,  
+    avatar VARCHAR(255) NULL,  
     reward_pt FLOAT DEFAULT 0, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
