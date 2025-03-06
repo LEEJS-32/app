@@ -1,37 +1,35 @@
 <?php
-    session_start();
-    $email = $_SESSION['email'];
-    include '../db/db_connect.php';
+session_start();
+$email = $_SESSION['email'];
+include '../db/db_connect.php';
 
-    // Get the JSON data
-    $data = json_decode(file_get_contents("php://input"));
+if (isset($_POST['image'])) {
+    $imageData = $_POST['image'];
 
-    if (isset($data->image)) {
-        $imageData = $data->image;
+    // Remove 'data:image/png;base64,' from string
+    $imageData = str_replace('data:image/png;base64,', '', $imageData);
+    $imageData = base64_decode($imageData);
 
-        // Remove 'data:image/png;base64,' from string
-        $imageData = str_replace('data:image/png;base64,', '', $imageData);
-        $imageData = base64_decode($imageData);
+    // Generate unique filename
+    $filePath = "../img/avatar/" . uniqid() . ".png";
+    $fileName = "../" . $filePath;
 
-        // Generate unique filename
-        $fileName_save = "../img/avatar/" . uniqid() . ".png";
-        $fileName = "../".$fileName_save;
+    // Save file
+    file_put_contents($filePath, $imageData);
 
-        // Save file
-        file_put_contents($fileName_save, $imageData);
+    // Save to database
+    $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE email = ?");
+    $stmt->bind_param("ss", $fileName, $email);
 
-        // Save to database
-        $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE email = ?");
-        $stmt->bind_param("ss", $fileName, $email);
-        
-        if ($stmt->execute()) {
-            echo "Image saved successfully!";
-        } else {
-            echo "Error saving image.";
-        }
+    if ($stmt->execute()) {
+        // Redirect after successful upload
+        echo "OK";
     } else {
-        echo "No image received.";
+        echo "Error saving image to database.";
     }
+} else {
+    echo "No image received.";
+}
 
-    $conn->close();
+$conn->close();
 ?>
