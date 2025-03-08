@@ -10,7 +10,7 @@
         $name = post('name');
         $email = post('email');
         $password = post('password');
-        
+        $hash_password = sha1($password);
 
         $sql_check_exist = "SELECT email from users where email = '$email'";
         $result_check_exist = $conn->query($sql_check_exist);
@@ -20,7 +20,7 @@
             exit();
         } 
         else {
-            $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$password')";
+            $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$hash_password')";
             $result_insert = $conn->query($sql);
             if ($result_insert){
                 echo "Signup successful<br>";

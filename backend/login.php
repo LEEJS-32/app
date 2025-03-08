@@ -10,6 +10,7 @@
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = post("email");
         $password = post("password");
+        $hash_password = sha1($password);
         $remember = isset($_POST['remember']);
         echo "$remember";
 
@@ -27,7 +28,7 @@
             }
         } else {
             // Check password
-            $sql_check_pwd = "SELECT * FROM users WHERE email = '$email' AND password = '$password' AND role = '$role'";
+            $sql_check_pwd = "SELECT * FROM users WHERE email = '$email' AND password = '$hash_password' AND role = '$role'";
             $result_check_pwd = $conn->query($sql_check_pwd);
 
             if ($result_check_pwd->num_rows > 0) {
