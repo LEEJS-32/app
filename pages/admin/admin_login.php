@@ -1,3 +1,8 @@
+<?php 
+    session_start();
+    $_SESSION['role'] = "admin"; 
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,10 +13,6 @@
     <script src="../../js/validation.js">
     </script>
 </head>
-<?php 
-    session_start();
-    $_SESSION['role'] = "admin"; 
-?>
 <body>
     <main>
         <h1>Admin Login</h1>

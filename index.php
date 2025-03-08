@@ -7,6 +7,7 @@
 <a href="pages/member/add_to_cart.php">Add to cart</a>
 <a href="pages/member/view_cart.php">View cart</a>
 <br><br>
+<script src="/js/session_destroy.js"></script>
 <?php 
 require 'database.php';
 include 'db/insert.php';

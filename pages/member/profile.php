@@ -53,7 +53,7 @@ echo ($user_id);
         // Fetch avatar from database
         $sql = "SELECT avatar FROM users WHERE email = '$email'";
         $result = $conn->query($sql);
-        $imageUrl = "../../img/avatar/avatar.jpg"; // Default avatar
+        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
         
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <?php
-    session_start();
     require '../database.php';
     include '../_base.php';
+    session_start();
     $role = $_SESSION['role'];
     echo "$role";
 
