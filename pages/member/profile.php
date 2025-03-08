@@ -7,8 +7,6 @@ $role = $_SESSION['role'];
 $email = $_SESSION['email'];
 
 echo ($user_id);
-
-echo "Welcome, user! <a href='../../backend/logout.php'>Logout</a>";
 ?>
 
 <!DOCTYPE html>
@@ -29,14 +27,18 @@ echo "Welcome, user! <a href='../../backend/logout.php'>Logout</a>";
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative; /* Ensures absolute positioning works */
         }
 
-        .avatar-container img, 
+        .avatar-container img,
         .avatar-container video {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
         }
 
         video {
@@ -45,11 +47,28 @@ echo "Welcome, user! <a href='../../backend/logout.php'>Logout</a>";
     </style>
 </head>
 <body>
+    <?php
+        require '../../db/db_connect.php';
 
+        // Fetch avatar from database
+        $sql = "SELECT avatar FROM users WHERE email = '$email'";
+        $result = $conn->query($sql);
+        $imageUrl = "../../img/avatar/avatar.jpg"; // Default avatar
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            
+        // If avatar exists, update the image URL
+            if (!empty($row["avatar"])) {
+                $imageUrl = $row["avatar"];
+            }
+        }
+    ?>
+    
     <h2>Avatar Capture</h2>
     
     <div class="avatar-container">
-        <img id="avatar" src="../../img/default-avatar.png" alt="Default Avatar">
+        <img id="avatar" src="<?php echo htmlspecialchars($imageUrl); ?>" alt="Default Avatar">
         <video id="video" autoplay></video>
     </div>
 

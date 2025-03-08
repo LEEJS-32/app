@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . "/../db/db_connect.php";
 // If session is already set, no need to check the cookie
 if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
     $token = $_COOKIE['remember_me'];

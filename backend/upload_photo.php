@@ -2,9 +2,10 @@
 session_start();
 $email = $_SESSION['email'];
 include '../db/db_connect.php';
+include '../_base.php';
 
 if (isset($_POST['image'])) {
-    $imageData = $_POST['image'];
+    $imageData = post('image');
 
     // Remove 'data:image/png;base64,' from string
     $imageData = str_replace('data:image/png;base64,', '', $imageData);
