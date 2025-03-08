@@ -56,7 +56,7 @@
                 <li><a href="/pages/member/profile.php">My Profile</a></li>
                 <li><a href="">Order</a></li>
                 <li><a href="">Rewards</a></li>
-                <li><a href="">Log out</a></li>
+                <li><a href="/backend/logout.php">Log out</a></li>
             </ul>
             </div>
             

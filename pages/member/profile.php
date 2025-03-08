@@ -1,3 +1,16 @@
+<?php
+session_start();
+require '../../backend/auth_check.php';
+$user_id = $_SESSION['user_id'];
+$name = $_SESSION['name'];
+$role = $_SESSION['role'];
+$email = $_SESSION['email'];
+
+echo ($user_id);
+
+echo "Welcome, user! <a href='../../backend/logout.php'>Logout</a>";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

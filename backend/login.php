@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <?php
+    session_start();
     require '../database.php';
     include '../_base.php';
-
-    session_start();
     $role = $_SESSION['role'];
     echo "$role";
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = post("email");
         $password = post("password");
+        $remember = isset($_POST['remember']);
+        echo "$remember";
 
         // Check if user exists
         $sql_check_exist = "SELECT * FROM users WHERE email = '$email' AND role = '$role'";
@@ -35,6 +36,19 @@
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['name'] = $user['name'];
                 $_SESSION['role'] = $role;
+
+                if ($remember) {
+                    // Generate a secure token
+                    $token = bin2hex(random_bytes(32));
+                    $expiry = date('Y-m-d H:i:s', strtotime('+1 days'));
+        
+                    // Store token in database
+                    $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
+                    $stmt->execute([$user['user_id'], $token, $expiry]);
+        
+                    // Set a cookie with token
+                    setcookie("remember_me", $token, time() + (86400 * 1), "/", "", false, true);
+                }
 
                 // Redirect to product_list.php after login
                 if ($role == "member") {
