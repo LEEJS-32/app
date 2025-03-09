@@ -1,6 +1,155 @@
+/* Main Section */
 main {
     margin: 0;
     left: 0;
     height: 88vh;
     padding: 0 8.5%;
 }
+
+/* General Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* Success Message */
+.success-message {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    width: 50%;
+    font-weight: bold;
+    display: none;
+    z-index: 1000;
+}
+
+/* Header */
+.header {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+/* Search Bar */
+.search-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.search-container form {
+    display: inline-block;
+    width: 50%;
+}
+
+.search-container input {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-container button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.search-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Product Container */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+/* Product Card */
+.product-card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    width: 250px;
+    text-align: center;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* No Products Message */
+.no-products {
+    text-align: center;
+    font-size: 18px;
+    color: #888;
+    margin-top: 20px;
+}
+
+/* Add to Cart Button - Green */
+.add-to-cart-btn {
+    background-color: #28a745; /* Green */
+    color: white;
+    font-weight: bold;
+    border: 2px solid #1e7e34;
+    padding: 10px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    width: 100%;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #218838; /* Darker green */
+    transform: scale(1.05);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Out of Stock Button - Red */
+.out-of-stock-btn {
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    border: 2px solid #b52b3b;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: not-allowed;
+    width: 100%;
+}
+
+.out-of-stock-btn:hover {
+    background-color: #c82333;
+}
+
+/* Ensure buttons align properly */
+.product-form button {
+    display: block;
+    margin-top: 10px;
+}
+

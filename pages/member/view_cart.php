@@ -33,19 +33,37 @@ $user = $result_user->fetch_assoc();
 $user_id = $user['user_id'];
 $user_name = $user['name'];
 
-// Handle quantity update request
+// Handle quantity update or item removal
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'], $_POST['action'])) {
     $cart_id = $_POST['cart_id'];
     $action = $_POST['action'];
 
     if ($action === 'increase') {
-        $sql_update = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE cart_id = ? AND email = ?";
+        $sql_update = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE cart_id = ? AND user_id = ?";
     } elseif ($action === 'decrease') {
-        $sql_update = "UPDATE shopping_cart SET quantity = GREATEST(quantity - 1, 1) WHERE cart_id = ? AND email = ?";
+        // Check current quantity before decreasing
+        $sql_check_quantity = "SELECT quantity FROM shopping_cart WHERE cart_id = ? AND user_id = ?";
+        $stmt_check = $conn->prepare($sql_check_quantity);
+        $stmt_check->bind_param("ii", $cart_id, $user_id);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+        $row = $result_check->fetch_assoc();
+        $current_quantity = $row['quantity'];
+        $stmt_check->close();
+
+        if ($current_quantity > 1) {
+            $sql_update = "UPDATE shopping_cart SET quantity = quantity - 1 WHERE cart_id = ? AND user_id = ?";
+        } else {
+            // If quantity reaches 0, delete the item
+            $sql_update = "DELETE FROM shopping_cart WHERE cart_id = ? AND user_id = ?";
+        }
+    } elseif ($action === 'remove') {
+        // Remove the product from cart completely
+        $sql_update = "DELETE FROM shopping_cart WHERE cart_id = ? AND user_id = ?";
     }
 
     $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("is", $cart_id, $user_email);
+    $stmt_update->bind_param("ii", $cart_id, $user_id);
     $stmt_update->execute();
     $stmt_update->close();
 
@@ -59,10 +77,10 @@ $sql_cart = "SELECT shopping_cart.cart_id, shopping_cart.quantity,
                     products.name, products.price, products.image_url
              FROM shopping_cart
              JOIN products ON shopping_cart.product_id = products.product_id
-             WHERE shopping_cart.email = ?";
+             WHERE shopping_cart.user_id = ?";
 
 $stmt_cart = $conn->prepare($sql_cart);
-$stmt_cart->bind_param("s", $user_email);
+$stmt_cart->bind_param("i", $user_id);
 $stmt_cart->execute();
 $result_cart = $stmt_cart->get_result();
 
@@ -94,6 +112,10 @@ if ($result_cart->num_rows > 0) {
                     <form method='POST' action='view_cart.php' style='display:inline;'>
                         <input type='hidden' name='cart_id' value='{$row['cart_id']}'>
                         <button type='submit' name='action' value='decrease'>-</button>
+                    </form>
+                    <form method='POST' action='view_cart.php' style='display:inline;'>
+                        <input type='hidden' name='cart_id' value='{$row['cart_id']}'>
+                        <button type='submit' name='action' value='remove'>Remove</button>
                     </form>
                 </td>
               </tr>";

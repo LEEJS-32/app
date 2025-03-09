@@ -1,28 +1,24 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../database.php'; 
+require_once '../../db/db_connect.php'; // Ensure correct path
 
-if (!isset($_SESSION['email'])) {
+// Ensure the user is logged in
+if (!isset($_SESSION['user_id'])) {
     die("Error: User not logged in.");
 }
 
-$user_email = $_SESSION['email'];
+$user_id = $_SESSION['user_id'];
+$product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+$quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 
-if (!isset($_POST['product_id']) || !isset($_POST['quantity'])) {
-    die("Error: Invalid request.");
-}
-
-$product_id = intval($_POST['product_id']);
-$quantity = intval($_POST['quantity']);
-
-if ($quantity <= 0) {
-    $_SESSION['cart_message'] = "Error: Invalid quantity.";
+if ($product_id <= 0 || $quantity <= 0) {
+    $_SESSION['cart_message'] = "Error: Invalid product or quantity.";
     header("Location: product_list.php");
     exit();
 }
 
 // Check if product exists and fetch stock
-$sql_check_product = "SELECT stock FROM products WHERE product_id = ?";
+$sql_check_product = "SELECT name, stock FROM products WHERE product_id = ?";
 $stmt = $conn->prepare($sql_check_product);
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
@@ -36,6 +32,7 @@ if ($result->num_rows === 0) {
 
 $row = $result->fetch_assoc();
 $available_stock = intval($row['stock']);
+$product_name = $row['name'];
 
 if ($quantity > $available_stock) {
     $_SESSION['cart_message'] = "Error: Not enough stock available!";
@@ -43,14 +40,15 @@ if ($quantity > $available_stock) {
     exit();
 }
 
-// Check if the product is already in the cart
-$sql_check_cart = "SELECT quantity FROM shopping_cart WHERE email = ? AND product_id = ?";
+// Check if product is already in the cart
+$sql_check_cart = "SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?";
 $stmt = $conn->prepare($sql_check_cart);
-$stmt->bind_param("si", $user_email, $product_id);
+$stmt->bind_param("ii", $user_id, $product_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
+    // Update quantity if product is already in the cart
     $row = $result->fetch_assoc();
     $new_quantity = $row['quantity'] + $quantity;
 
@@ -60,22 +58,24 @@ if ($result->num_rows > 0) {
         exit();
     }
 
-    $sql_update = "UPDATE shopping_cart SET quantity = ? WHERE email = ? AND product_id = ?";
+    $sql_update = "UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?";
     $stmt = $conn->prepare($sql_update);
-    $stmt->bind_param("isi", $new_quantity, $user_email, $product_id);
+    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
 } else {
-    $sql_insert = "INSERT INTO shopping_cart (email, product_id, quantity) VALUES (?, ?, ?)";
+    // Insert new entry if product is not in the cart
+    $sql_insert = "INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql_insert);
-    $stmt->bind_param("sii", $user_email, $product_id, $quantity);
+    $stmt->bind_param("iii", $user_id, $product_id, $quantity);
 }
 
-// Execute the query
+// Execute query
 if ($stmt->execute()) {
-    $_SESSION['cart_message'] = "Product added to cart successfully!";
+    $_SESSION['cart_message'] = "✅ '$product_name' added to cart successfully!";
 } else {
     $_SESSION['cart_message'] = "Error: Could not add to cart.";
 }
 
+// Redirect back to product list
 header("Location: product_list.php");
 exit();
 
