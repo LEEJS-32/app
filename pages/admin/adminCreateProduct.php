@@ -5,11 +5,13 @@ session_start();
 //     header("Location: /pages/signup_login.php");
 //     exit();
 // }
-require '../../_base.php';
+// require '../../_base.php';
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "TESTING1";
+include '../../_header.php';
+
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -88,7 +90,6 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <?php include '../../_header.php'; ?>
     <title>Add Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
