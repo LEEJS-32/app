@@ -62,7 +62,7 @@
             
         </nav>
 
-        
     </header>
-
+            <!-- Flash message -->
+            <div id="info"><?= temp('info') ?></div>
 </html>

@@ -1,8 +1,94 @@
+
+<?php
+session_start();
+// if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
+//     header("Location: /pages/signup_login.php");
+//     exit();
+// }
+require '../../_base.php';
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "TESTING1";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+    $stock = $_POST['stock'];
+    $category = $_POST['category'];
+    $status = $_POST['status'];
+    $discount = $_POST['discount'];
+    $weight = $_POST['weight'];
+    $length = $_POST['length'];
+    $width = $_POST['width'];
+    $height = $_POST['height'];
+    $brand = $_POST['brand'];
+    $color = $_POST['color'];
+    $rating = $_POST['rating'];
+    $reviews_count = $_POST['reviews_count'];
+
+    // image_url also used the $name variable
+    // so we need to store the $name variable in another variable
+    $product_name = $name;
+
+    // Calculate discounted price
+    $discounted_price = $price - ($price * ($discount / 100));
+
+    // Handle file uploads
+    $image_urls = [];
+    $target_dir = "../../img/";
+    foreach ($_FILES['image_url']['name'] as $key => $name) {
+        if ($_FILES['image_url']['error'][$key] == 0) {
+            $target_file = $target_dir . basename($name);
+            if (move_uploaded_file($_FILES['image_url']['tmp_name'][$key], $target_file)) {
+                $image_urls[] = $target_file;
+            } else {
+                echo "Sorry, there was an error uploading your file: $name<br>";
+            }
+        }
+    }
+
+    // Convert image URLs array to JSON
+    $image_urls_json = json_encode($image_urls);
+
+    // Prepare and bind
+    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    if (!$stmt) {
+        echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+    }
+    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $weight, $length, $width, $height, $brand, $color, $rating, $reviews_count);
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        temp('info', 'Record inserted');
+        // redirect('/');
+
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    // Close the statement
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php include '../../_header.php'; ?>
     <title>Add Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -198,80 +284,3 @@
     </form>
 </body>
 </html>
-
-<?php
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-    $price = $_POST['price'];
-    $stock = $_POST['stock'];
-    $category = $_POST['category'];
-    $status = $_POST['status'];
-    $discount = $_POST['discount'];
-    $weight = $_POST['weight'];
-    $length = $_POST['length'];
-    $width = $_POST['width'];
-    $height = $_POST['height'];
-    $brand = $_POST['brand'];
-    $color = $_POST['color'];
-    $rating = $_POST['rating'];
-    $reviews_count = $_POST['reviews_count'];
-
-    // image_url also used the $name variable
-    // so we need to store the $name variable in another variable
-    $product_name = $name;
-
-    // Calculate discounted price
-    $discounted_price = $price - ($price * ($discount / 100));
-
-    // Handle file uploads
-    $image_urls = [];
-    $target_dir = "../../img/";
-    foreach ($_FILES['image_url']['name'] as $key => $name) {
-        if ($_FILES['image_url']['error'][$key] == 0) {
-            $target_file = $target_dir . basename($name);
-            if (move_uploaded_file($_FILES['image_url']['tmp_name'][$key], $target_file)) {
-                $image_urls[] = $target_file;
-            } else {
-                echo "Sorry, there was an error uploading your file: $name<br>";
-            }
-        }
-    }
-
-    // Convert image URLs array to JSON
-    $image_urls_json = json_encode($image_urls);
-
-    // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
-    if (!$stmt) {
-        echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
-    }
-    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $weight, $length, $width, $height, $brand, $color, $rating, $reviews_count);
-
-    // Execute the statement
-    if ($stmt->execute()) {
-        echo "New product added successfully";
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-
-    // Close the statement
-    $stmt->close();
-}
-
-$conn->close();
-?>
