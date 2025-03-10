@@ -162,7 +162,7 @@
 
         // Execute the statement
         if ($stmt->execute()) {
-            echo "Product updated successfully";
+            // echo "Product updated successfully";
             temp('insert_record', 'Record inserted');
         } else {
             echo "Error: " . $stmt->error;
