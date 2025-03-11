@@ -1,3 +1,8 @@
+<?php 
+ob_start(); // Start output buffering
+include '../../_header.php'; ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +22,38 @@
             text-align: left;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Handle delete action
+            $('.delete').click(function(e) {
+                e.preventDefault();
+                var productId = $(this).data('id');
+                if (confirm('Are you sure you want to delete this product?')) {
+                    $.ajax({
+                        url: 'adminDeleteProduct.php',
+                        type: 'GET',
+                        data: { product_id: productId },
+                        success: function(response) {
+                            alert('Product deleted successfully');
+                            location.reload();
+                        },
+                        error: function() {
+                            alert('Error deleting product');
+                        }
+                    });
+                }
+            });
+
+            // Handle update action
+            $('.update').click(function(e) {
+                e.preventDefault();
+                var productId = $(this).data('id');
+                window.location.href = 'adminUpdateProduct.php?product_id=' + productId;
+            });
+        });
+    </script>
 </head>
 <body>
     <h1>Product List</h1>
@@ -98,6 +135,10 @@
                     echo "<td>" . $row["reviews_count"] . "</td>";
                     echo "<td>" . $row["created_at"] . "</td>";
                     echo "<td>" . $row["updated_at"] . "</td>";
+                    echo "<td class='action-buttons'>";
+                    echo "<a href='#' class='update' data-id='" . $row["product_id"] . "'>Update</a>";
+                    echo "<a href='#' class='delete' data-id='" . $row["product_id"] . "'>Delete</a>";
+                    echo "</td>";
                     echo "</tr>";
                 }
             } else {
