@@ -1,3 +1,9 @@
+<?php 
+session_start();
+ob_start(); 
+include '../../_header.php'; 
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,13 +168,22 @@
 
         // Execute the statement
         if ($stmt->execute()) {
-            // echo "Product updated successfully";
-            temp('insert_record', 'Record inserted');
+            header("Location: adminUpdateProduct.php?product_id=" . $product_id);
+            temp('info', 'Record updated successfully');
+            exit();
         } else {
             echo "Error: " . $stmt->error;
         }
 
         // Close the statement
+        $stmt->close();
+
+        // Re-fetch the product details after update
+        $stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
+        $stmt->bind_param("i", $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $product = $result->fetch_assoc();
         $stmt->close();
     }
 
