@@ -12,7 +12,7 @@ $order_id = $_GET['order_id'] ?? null;
 $amount = $_GET['amount'] / 100; // Convert back to RM
 
 // Verify payment with ToyyibPay API
-$api_key = "YOUR_SANDBOX_API_KEY";
+$api_key = "srlq0i5d-gfgf-ok6k-gy8j-92f18h7rhbw1";
 $url = "https://dev.toyyibpay.com/index.php/api/getBillTransactions?billCode=" . $bill_code . "&userSecretKey=" . $api_key;
 
 $response = file_get_contents($url);
