@@ -116,8 +116,10 @@ $sql_create_payments_table = "CREATE TABLE IF NOT EXISTS payments (
     order_id INT NOT NULL,
     user_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
-    payment_method ENUM('Credit Card', 'PayPal', 'Bank Transfer') NOT NULL,
+    payment_method ENUM('Credit Card', 'PayPal', 'Bank Transfer', 'ToyyibPay') NOT NULL,
     payment_status ENUM('Pending', 'Completed', 'Failed') DEFAULT 'Pending',
+    transaction_id VARCHAR(100) NOT NULL UNIQUE,
+    bill_code VARCHAR(100) NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE

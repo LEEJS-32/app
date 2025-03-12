@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'database.php'; // Include database connection
+require '../../database.php'; // Include database connection
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -37,51 +37,62 @@ if ($total_amount <= 0) {
 }
 
 // Convert total amount to cents (RM10.00 → 1000)
-$bill_amount = $total_amount * 100;
+$bill_amount = intval($total_amount * 100); // Ensure it's an integer
 
-// ToyyibPay API details (Replace with your own)
-$api_key = "srlq0i5d-gfgf-ok6k-gy8j-92f18h7rhbw1";
-$category_code = "vsofdz4y";
+// ToyyibPay API details (Replace with actual API key & category code)
+$api_key = trim("srlq0i5d-gfgf-ok6k-gy8j-92f18h7rhbw1"); // Replace with actual API key
+$category_code = trim("vsofdz4y"); // Replace with actual category code
+
+// Validate API Key and Category Code
+if (empty($api_key) || empty($category_code)) {
+    die("Error: API Key or Category Code is missing.");
+}
+
+// Generate a unique order reference
+$order_ref = 'ORD' . uniqid();
 
 // Payment details
-$bill_name = "Order Payment";
-$bill_description = "Process payment for your order";
-$return_url = "http://yourwebsite.com/payment_success.php";
-$callback_url = "http://yourwebsite.com/payment_callback.php";
-
-// Assign user details
-$customer_name = $user['name'];
-$customer_email = $user['email'];
-$customer_phone = $user['phonenum'];
-
-$data = array(
+$data = [
     'userSecretKey' => $api_key,
     'categoryCode' => $category_code,
-    'billName' => $bill_name,
-    'billDescription' => $bill_description,
+    'billName' => "Order Payment",
+    'billDescription' => "Process payment for your order",
     'billPriceSetting' => 1,
     'billPayorInfo' => 1,
-    'billAmount' => $bill_amount, // Total price of cart
-    'billReturnUrl' => $return_url,
-    'billCallbackUrl' => $callback_url,
-    'billExternalReferenceNo' => 'ORD' . uniqid(),
-    'billTo' => $customer_name,
-    'billEmail' => $customer_email,
-    'billPhone' => $customer_phone
-);
+    'billAmount' => $bill_amount, // Total price of cart in cents
+    'billReturnUrl' => "http://localhost:8000/pages/member/payment_callback.php",
+    'billCallbackUrl' => "http://localhost:8000/pages/member/payment_callback.php",
+    'billExternalReferenceNo' => $order_ref,
+    'billTo' => $user['name'],
+    'billEmail' => $user['email'],
+    'billPhone' => $user['phonenum'],
+    'billSuccessButtonText' => 'Proceed', 
+    'billFailedButtonText' => 'Cancel'
+];
 
+// Initialize cURL request to ToyyibPay
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, 'https://dev.toyyibpay.com/index.php/api/createBill');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Convert array to URL-encoded format
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']); // Correct content type
 
 $response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curl_error = curl_error($ch);
 curl_close($ch);
 
-// Decode response and get the payment link
+// Debugging: Print response if there's an error
+if (!$response || $http_code != 200) {
+    die("cURL Error: " . $curl_error . "<br>Response: " . $response);
+}
+
+// Decode response
 $response_data = json_decode($response, true);
-if (isset($response_data[0]['BillCode'])) {
+
+// Check if response contains BillCode
+if (is_array($response_data) && isset($response_data[0]['BillCode'])) {
     $bill_code = $response_data[0]['BillCode'];
     $payment_url = "https://dev.toyyibpay.com/" . $bill_code;
 
@@ -89,6 +100,6 @@ if (isset($response_data[0]['BillCode'])) {
     header("Location: " . $payment_url);
     exit();
 } else {
-    echo "Error creating payment link. Please check your API key and category code.";
+    echo "Error creating payment link. Response from ToyyibPay: " . print_r($response, true);
 }
 ?>

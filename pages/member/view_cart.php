@@ -126,8 +126,17 @@ if ($result_cart->num_rows > 0) {
             <td><strong>\$$total_cart_price</strong></td>
             <td></td>
           </tr>";
-    
+
     echo "</table>";
+
+    // Checkout button
+    echo "<br>
+          <form action='create_payment.php' method='POST'>
+              <input type='hidden' name='user_id' value='$user_id'>
+              <input type='hidden' name='user_name' value='$user_name'>
+              <input type='hidden' name='total_amount' value='$total_cart_price'>
+              <button type='submit'>Checkout</button>
+          </form>";
 } else {
     echo "<p>Your cart is empty!</p>";
 }
