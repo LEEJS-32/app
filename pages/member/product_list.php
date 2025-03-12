@@ -1,21 +1,36 @@
 <?php
 session_start();
-include '../../database.php'; // Adjust the path based on your folder structure
+require '../../db/db_connect.php';
+include '../../_header.php';
 
-// Check if database connection is successful
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+// Check if the user is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
+    die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
 }
 
-// Fetch products from the database
-$sql = "SELECT * FROM products WHERE status = 'active'";
-$result = $conn->query($sql);
+$user_id = $_SESSION['user_id'];
+$user_name = $_SESSION['name'];
 
-// Debugging: Check if query executes successfully
+// Fetch search query (if any)
+$search_query = "";
+if (isset($_GET['search'])) {
+    $search_query = trim($_GET['search']);
+}
+
+// Fetch products from the database based on the search query
+$sql = "SELECT * FROM products WHERE status = 'active'";
+if (!empty($search_query)) {
+    $sql .= " AND name LIKE '%" . $conn->real_escape_string($search_query) . "%'";
+}
+
+$result = $conn->query($sql);
 if (!$result) {
     die("Error fetching products: " . $conn->error);
 }
 
+// Get alert message from session if exists
+$alertMessage = isset($_SESSION['cart_message']) ? $_SESSION['cart_message'] : "";
+unset($_SESSION['cart_message']); // Remove message after displaying it
 ?>
 
 <!DOCTYPE html>
@@ -24,66 +39,74 @@ if (!$result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
-    <style>
-        .product {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin: 10px;
-            width: 220px;
-            display: inline-block;
-            text-align: center;
-            border-radius: 8px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-        }
-        img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/style.css"> <!-- External CSS -->
+
+    <script>
+        window.onload = function () {
+            let message = document.getElementById("successMessage");
+            if (message) {
+                message.style.display = "block"; // Show message
+                setTimeout(function () {
+                    message.style.display = "none"; // Hide after 2 seconds
+                }, 2000);
+            }
+        };
+    </script>
 </head>
 <body>
-    <h2>Product List</h2>
 
-    <?php
-    // Debugging: Check number of products found
-    echo "<p>Number of products found: " . $result->num_rows . "</p>";
+    <!-- Success Message (Placed at the very top) -->
+    <?php if (!empty($alertMessage)) { ?>
+        <div id="successMessage" class="success-message"><?php echo htmlspecialchars($alertMessage); ?></div>
+    <?php } ?>
 
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo "<div class='product'>";
-            echo "<img src='" . htmlspecialchars($row['image_url']) . "' alt='" . htmlspecialchars($row['name']) . "'>";
-            echo "<h3>" . htmlspecialchars($row['name']) . "</h3>";
-            echo "<p>Price: $" . number_format($row['price'], 2) . "</p>";
-            echo "<p>Brand: " . htmlspecialchars($row['brand']) . "</p>";
-            echo "<p>Color: " . htmlspecialchars($row['color']) . "</p>";
-            echo "<form action='add_to_cart.php' method='POST'>";
-            echo "<input type='hidden' name='product_id' value='" . htmlspecialchars($row['product_id']) . "'>";
-            echo "<label>Quantity: <input type='number' name='quantity' value='1' min='1'></label>";
-            echo "<button type='submit'>Add to Cart</button>";
-            echo "</form>";
-            echo "</div>";
+    <div class="header">
+        <h2>Product List</h2>
+        <p><strong>User ID:</strong> <?php echo htmlspecialchars($user_id); ?></p>
+        <p><strong>User Name:</strong> <?php echo htmlspecialchars($user_name); ?></p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form method="GET" action="product_list.php">
+            <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div class="product-container">
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $stock = intval($row['stock']);
+                ?>
+                <div class="product-card">
+                    <img class="product-image" src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
+                    <h3><?php echo htmlspecialchars($row['name']); ?></h3>
+                    <p>Price: $<?php echo number_format($row['price'], 2); ?></p>
+                    <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>
+                    <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
+                    <p><strong>Stock: <?php echo $stock; ?></strong></p>
+
+                    <form action="add_to_cart.php" method="POST" class="product-form">
+                        <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">
+                        <?php if ($stock > 0) { ?>
+                            <label>Quantity: <input type="number" name="quantity" value="1" min="1" max="<?php echo $stock; ?>"></label>
+                            <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                        <?php } else { ?>
+                            <button type="button" class="out-of-stock-btn" disabled>Out of Stock</button>
+                        <?php } ?>
+                    </form>
+                </div>
+                <?php
+            }
+        } else {
+            echo "<p class='no-products'>No products found.</p>";
         }
-    } else {
-        echo "<p>No products available.</p>";
-    }
-    ?>
+        ?>
+    </div>
 
 </body>
 </html>
 
-<?php
-$conn->close();
-?>
+<?php $conn->close(); ?>

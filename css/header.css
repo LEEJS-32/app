@@ -1,0 +1,125 @@
+* {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    
+}
+
+header {
+    font-size: 19px;
+    align-items: center;
+}
+
+nav{
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 8.5%;
+    align-items: center;
+    font-weight: 520;
+    /* background-color: aqua; */
+}
+
+.nav-bar ul{
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav div ul li {
+    list-style: none;
+    margin: 0 15px;
+}
+
+nav div ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+.other button {
+    all: unset;
+    cursor: pointer;
+}
+
+.logo {
+    /* background-color: green; */
+}
+
+.other {
+    /* background-color: yellow;     */
+}
+
+.other button {
+    margin: 0px 10px;
+}
+
+.other button i {
+    font-size: 27px;
+}
+
+.nav-bar {
+    /* background-color: red; */
+}
+
+.profile-dropdown-list{
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+    padding: 0;
+    right: 0;
+    margin: 0;
+    margin-right: 9%;
+    z-index: 5;
+    margin-top: 17px;
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    width: 10%;
+    color: black;
+    font-size: 15px;
+    display: none;
+}
+
+.profile-dropdown-list.active {
+    display: block; /* Show when active */
+}
+
+.profile-dropdown-list li {
+    cursor: pointer;
+    width: 100%;
+    padding-left: 15px;
+    margin: 0; /* Ensure no unwanted margin */
+}
+
+.profile-dropdown-list li a {
+    padding:10px 0;
+    text-decoration: none;
+    color: black;
+    display: block; /* Ensure it fills the li */
+    width: 100%; /* Stretch across full width */
+    /* background-color: aqua; */
+}
+
+/* Flash Message ----------------------------------------------------------- */
+
+#info {
+    position: fixed;
+    color: #fff;
+    background: #666;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 10px 20px;
+    left: 50%;
+    translate: -50% 0;
+    z-index: 999;
+
+    top: -100px;
+    opacity: 0;
+}
+
+#info:not(:empty) {
+    animation: fade 5s;
+}
+
+@keyframes fade {
+      0% { top: -100px; opacity: 0; }
+     10% { top:  100px; opacity: 1; }
+     90% { top:  100px; opacity: 1; }
+    100% { top: -100px; opacity: 0; }
+}

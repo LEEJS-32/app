@@ -20,7 +20,7 @@ h1 pre {
 }
 
 .intro-left {
-    padding: 10px 0 20px 2% ;
+    padding: 10px 0 20px 1%;
     /* background-color: rgb(231, 231, 231); */
     width: 35%;
     height: 78vh;
@@ -101,7 +101,7 @@ h3 {
 .intro-right {
     padding: 25px 3%;
     /* background-color: rgb(231, 231, 231); */
-    width: 65%;
+    width: 66.5%;
     height: 78vh;
     
 }
@@ -110,7 +110,7 @@ h3 {
     position: absolute;
     top: 56vh;
     right: 0;
-    width: 22%;
+    width: 23%;
     height: 32vh;
     margin-right: 8%;
     /* background-color: aqua; */

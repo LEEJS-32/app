@@ -9,7 +9,7 @@ footer {
 
 
 .footer {
-    padding:20px 8% 5px 8%;
+    padding:20px 8.5% 5px 8.5%;
     display: flex;
     justify-content: space-between;
 }
@@ -54,4 +54,8 @@ footer {
     font-size: 28px;
     padding: 24px 12px;
 
+}
+.div2 ul li a, .div3 ul li a{
+    text-decoration: none;
+    color: black;
 }

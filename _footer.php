@@ -7,7 +7,7 @@
         <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
         <!-- <title>Header</title> -->
-        <link rel="stylesheet" href="css/footer.css">
+        <link rel="stylesheet" href="/css/footer.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
         <hr>
         <div class="footer">
             <div class="div1">
-                <img src="../img/logo4.png" alt="img/logo4.png" class="footer-logo">
+                <img src="/img/logo4.png" alt="img/logo4.png" class="footer-logo">
                 <p>Discover premium-quality furniture that<br>
                 blends style and functionality. We offer a<br>
                 wide range of masterpieces to transform<br>
@@ -35,18 +35,18 @@
             <div class="div2">
                 <ul>
                     <li class="title">Company</li>
-                    <li>About Us</li>
-                    <li>FAQ</li>
-                    <li>Contact Us</li>
-                    <li>Privacy</li>
+                    <li><a href="">About Us</a></li>
+                    <li><a href="">FAQ</a></li>
+                    <li><a href="">Contact Us</a></li>
+                    <li><a href="">Privacy</a></li>
                 </ul>
             </div>
             <div class="div3">
                 <ul>
-                    <li class="title">Customer Services</li>
-                    <li>My Profile</li>
-                    <li>Track Your Order</li>
-                    <li>Return</li>
+                    <li class="title">Customer Services</a></li>
+                    <li><a href="">My Profile</a></li>
+                    <li><a href="">Track Your Order</a></li>
+                    <li><a href="">Return</a></li>
                 </ul>
             </div>
             <div class="div4">

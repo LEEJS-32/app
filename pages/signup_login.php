@@ -14,6 +14,8 @@
 
     <body>
         <?php
+        $_SESSION['role'] = "member"; 
+
         if (isset($_SESSION['error_exist'])) {
             echo "<p style='color:red;'>".$_SESSION['error_exist']."</p>";
             unset($_SESSION['error_exist']); 
@@ -35,9 +37,6 @@
                 <input type="password" id="password" name="password">
                 <span id="pwd_error1" style="color:red;"></span>
                 <span id="pwd_error2" style="color:red;"></span>
-                <br><br>
-                <input type="checkbox" id="remember" name="remember"><label for="remember">Remember Me</label>
-                <a href="" class="forgot">Forgot Password?</a>
                 <br><br>
                 <button type="submit">Submit</button>
                 <button type="reset">Cancel</button>
@@ -66,6 +65,9 @@
                 <input type="password" id="password" name="password">
                 <span id="pwd_error1" style="color:red;"></span>
                 <span id="pwd_error2" style="color:red;"></span>
+                <br><br>
+                <input type="checkbox" id="remember" name="remember"><label for="remember">Remember Me</label>
+                <a href="" class="forgot">Forgot Password?</a>
                 <br><br>
                 <button type="submit">Submit</button>
                 <button type="reset">Cancel</button>

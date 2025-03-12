@@ -2,7 +2,13 @@
 
 <a href="delete_database.php">Delete database</a>
 <a href="pages/signup_login.php">Sign Up/Login</a>
-<a href="pages/add_to_cart.php">Add to cart</a>
-<a href="pages/view_cart.php">View cart</a>
+<a href="pages/admin/admin_login.php">Admin Login</a>
+<a href="pages/member/product_list.php">See Product</a>
+<a href="pages/member/add_to_cart.php">Add to cart</a>
+<a href="pages/member/view_cart.php">View cart</a>
 <br><br>
-<?php require 'database.php' ?>
+<script src="/js/session_destroy.js"></script>
+<?php 
+require 'database.php';
+include 'db/insert.php';
+ ?>
