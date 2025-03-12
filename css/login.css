@@ -88,6 +88,7 @@ button {
     border: 1.5px solid black;
     background-color: black;
     color: white;
+    font-weight: 500;
     cursor: pointer;
 }
 
