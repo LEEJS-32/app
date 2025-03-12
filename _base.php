@@ -69,12 +69,13 @@ function html_pwd($key, $attr = '') {
 }
 
 // Generate <input type='radio'> list
-function html_radios($key, $items, $br = false) {
+function html_radios($key, $items, $br = false, $disabled = '') {
     $value = encode($GLOBALS[$key] ?? '');
     echo '<div>';
     foreach ($items as $id => $text) {
-        $state = $id == $value ? 'checked' : '';
-        echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $state>$text</label>";
+        $checked = ($id == $value) ? 'checked' : '';
+        $disabledAttr = $disabled ? 'disabled' : ''; // Ensure disabled is applied
+        echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $checked $disabledAttr> $text</label>";
         if ($br) {
             echo '<br>';
         }

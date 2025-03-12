@@ -54,6 +54,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         // include __DIR__.'/../../_base.php';
         ?>
     </header>
+    <main>
     <?php
         require '../../db/db_connect.php';
 
@@ -114,22 +115,40 @@ if ($row = $result->fetch_assoc()) {
 
 ?> 
     <h1>Update Your Profile</h1>
-    <form method="post" action="../../backend/extra_info_process.php">
+    <form method="post" id="#editForm" action="../../backend/extra_info_process.php">
     <label for="gender">Gender:</label>
-                <?php html_radios('gender', $_genders)?>
+                <?php html_radios('gender', $_genders, true, 'disabled')?>
                 <br>
                 <label for="phonenum">Phone Number:</label>
-                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>">
+                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>" disabled>
                 <br><br>
                 <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>">
+                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>" disabled>
                 <br><br>
                 <label for="occupation">Occupation:</label>
-                <?php html_text('occupation')?>
+                <?php html_text('occupation', 'disabled')?>
                 <br><br>
-                <button>Edit</button>
+                <button type="button" id="edit-btn" onclick="enableForm()">Edit</button>
+                <button type="submit" id="confirm-btn" style="display: none;">Confirm</button>
     </form>
 
-    
+    <script>
+        function enableForm() {
+    // Enable all input fields
+    document.querySelectorAll("form input, form select").forEach(input => {
+        input.removeAttribute("disabled");
+    });
+
+    // Hide "Edit" button and show "Confirm" button
+    document.getElementById("edit-btn").style.display = "none";
+    document.getElementById("confirm-btn").style.display = "inline-block";
+    }
+    </script>
+    </main>
+    <footer>
+        <?php include '../../_footer.php'; ?>
+</footer>
+
+
 </body>
 </html>
