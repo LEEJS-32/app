@@ -6,7 +6,8 @@ $name = $_SESSION['name'];
 $role = $_SESSION['role'];
 $email = $_SESSION['email'];
 
-echo ($user_id);
+$_genders = ['male' => 'Male', 'female' => 'Female'];
+// echo ($user_id);
 ?>
 
 <!DOCTYPE html>
@@ -47,6 +48,12 @@ echo ($user_id);
     </style>
 </head>
 <body>
+    <header>
+        <?php 
+        include __DIR__.'/../../_header.php'; 
+        // include __DIR__.'/../../_base.php';
+        ?>
+    </header>
     <?php
         require '../../db/db_connect.php';
 
@@ -82,5 +89,47 @@ echo ($user_id);
         <button type="submit" id="upload" style="display: none;">Upload</button>
     </form>
 
+
+
+
+
+
+<!-- Edit Profile -->
+<?php 
+
+require __DIR__ . '/../../db/db_connect.php';
+$sql = "SELECT gender, phonenum, dob, occupation FROM users WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($row = $result->fetch_assoc()) {
+    // Store retrieved values in variables
+    $GLOBALS['gender'] = $row['gender'];
+    $GLOBALS['phonenum'] = $row['phonenum'];
+    $GLOBALS['dob'] = $row['dob'];
+    $GLOBALS['occupation'] = $row['occupation'];
+}
+
+?> 
+    <h1>Update Your Profile</h1>
+    <form method="post" action="../../backend/extra_info_process.php">
+    <label for="gender">Gender:</label>
+                <?php html_radios('gender', $_genders)?>
+                <br>
+                <label for="phonenum">Phone Number:</label>
+                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>">
+                <br><br>
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>">
+                <br><br>
+                <label for="occupation">Occupation:</label>
+                <?php html_text('occupation')?>
+                <br><br>
+                <button>Edit</button>
+    </form>
+
+    
 </body>
 </html>

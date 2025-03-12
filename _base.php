@@ -54,7 +54,7 @@ function temp($key, $value = null) {
 
 // Encode HTML special characters
 function encode($value) {
-    return htmlentities($value);
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
 
 // Generate <input type='text'>
