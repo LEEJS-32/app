@@ -64,6 +64,5 @@
 
     </header>
             <!-- Flash message -->
-             <?php include __DIR__ . '/_base.php'; ?>
+             <?php include_once __DIR__ . '/_base.php'; ?>
             <div id="info"><?= temp('info') ?></div>
-</html>

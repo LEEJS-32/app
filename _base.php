@@ -114,3 +114,52 @@ function err($key) {
         echo '<span></span>';
     }
 }
+
+// ============================================================================
+// Security
+// ============================================================================
+
+// Global user object
+session_start();
+$_user = $_SESSION['user'] ?? null;
+
+// Login user
+function login($user, $url = '/') {
+    $_SESSION['user'] = $user;
+    redirect($url);
+}
+
+// Logout user
+// function logout($url = '/') {
+//     unset($_SESSION['user']);
+//     redirect($url);
+// }
+
+// Authorization
+function auth(...$roles) {
+    global $_user;
+
+    if ($_user) {
+        echo "User is logged in. Role: " . $_user['role'] . "<br>";
+
+        if ($roles) {
+            echo "Roles required: ";
+            print_r($roles); // Display required roles
+            echo "<br>";
+
+            if (in_array($_user['role'], $roles)) {
+                echo "✅ User role matches. Access granted.<br>";
+                return; // ✅ Allow access
+            } else {
+                echo "❌ User role does NOT match. Access denied.<br>";
+            }
+        } else {
+            echo "✅ No specific role required. Access granted.<br>";
+            return; // ✅ Allow access
+        }
+    } else {
+        echo "❌ User is NOT logged in. Access denied.<br>";
+    }
+
+    redirect('/pages/admin/admin_login.php'); 
+}
