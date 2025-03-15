@@ -121,6 +121,7 @@ function err($key) {
 
 // Global user object
 session_start();
+require_once 'db/db_connect.php';
 $_user = $_SESSION['user'] ?? null;
 
 // Login user
@@ -163,3 +164,37 @@ function auth(...$roles) {
 
     redirect('/pages/admin/admin_login.php'); 
 }
+
+
+// Check session and 'remember me'
+function auth_user() {
+    global $_user, $conn;
+
+    // If session exists, keep user logged in
+    if (isset($_SESSION['user'])) {
+        $_user = $_SESSION['user'];
+        return;
+    }
+
+    // Check "Remember Me" token
+    if (isset($_COOKIE['remember_me'])) {
+        $token = $_COOKIE['remember_me'];
+
+        $stmt = $conn->prepare("SELECT users.* FROM users INNER JOIN token ON users.user_id = token.user_id WHERE token.token_id = ? AND token.expire > NOW()");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $_user = $result->fetch_assoc();
+            $_SESSION['user'] = $_user; // Restore session
+            return;
+        }
+    }
+
+    // If no valid session or remember me, redirect to login
+    echo "not log in";
+    redirect('/pages/admin/admin_login.php');
+    exit();
+}
+

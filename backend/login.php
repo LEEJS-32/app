@@ -1,64 +1,44 @@
-<!DOCTYPE html>
-<html>
 <?php
-require '../database.php';
-include '../_base.php';
-session_start();  // Ensure session is started before using session variables
+session_start();
+require '../db/db_connect.php';
+include_once '../_base.php';
 
-if (is_post()) {
-    $email = post("email");
-    $password = post("password");
-    $hash_password = sha1($password);
-    $remember = isset($_POST['remember']);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST["email"];
+    $password = sha1($_POST["password"]);
+    $remember = isset($_POST["remember"]); // Check if "Remember Me" is ticked
 
-    // Check if user exists
-    $sql_check_exist = "SELECT * FROM users WHERE email = ?";
-    $stmt = $conn->prepare($sql_check_exist);
-    $stmt->bind_param("s", $email);
+    // Check user credentials
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+    $stmt->bind_param("ss", $email, $password);
     $stmt->execute();
-    $result_check_exist = $stmt->get_result();
+    $result = $stmt->get_result();
 
-    if ($result_check_exist->num_rows == 0) {
-        $_SESSION['error_not_exist'] = 'Record not exists.';
-        redirect("../pages/signup_login.php");
-        exit();
-    } else {
-        // Check password
-        $sql_check_pwd = "SELECT * FROM users WHERE email = ? AND password = ?";
-        $stmt = $conn->prepare($sql_check_pwd);
-        $stmt->bind_param("ss", $email, $hash_password);
-        $stmt->execute();
-        $result_check_pwd = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $_SESSION["user"] = $user; // Store in session
 
-        if ($result_check_pwd->num_rows > 0) {
-            $user = $result_check_pwd->fetch_assoc();
+        if ($remember) {
+            // Generate a secure token
+            $token = bin2hex(random_bytes(32));
+            $expiry = date("Y-m-d H:i:s", strtotime("+7 days")); // Valid for 7 days
 
-            if ($remember) {
-                // Generate a secure token
-                $token = bin2hex(random_bytes(32));
-                $expiry = date('Y-m-d H:i:s', strtotime('+1 days'));
+            // Store token in database
+            $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
+            $stmt->bind_param("iss", $user["user_id"], $token, $expiry);
+            $stmt->execute();
 
-                // Store token in database
-                $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
-                $stmt->bind_param("iss", $user['user_id'], $token, $expiry);
-                $stmt->execute();
-
-                // Set a cookie with token
-                setcookie("remember_me", $token, time() + (86400 * 1), "/", "", false, true);
-            }
-
-            // Use the login function to set session and redirect
-            echo "OK";
-            login($user, ($user['role'] == "member") ? "../pages/member/product_list.php" : "/../pages/member/sample.php");
-        } else {
-            $_SESSION['error_pwd'] = 'Incorrect Password.';
-            redirect("../pages/signup_login.php");
-            exit();
+            // Store token in cookie
+            setcookie("remember_me", $token, time() + (86400 * 7), "/", "", false, true);
         }
+
+        // Redirect based on role
+        $redirect_url = ($user['role'] == "admin") ? "../pages/member/profile.php" : "../pages/member/product_list.php";
+        redirect($redirect_url);
+    } else {
+        $_SESSION["error"] = "Invalid email or password.";
+        // redirect("../pages/signup_login.php");
+        echo "invalid email";
     }
 }
 ?>
-</html>
-
-// redirect("/../pages/member/profile.php");
-// exit();

@@ -1,4 +1,6 @@
 <?php
+require __DIR__ . '/../database.php';
+
 $host = "localhost";  
 $user = "root";       
 $pwd = "";           
