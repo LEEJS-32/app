@@ -16,6 +16,8 @@
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
 
+
+
     <script>
         function toggleDropdown() {
             const dropdown = document.querySelector(".profile-dropdown-list");
@@ -36,7 +38,7 @@
     <header>
         <nav>
             <div class="logo">
-            <img src="/img/logo4.png" alt="img/logo.png" class="logo">
+            <a href="/index.php"><img src="/img/logo4.png" alt="img/logo.png" class="logo"></a>
             </div>
         
             <div class="nav-bar">

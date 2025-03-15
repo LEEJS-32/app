@@ -1,20 +1,16 @@
 <?php
-session_start();
-require '../../backend/auth_check.php';
-$user_id = $_SESSION['user_id'];
-$name = $_SESSION['name'];
-$role = $_SESSION['role'];
-$email = $_SESSION['email'];
+include_once '../../_base.php';
 
-$_genders = ['male' => 'Male', 'female' => 'Female'];
-// echo ($user_id);
+// ----------------------------------------------------------------------------
+
+//member role
+auth_user();
+auth('member', 'admin');
+
+// ----------------------------------------------------------------------------
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
+</script>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webcam Avatar</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script defer src="../../js/webcam.js"></script>
@@ -46,14 +42,16 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             display: none;
         }
     </style>
+
 </head>
+
 <body>
     <header>
         <?php 
-        include __DIR__.'/../../_header.php'; 
-        // include __DIR__.'/../../_base.php';
+            include __DIR__ . '/../../_header.php'; 
         ?>
     </header>
+
     <main>
     <?php
         require '../../db/db_connect.php';
@@ -144,11 +142,13 @@ if ($row = $result->fetch_assoc()) {
     document.getElementById("confirm-btn").style.display = "inline-block";
     }
     </script>
+
     </main>
+
     <footer>
-        <?php include '../../_footer.php'; ?>
-</footer>
-
-
+        <?php
+            include __DIR__ . '/../../_footer.php';
+        ?>
+    </footer>
 </body>
-</html>
+    
