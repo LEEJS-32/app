@@ -8,6 +8,8 @@
 <a href="pages/member/view_cart.php">View cart</a>
 <br><br>
 
+<h1>Use sample.php as reference code!!!!!!!!!!!!!!</h1>
+
 <?php 
 require 'database.php';
 include 'db/insert.php';
