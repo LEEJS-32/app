@@ -1,6 +1,5 @@
-
 <?php
-session_start();
+// session_start();
 // if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
 //     header("Location: /pages/signup_login.php");
 //     exit();
@@ -283,5 +282,6 @@ $conn->close();
 
         <input type="submit" value="Add Product">
     </form>
+    <button onclick="window.location.href='adminProduct.php'">Back to Product List</button>
 </body>
 </html>

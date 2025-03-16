@@ -1,5 +1,5 @@
 <?php 
-session_start();
+// session_start();
 ob_start(); 
 include '../../_header.php'; 
 ?>
@@ -261,5 +261,6 @@ include '../../_header.php';
 
         <input type="submit" value="Update Product">
     </form>
+    <button onclick="window.location.href='adminProduct.php'">Back to Product List</button>
 </body>
 </html>
