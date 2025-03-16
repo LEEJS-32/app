@@ -192,9 +192,5 @@ function auth_user() {
         }
     }
 
-    // If no valid session or remember me, redirect to login
-    echo "not log in";
-    redirect('/pages/admin/admin_login.php');
-    exit();
 }
 
