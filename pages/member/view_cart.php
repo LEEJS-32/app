@@ -1,5 +1,5 @@
 <?php
-session_start();
+include_once '../../_base.php';
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -12,11 +12,12 @@ if ($conn->connect_error) {
 }
 
 // Ensure the user is logged in
-if (!isset($_SESSION['email'])) {
+if (!isset($_SESSION['user'])) {
     die("Error: User not logged in.");
 }
 
-$user_email = $_SESSION['email']; // Get logged-in user email
+$user = $_SESSION['user'];
+$user_email = $user['email']; // Get logged-in user email
 
 // Retrieve user details (user_id and name)
 $sql_user = "SELECT user_id, name FROM users WHERE email = ?";
