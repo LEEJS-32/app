@@ -3,12 +3,13 @@ require '../../db/db_connect.php';
 include '../../_header.php';
 
 // Check if the user is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
-    die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
-}
+// if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
+//     die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
+// }
 
-$user_id = $_SESSION['user_id'];
-$user_name = $_SESSION['name'];
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
+$user_name = $user['name'];
 
 // Fetch search query (if any)
 $search_query = "";
