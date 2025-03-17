@@ -5,7 +5,11 @@ session_start();
 //     header("Location: /pages/signup_login.php");
 //     exit();
 // }
-// require '../../_base.php';
+require_once '../../_base.php';
+
+auth_user();
+auth('admin');
+
 $servername = "localhost";
 $username = "root";
 $password = "";
