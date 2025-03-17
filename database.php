@@ -89,7 +89,7 @@ $conn->query($sql_create_cart_table);
 
 // Create orders table
 $sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (
-    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id VARCHAR(50) PRIMARY KEY,  -- Changed from INT to VARCHAR(50)
     user_id INT NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +101,7 @@ $conn->query($sql_create_orders_table);
 // Create order_items table
 $sql_create_order_items_table = "CREATE TABLE IF NOT EXISTS order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
+    order_id VARCHAR(50) NOT NULL,  -- Changed from INT to VARCHAR(50)
     product_id INT NOT NULL,
     quantity INT NOT NULL,
     subtotal DECIMAL(10,2) NOT NULL,
@@ -113,11 +113,11 @@ $conn->query($sql_create_order_items_table);
 // Create payments table
 $sql_create_payments_table = "CREATE TABLE IF NOT EXISTS payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
+    order_id VARCHAR(50) NOT NULL,  -- Changed from INT to VARCHAR(50)
     user_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     payment_method ENUM('Credit Card', 'PayPal', 'Bank Transfer', 'ToyyibPay') NOT NULL,
-    payment_status ENUM('Pending', 'Completed', 'Failed') DEFAULT 'Pending',
+    payment_status ENUM('Pending', 'Completed', 'Failed','Refunded') DEFAULT 'Pending',
     transaction_id VARCHAR(100) NOT NULL UNIQUE,
     bill_code VARCHAR(100) NOT NULL,
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -125,6 +125,7 @@ $sql_create_payments_table = "CREATE TABLE IF NOT EXISTS payments (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 )";
 $conn->query($sql_create_payments_table);
+
 
 // Keep connection open for other scripts to use
 ?>
