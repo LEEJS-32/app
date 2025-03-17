@@ -7,6 +7,9 @@ include_once '../../_base.php';
 auth_user();
 auth('member', 'admin');
 
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
+$_genders = ['male' => 'Male', 'female' => 'Female'];
 // ----------------------------------------------------------------------------
 ?>
 </script>
@@ -57,7 +60,7 @@ auth('member', 'admin');
         require '../../db/db_connect.php';
 
         // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE email = '$email'";
+        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
         $result = $conn->query($sql);
         $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
         

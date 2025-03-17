@@ -46,7 +46,7 @@
             <ul>
                 <li><a href="/pages/home.php">Home</a></li>
                 <li><a href="">About us</a></li>
-                <li><a href="">Products</a></li>
+                <li><a href="/pages/products.php">Products</a></li>
                 <li><a href="">Contact</a></li>
             </ul>
             </div>

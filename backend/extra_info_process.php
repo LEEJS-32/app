@@ -1,12 +1,11 @@
 <?php
-session_start();
 include '../_base.php';
-if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
-    header("Location: /pages/signup_login.php");
-    exit();
-}
-$email = $_SESSION['email'];
-$name = $_SESSION['name'];
+
+auth_user();
+auth('admin');
+
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
 
 $servername = "localhost";
 $username = "root";
@@ -26,8 +25,8 @@ $country = post('country') ?? null;
 $postcode = post('postcode') ?? null;
 $preference = post('preference') ?? null;
 
-$stmt = $conn->prepare("UPDATE users SET gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE email=?");
-$stmt->bind_param("ssssss",  $gender, $phonenum, $preference, $dob, $occupation, $email);
+$stmt = $conn->prepare("UPDATE users SET gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE user_id=?");
+$stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation, $user_id);
 
 // Execute SQL query
 if ($stmt->execute()) {
