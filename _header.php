@@ -9,12 +9,15 @@
         <!-- <title>Header</title> -->
         <link rel="stylesheet" href="\css\header.css">
         <link rel="stylesheet" href="\css\logo.css">
+        <link rel="stylesheet" href="\css\style.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
+
+
 
     <script>
         function toggleDropdown() {
@@ -36,14 +39,14 @@
     <header>
         <nav>
             <div class="logo">
-            <img src="/img/logo4.png" alt="img/logo.png" class="logo">
+            <a href="/index.php"><img src="/img/logo4.png" alt="img/logo.png" class="logo"></a>
             </div>
         
             <div class="nav-bar">
             <ul>
                 <li><a href="/pages/home.php">Home</a></li>
                 <li><a href="">About us</a></li>
-                <li><a href="">Products</a></li>
+                <li><a href="/pages/products.php">Products</a></li>
                 <li><a href="">Contact</a></li>
             </ul>
             </div>
@@ -64,6 +67,5 @@
 
     </header>
             <!-- Flash message -->
-             <?php include __DIR__ . '/_base.php'; ?>
+             <?php include_once __DIR__ . '/_base.php'; ?>
             <div id="info"><?= temp('info') ?></div>
-</html>

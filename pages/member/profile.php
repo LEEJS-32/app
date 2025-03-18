@@ -1,20 +1,19 @@
 <?php
-session_start();
-require '../../backend/auth_check.php';
-$user_id = $_SESSION['user_id'];
-$name = $_SESSION['name'];
-$role = $_SESSION['role'];
-$email = $_SESSION['email'];
+include_once '../../_base.php';
 
+// ----------------------------------------------------------------------------
+
+//member role
+auth_user();
+auth('member', 'admin');
+
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
 $_genders = ['male' => 'Male', 'female' => 'Female'];
-// echo ($user_id);
+// ----------------------------------------------------------------------------
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
+</script>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webcam Avatar</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script defer src="../../js/webcam.js"></script>
@@ -46,19 +45,22 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             display: none;
         }
     </style>
+
 </head>
+
 <body>
     <header>
         <?php 
-        include __DIR__.'/../../_header.php'; 
-        // include __DIR__.'/../../_base.php';
+            include __DIR__ . '/../../_header.php'; 
         ?>
     </header>
+
+    <main>
     <?php
         require '../../db/db_connect.php';
 
         // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE email = '$email'";
+        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
         $result = $conn->query($sql);
         $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
         
@@ -114,22 +116,42 @@ if ($row = $result->fetch_assoc()) {
 
 ?> 
     <h1>Update Your Profile</h1>
-    <form method="post" action="../../backend/extra_info_process.php">
+    <form method="post" id="#editForm" action="../../backend/extra_info_process.php">
     <label for="gender">Gender:</label>
-                <?php html_radios('gender', $_genders)?>
+                <?php html_radios('gender', $_genders, true, 'disabled')?>
                 <br>
                 <label for="phonenum">Phone Number:</label>
-                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>">
+                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>" disabled>
                 <br><br>
                 <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>">
+                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>" disabled>
                 <br><br>
                 <label for="occupation">Occupation:</label>
-                <?php html_text('occupation')?>
+                <?php html_text('occupation', 'disabled')?>
                 <br><br>
-                <button>Edit</button>
+                <button type="button" id="edit-btn" onclick="enableForm()">Edit</button>
+                <button type="submit" id="confirm-btn" style="display: none;">Confirm</button>
     </form>
 
-    
+    <script>
+        function enableForm() {
+    // Enable all input fields
+    document.querySelectorAll("form input, form select").forEach(input => {
+        input.removeAttribute("disabled");
+    });
+
+    // Hide "Edit" button and show "Confirm" button
+    document.getElementById("edit-btn").style.display = "none";
+    document.getElementById("confirm-btn").style.display = "inline-block";
+    }
+    </script>
+
+    </main>
+
+    <footer>
+        <?php
+            include __DIR__ . '/../../_footer.php';
+        ?>
+    </footer>
 </body>
-</html>
+    

@@ -1,17 +1,22 @@
 <?php
 session_start();
+require '../db/db_connect.php';
+include_once '../_base.php';
+
+// Remove session
 session_destroy();
 
-include '../_base.php';
-// Remove token from database
-require __DIR__.'/../db/db_connect.php';
-if (isset($_COOKIE['remember_me'])) {
+// Remove token from database if "Remember Me" was used
+if (isset($_COOKIE["remember_me"])) {
     $stmt = $conn->prepare("DELETE FROM token WHERE token_id = ?");
-    $stmt->execute([$_COOKIE['remember_me']]);
+    $stmt->bind_param("s", $_COOKIE["remember_me"]);
+    $stmt->execute();
 
-    setcookie("remember_me", "", time() - 3600, "/"); // Expire cookie
+    // Expire the cookie
+    setcookie("remember_me", "", time() - 3600, "/");
 }
 
-echo "Logged out";
-redirect('../index.php');
+// Redirect to login page
+redirect("../pages/admin/admin_login.php");
 ?>
+

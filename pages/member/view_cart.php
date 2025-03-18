@@ -1,5 +1,5 @@
 <?php
-session_start();
+include_once '../../_base.php';
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -12,11 +12,12 @@ if ($conn->connect_error) {
 }
 
 // Ensure the user is logged in
-if (!isset($_SESSION['email'])) {
+if (!isset($_SESSION['user'])) {
     die("Error: User not logged in.");
 }
 
-$user_email = $_SESSION['email']; // Get logged-in user email
+$user = $_SESSION['user'];
+$user_email = $user['email']; // Get logged-in user email
 
 // Retrieve user details (user_id and name)
 $sql_user = "SELECT user_id, name FROM users WHERE email = ?";
@@ -126,8 +127,17 @@ if ($result_cart->num_rows > 0) {
             <td><strong>\$$total_cart_price</strong></td>
             <td></td>
           </tr>";
-    
+
     echo "</table>";
+
+    // Checkout button
+    echo "<br>
+          <form action='create_payment.php' method='POST'>
+              <input type='hidden' name='user_id' value='$user_id'>
+              <input type='hidden' name='user_name' value='$user_name'>
+              <input type='hidden' name='total_amount' value='$total_cart_price'>
+              <button type='submit'>Checkout</button>
+          </form>";
 } else {
     echo "<p>Your cart is empty!</p>";
 }

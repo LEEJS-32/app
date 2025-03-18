@@ -1,13 +1,14 @@
 <?php
-session_start();
+include_once '../../_base.php';
 require_once '../../db/db_connect.php'; // Ensure correct path
 
 // Ensure the user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user'])) {
     die("Error: User not logged in.");
 }
 
-$user_id = $_SESSION['user_id'];
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
 $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
 $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 

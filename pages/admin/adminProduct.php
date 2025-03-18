@@ -138,6 +138,7 @@ include '../../_header.php';
 </head>
 <body>
     <h1>Product List</h1>
+    <button onclick="window.location.href='adminCreateProduct.php'">Add New Product</button>
     <input type="text" id="search" placeholder="Search products...">
     <select id="categoryFilter">
         <option value="">All Categories</option>

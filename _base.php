@@ -69,12 +69,13 @@ function html_pwd($key, $attr = '') {
 }
 
 // Generate <input type='radio'> list
-function html_radios($key, $items, $br = false) {
+function html_radios($key, $items, $br = false, $disabled = '') {
     $value = encode($GLOBALS[$key] ?? '');
     echo '<div>';
     foreach ($items as $id => $text) {
-        $state = $id == $value ? 'checked' : '';
-        echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $state>$text</label>";
+        $checked = ($id == $value) ? 'checked' : '';
+        $disabledAttr = $disabled ? 'disabled' : ''; // Ensure disabled is applied
+        echo "<label><input type='radio' id='{$key}_$id' name='$key' value='$id' $checked $disabledAttr> $text</label>";
         if ($br) {
             echo '<br>';
         }
@@ -113,3 +114,83 @@ function err($key) {
         echo '<span></span>';
     }
 }
+
+// ============================================================================
+// Security
+// ============================================================================
+
+// Global user object
+session_start();
+require_once 'db/db_connect.php';
+$_user = $_SESSION['user'] ?? null;
+
+// Login user
+function login($user, $url = '/') {
+    $_SESSION['user'] = $user;
+    redirect($url);
+}
+
+// Logout user
+// function logout($url = '/') {
+//     unset($_SESSION['user']);
+//     redirect($url);
+// }
+
+// Authorization
+function auth(...$roles) {
+    global $_user;
+
+    if ($_user) {
+        echo "User is logged in. Role: " . $_user['role'] . "<br>";
+
+        if ($roles) {
+            echo "Roles required: ";
+            print_r($roles); // Display required roles
+            echo "<br>";
+
+            if (in_array($_user['role'], $roles)) {
+                echo "✅ User role matches. Access granted.<br>";
+                return; // ✅ Allow access
+            } else {
+                echo "❌ User role does NOT match. Access denied.<br>";
+            }
+        } else {
+            echo "✅ No specific role required. Access granted.<br>";
+            return; // ✅ Allow access
+        }
+    } else {
+        echo "❌ User is NOT logged in. Access denied.<br>";
+    }
+
+    redirect('/pages/admin/admin_login.php'); 
+}
+
+
+// Check session and 'remember me'
+function auth_user() {
+    global $_user, $conn;
+
+    // If session exists, keep user logged in
+    if (isset($_SESSION['user'])) {
+        $_user = $_SESSION['user'];
+        return;
+    }
+
+    // Check "Remember Me" token
+    if (isset($_COOKIE['remember_me'])) {
+        $token = $_COOKIE['remember_me'];
+
+        $stmt = $conn->prepare("SELECT users.* FROM users INNER JOIN token ON users.user_id = token.user_id WHERE token.token_id = ? AND token.expire > NOW()");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $_user = $result->fetch_assoc();
+            $_SESSION['user'] = $_user; // Restore session
+            return;
+        }
+    }
+
+}
+
