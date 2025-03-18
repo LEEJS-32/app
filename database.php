@@ -43,48 +43,6 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
 
 $conn->query($sql_create_users_table);
 
-// Handle profile photo upload
-function handleAvatarUpload() {
-    $uploadDir = 'uploads/avatars/';
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-
-    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['avatar']['tmp_name'];
-        $fileName = $_FILES['avatar']['name'];
-        $fileSize = $_FILES['avatar']['size'];
-        $fileType = $_FILES['avatar']['type'];
-        $fileNameCmps = explode(".", $fileName);
-        $fileExtension = strtolower(end($fileNameCmps));
-
-        // Sanitize file name and generate unique name
-        $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
-        $destPath = $uploadDir . $newFileName;
-
-        // Check if image file is actual image
-        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif'];
-        if (!in_array($fileExtension, $allowedTypes)) {
-            throw new Exception('Only JPG, JPEG, PNG & GIF files are allowed.');
-        }
-
-        // Verify file size (5MB max)
-        if ($fileSize > 5000000) {
-            throw new Exception('File size exceeds 5MB limit.');
-        }
-
-        // Move uploaded file
-        if (move_uploaded_file($fileTmpPath, $destPath)) {
-            return $newFileName;
-        } else {
-            throw new Exception('There was an error uploading your file.');
-        }
-    }
-    return null;
-}
-
 // Create token table with InnoDB engine
 $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
     token_id VARCHAR(100) PRIMARY KEY, 
