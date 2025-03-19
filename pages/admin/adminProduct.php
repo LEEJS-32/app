@@ -219,7 +219,7 @@ include '../../_header.php';
                     echo "<td>";
                     if (is_array($image_urls)) {
                         foreach ($image_urls as $image_url) {
-                            echo "<img src='" . $image_url . "' alt='Product Image' style='max-width: 100px; max-height: 100px; margin: 5px;'>";
+                            echo "<img src='/" . htmlspecialchars($image_url) . "' alt='Product Image' style='max-width: 100px; max-height: 100px; margin: 5px;'>";
                         }
                     }
                     echo "</td>";

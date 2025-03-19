@@ -81,7 +81,17 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                 $stock = intval($row['stock']);
                 ?>
                 <div class="product-card">
-                    <img class="product-image" src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
+                    <?php
+                    $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
+                    if (is_array($image_urls) && !empty($image_urls)) {
+                        // Use the first image in the array as the product image
+                        $image_path = $image_urls[0];
+                        echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
+                    } else {
+                        // Fallback image if no image is available
+                        echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
+                    }
+                    ?>
                     <h3><?php echo htmlspecialchars($row['name']); ?></h3>
                     <p>Price: $<?php echo number_format($row['price'], 2); ?></p>
                     <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>

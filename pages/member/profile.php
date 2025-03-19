@@ -5,7 +5,7 @@ include_once '../../_base.php';
 
 //member role
 auth_user();
-auth('member', 'admin');
+auth('admin');
 
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
