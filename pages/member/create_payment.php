@@ -79,7 +79,7 @@ $api_key = "srlq0i5d-gfgf-ok6k-gy8j-92f18h7rhbw1"; // Replace with actual API ke
 $category_code = "vsofdz4y"; // Replace with actual category code
 
 // Ensure callback URL is correct (HTTPS required for production)
-$callback_url = "https://abef-2001-f40-97e-e6b8-4076-303d-e7af-5dd5/pages/member/payment_callback.php"; 
+$callback_url = "https://1f79-2001-f40-97e-e6b8-4c63-7d3e-60d0-6e68.ngrok-free.app/pages/member/payment_callback.php"; 
 $return_url = "http://localhost:8000/pages/member/order_history.php";
 
 // Payment details
