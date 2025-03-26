@@ -1,6 +1,5 @@
 <?php 
-    // session_start();
-    // $_SESSION['role'] = "admin"; 
+    
 ?>
 
 <!DOCTYPE html>
@@ -16,6 +15,7 @@
     <link rel="stylesheet" href="\css\logo.css">
     <link rel="stylesheet" href="\css\style.css">
     <link rel="stylesheet" href="\css\login.css">
+    <script scr="../../js/validation.js"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
