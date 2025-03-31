@@ -1,3 +1,5 @@
+<?php include_once ('_base.php'); ?>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -53,13 +55,28 @@
 
             <div class="other">
             <button class="search"><i class='bx bx-search'></i></button>
-            <button class="cart"><i class='bx bx-shopping-bag'></i></button>
+            <a href="/pages/member/view_cart.php"><button class="cart"><i class='bx bx-shopping-bag'></i></button></a>
             <button class="user" onclick="toggleDropdown()"><i class='bx bx-user' ></i></button>
             <ul class="profile-dropdown-list">
-                <li><a href="/pages/member/profile.php">My Profile</a></li>
-                <li><a href="">Order</a></li>
-                <li><a href="">Rewards</a></li>
-                <li><a href="/backend/logout.php">Log out</a></li>
+                <?php if (($_user) && ($_user['role'] == 'member')): ?>
+                    <li><a href="/pages/member/member_profile.php">My Profile</a></li>                
+                    <li><a href="">Orders</a></li>
+                    <li><a href="">Rewards</a></li>
+                <?php endif ?>
+
+                <?php if (($_user) && ($_user['role'] == 'admin')): ?>
+                    <li><a href="/pages/admin/admin_profile.php">My Profile</a></li>                
+                    <li><a href="">Members</a></li>
+                    <li><a href="">Orders</a></li>
+                <?php endif ?>
+
+                <?php if($_user): ?>
+                    <li><a href="/backend/logout.php">Log out</a></li>
+                <?php else: ?>
+                    <li><a href="/pages/signup_login.php">Sign Up/Login</a></li>
+                    <li><a href="">Orders</a></li>
+                    <li><a href="">Rewards</a></li>
+                <?php endif ?>
             </ul>
             </div>
             

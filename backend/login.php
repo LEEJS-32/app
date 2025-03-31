@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // Redirect based on role
-        $redirect_url = ($user['role'] == "admin") ? "../pages/member/profile.php" : "../pages/member/product_list.php";
+        $redirect_url = ($user['role'] == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
         redirect($redirect_url);
     } else {
         $_SESSION["error"] = "Invalid email or password.";

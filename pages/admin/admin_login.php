@@ -26,7 +26,7 @@
     <main>
         <div class="login">
             <div class="left">
-                <img class="logo" src="../../img/logo4.png" alt="logo4.png">
+                <a href="../../index.php"><img class="logo" src="../../img/logo4.png" alt="logo4.png"></a>
                 <div class="form">
                     <h1>Admin Log In</h1>
                     <form method="post" action="../../backend/login.php" onsubmit="return validateForm()">
