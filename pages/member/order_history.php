@@ -118,7 +118,7 @@ while ($row = $result->fetch_assoc()) {
                 <th>Status</th>
                 <th>Payment Status</th>
                 <th>Payment Method</th>
-                <th>Amount (RM)</th>
+                <th>Amount Paid(RM)</th>
                 <th>Transaction Date</th>
             </tr>
         </thead>
