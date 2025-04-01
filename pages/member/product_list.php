@@ -1,6 +1,10 @@
+<<<<<<< Updated upstream
 <?php
 include_once '../../_base.php';
 
+=======
+<?php 
+>>>>>>> Stashed changes
 require '../../db/db_connect.php';
 include '../../_header.php';
 

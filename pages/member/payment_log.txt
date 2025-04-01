@@ -14,6 +14,3 @@ Error: Unable to create payment.
 2025-04-01 00:05:52 - API Response: 						[{"BillCode":"rr9oks99"}]
 2025-04-01 00:11:06 - API Response: 						[{"BillCode":"ovteg9nq"}]
 2025-04-01 00:33:26 - API Response: 						[{"BillCode":"wwkf2qhr"}]
-2025-04-01 22:19:42 - API Response: 						[{"BillCode":"a9e5g84p"}]
-2025-04-01 22:21:21 - API Response: 						[{"BillCode":"u0b8riuq"}]
->>>>>>> Stashed changes
