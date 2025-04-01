@@ -113,8 +113,8 @@ if (!empty($cart_items)) {
 
     if ($user_id > 0) {
         echo "<form action='create_payment.php' method='POST'>
-            <button type='submit'>Proceed to Checkout</button>
-          </form>";
+        <button type='submit'>Proceed to Checkout</button>
+      </form>";
     } else {
         echo "<p>You must <a href='../signup_login.php'>log in</a> to proceed to checkout.</p>";
     }
