@@ -1,3 +1,7 @@
+<?php
+include_once('_base.php');
+auth_user();
+?>
 <?php include '_header.php';?>
 
 <a href="delete_database.php">Delete database</a>
@@ -7,7 +11,9 @@
 <a href="pages/member/add_to_cart.php">Add to cart</a>
 <a href="pages/member/view_cart.php">View cart</a>
 <br><br>
-<script src="/js/session_destroy.js"></script>
+
+<h1>Use sample.php as reference code!!!!!!!!!!!!!!</h1>
+
 <?php 
 require 'database.php';
 include 'db/insert.php';

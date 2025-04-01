@@ -12,7 +12,22 @@ $avatar = "../../img/avatar/avatar.jpg";
 $sql_insert_admin = "INSERT IGNORE INTO users (name, email, password, role, avatar) VALUES ('$name', '$email', '$hash_pwd', '$role', '$avatar')";
 
 if ($conn->query($sql_insert_admin) === TRUE) {
-    echo "Admin data inserted successfully";
+    // echo "Admin data inserted successfully";
+} else {
+    echo "Error: " . $conn->error;
+}
+
+$name = "qqqq";
+$email = "qqqq@qqqq";
+$pwd = "Qq12@1212";
+$hash_pwd = sha1($pwd);
+$role = "member";
+$avatar = "../../img/avatar/avatar.jpg";
+
+$sql_insert_member = "INSERT IGNORE INTO users (name, email, password, role, avatar) VALUES ('$name', '$email', '$hash_pwd', '$role', '$avatar')";
+
+if ($conn->query($sql_insert_member) === TRUE) {
+    // echo "Member data inserted successfully";
 } else {
     echo "Error: " . $conn->error;
 }

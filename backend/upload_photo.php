@@ -1,8 +1,13 @@
 <?php
-session_start();
-$email = $_SESSION['email'];
 include '../db/db_connect.php';
 include '../_base.php';
+
+auth_user();
+auth();
+
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
+
 
 if (isset($_POST['image'])) {
     $imageData = post('image');
@@ -19,8 +24,8 @@ if (isset($_POST['image'])) {
     file_put_contents($filePath, $imageData);
 
     // Save to database
-    $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE email = ?");
-    $stmt->bind_param("ss", $fileName, $email);
+    $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE user_id = ?");
+    $stmt->bind_param("si", $fileName, $user_id);
 
     if ($stmt->execute()) {
         // Redirect after successful upload

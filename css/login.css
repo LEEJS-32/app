@@ -1,0 +1,132 @@
+body {
+    background-color: rgb(234, 234, 234);
+    background: linear-gradient(to top, rgb(188, 188, 188), white);
+    height: 90vh;
+}
+
+.login {
+    height: 80vh;
+    margin: 10vh 20vh;
+    display: flex;
+    border-radius: 25px;
+    background-color: white;
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+}
+
+.left {
+    width: 50%;
+    background-color: white;
+    margin: 20px 40px;
+    overflow: hidden; /* Prevent overflow issues when sliding */
+    position: relative; /* Ensure both forms align and slide within this space */
+}
+
+.right {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% center;
+    border-radius: 0px 25px 25px 0px;
+    background-color: white;
+}
+
+.left h1 {
+    margin-top: 15px;
+    background-color: white;
+}
+
+h1 {
+    font-size: 43px;
+    margin-bottom: 30px;
+}
+
+.form {
+    position: absolute; /* Absolutely position forms inside the left container */
+    margin: 0 20px 0 20px;
+    width: 90.5%;
+    transform: translateX(110%); /* Initially, the sign-up form is off-screen */
+    transition: transform 0.5s ease-in-out; /* Smooth horizontal transition */
+}
+
+#login {
+    transform: translateX(0); /* Login form starts in view */
+}
+
+label {
+    font-size: 20px;
+    font-weight: 550;
+    background-color: white;
+}
+
+input {
+    background-color: white;
+}
+
+input[type=text], input[type=password] {
+    margin: 10px 0 30px 0;
+    width: 96.5%;
+    font-size: 16px;
+    padding: 13px 0 13px 10px;
+    border-radius: 25px;
+    border: 1.7px solid grey;
+}
+
+button {
+    font-size: 20px;
+    width: 100%;
+    padding: 13px 0;
+    border-radius: 25px;
+    border: 1.5px solid black;
+    background-color: black;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+a, .rmb {
+    font-size: 16px;
+    color: black;
+    background-color: white;
+}
+
+.rmb-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    margin-top: -10px;
+}
+
+input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin-right: 3px;
+    accent-color: black;
+}
+
+p {
+    margin-top: 10px;
+    text-align: center;
+    background-color: white;
+}
+
+.form {
+    transition: transform 0.5s ease-in-out;
+}
+
+/* Start positions */
+#login {
+    transform: translateX(0); /* Initially visible */
+}
+
+#sign-up {
+    transform: translateX(110%); /* Start off-screen to the right */
+}
