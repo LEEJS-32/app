@@ -10,43 +10,19 @@ auth('admin');
 
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
-$_genders = ['male' => 'Male', 'female' => 'Female'];
+$name = $user['name'];
+$role = $user['role'];
+
 // ----------------------------------------------------------------------------
 ?>
 </script>
 <head>
-    <title>Webcam Avatar</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
-    <style>
-        .avatar-container {
-            width: 150px;
-            height: 150px;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 2px solid #ccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative; /* Ensures absolute positioning works */
-        }
-
-        .avatar-container img,
-        .avatar-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        video {
-            display: none;
-        }
-    </style>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -59,7 +35,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <main>
     <?php
         require '../../db/db_connect.php';
-
+    
         // Fetch avatar from database
         $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
         $result = $conn->query($sql);
@@ -74,81 +50,129 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             }
         }
     ?>
-    
-    <h2>Avatar Capture</h2>
-    
-    <div class="avatar-container">
-        <img id="avatar" src="<?php echo htmlspecialchars($imageUrl); ?>" alt="Default Avatar">
-        <video id="video" autoplay></video>
+    <div class="container">
+        <div class="left">
+            <div class="profile">
+                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <div class="profile-text">
+                    <h3><?php echo ($name); ?></h3>
+                    <p><?php echo ($role); ?></p>
+                </div>
+            </div>
+
+            <ul class="nav">
+                <li><a href="admin_profile.php" class="active"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
+                <li><a href="#"><i class='bx bxs-user-account' ></i>Members</a></li>
+                <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
+                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="right">
+            <h1>Dashboard</h1>
+            <div class="categories">
+                <div class="category">
+                    <ul>
+                        <li>Selling Products</li>
+                        <li>3,000</li>
+                    </ul>
+                </div>
+                <div class="category">
+                    <ul>
+                        <li>Members</li>
+                        <li>2,000</li>
+                    </ul>
+                </div>
+                <div class="category">
+                    <ul>
+                        <li>Total Revenue</li>
+                        <li>RM 100,000</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="overview">
+                <div class="total">
+                    <div class="section1">
+                        <h2>Financial Income</h2>
+                    </div>
+                    <div class="section2">
+                    <h3>Total Products Sold</h3>
+                    <h1>227</h1>
+                    <p>Increased 10% from last month</p>
+                    </div>
+                    <div class="section3">
+                    <h3>Total Revenue</h3>
+                    <h1>RM 35,300</h1>
+                    <p>Increased 15% from last month</p>
+                    </div>
+                </div>
+                <div class="chart">
+                    <canvas id="myChart"></canvas> <!-- Canvas to render the line chart -->
+                </div>
+            </div>
+        </div>
     </div>
 
-    <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
-
-    <br>
-    <button id="openCamera">Open Camera</button>
-    <button id="capture" style="display: none;">Capture</button>
-    <form id="uploadForm" action="../../backend/upload_photo.php" method="POST">
-        <input type="hidden" name="image" id="imageData">
-        <button type="submit" id="upload" style="display: none;">Upload</button>
-    </form>
-
-
-
-
-
-
-<!-- Edit Profile -->
-<?php 
-
-require __DIR__ . '/../../db/db_connect.php';
-$sql = "SELECT gender, phonenum, dob, occupation FROM users WHERE user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($row = $result->fetch_assoc()) {
-    // Store retrieved values in variables
-    $GLOBALS['gender'] = $row['gender'];
-    $GLOBALS['phonenum'] = $row['phonenum'];
-    $GLOBALS['dob'] = $row['dob'];
-    $GLOBALS['occupation'] = $row['occupation'];
-}
-
-?> 
-    <h1>Update Your Profile</h1>
-    <form method="post" id="#editForm" action="../../backend/extra_info_process.php">
-    <label for="gender">Gender:</label>
-                <?php html_radios('gender', $_genders, true, 'disabled')?>
-                <br>
-                <label for="phonenum">Phone Number:</label>
-                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>" disabled>
-                <br><br>
-                <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>" disabled>
-                <br><br>
-                <label for="occupation">Occupation:</label>
-                <?php html_text('occupation', 'disabled')?>
-                <br><br>
-                <button type="button" id="edit-btn" onclick="enableForm()">Edit</button>
-                <button type="submit" id="confirm-btn" style="display: none;">Confirm</button>
-    </form>
-
     <script>
-        function enableForm() {
-    // Enable all input fields
-    document.querySelectorAll("form input, form select").forEach(input => {
-        input.removeAttribute("disabled");
-    });
+        // Generate last 6 months dynamically
+        function getLastSixMonths() {
+            let months = [];
+            let currentMonth = new Date();
+            for (let i = 0; i < 6; i++) {
+                months.unshift(currentMonth.toLocaleString('default', { month: 'short' }));
+                currentMonth.setMonth(currentMonth.getMonth() - 1); // Move to previous month
+            }
+            return months;
+        }
 
-    // Hide "Edit" button and show "Confirm" button
-    document.getElementById("edit-btn").style.display = "none";
-    document.getElementById("confirm-btn").style.display = "inline-block";
-    }
+        var months = getLastSixMonths(); // Get the last 6 months    
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line', // Line chart type
+            data: {
+                labels: months, // X-axis labels (months)
+                datasets: [{
+                    label: 'Members Registered', // First line label
+                    data: [50, 100, 150, 200, 250, 300], // Example data for members registered
+                    borderColor: 'red', // Line color for members registered
+                    backgroundColor: 'red',
+                    fill: false, // Fill the area under the line
+                    tension: 0.1, // Curve the line slightly
+                    borderWidth: 2 // Line width
+                },
+                {
+                    label: 'Products Sold', // Second line label
+                    data: [30, 80, 120, 170, 220, 280], // Example data for products sold
+                    borderColor: 'blue', // Line color for products sold
+                    backgroundColor: 'blue',
+                    fill: false, // Fill the area under the line
+                    tension: 0.1, // Curve the line slightly
+                    borderWidth: 2 // Line width
+                }]
+            },
+            options: {
+                responsive: true, // Make the chart responsive
+                scales: {
+                    y: {
+                        beginAtZero: true // Start Y-axis at 0
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            }
+        });
     </script>
 
-    </main>
 
+    </main>
     <footer>
         <?php
             include __DIR__ . '/../../_footer.php';
