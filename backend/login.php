@@ -18,7 +18,7 @@
         $sql_check_exist = "SELECT * FROM users WHERE email = '$email' AND role = '$role'";
         $result_check_exist = $conn->query($sql_check_exist);
 
-<<<<<<< Updated upstream
+
         if ($result_check_exist->num_rows == 0) {
             $_SESSION['error_not_exist'] = 'Record not exists.';
             if ($role == "member") {
@@ -31,7 +31,7 @@
             // Check password
             $sql_check_pwd = "SELECT * FROM users WHERE email = '$email' AND password = '$hash_password' AND role = '$role'";
             $result_check_pwd = $conn->query($sql_check_pwd);
-=======
+
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $_SESSION["user"] = $user; // Store in session
@@ -73,7 +73,6 @@
             $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
             $stmt->bind_param("iss", $user_id, $token, $expiry);
             $stmt->execute();
->>>>>>> Stashed changes
 
                 // Redirect to product_list.php after login
                 if ($role == "member") {
@@ -94,8 +93,11 @@
                 }
             }
         }
-<<<<<<< Updated upstream
-=======
+
+            // Store token in cookie
+            setcookie("remember_me", $token, time() + (86400 * 7), "/", "", false, true);
+        }
+
 
         // Redirect based on role
         $redirect_url = ($user['role'] == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
@@ -103,7 +105,7 @@
     } else {
         $_SESSION["error"] = "Invalid email or password.";
         echo "Invalid email or password.";
->>>>>>> Stashed changes
+
     }
 ?>
 </html>
