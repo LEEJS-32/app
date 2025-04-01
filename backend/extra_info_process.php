@@ -31,8 +31,17 @@ $stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
-    redirect("../pages/signup_login.php"); // Redirect to a success page
-} else {
+    if (($_user) && ($_user['role'] = "member")) {
+        redirect("../pages/member/member_profile.php");
+    }
+    else if (($_user) && ($_user['role'] = "admin")) {
+        redirect("../pages/member/admin_profile.php");
+    }
+    else{
+        redirect("../pages/signup_login.php"); // Redirect to a success page
+    }
+}
+else {
     echo "Error: " . $stmt->error;
 }
 
