@@ -11,6 +11,7 @@
         $email = post('email');
         $password = post('password');
         $hash_password = sha1($password);
+        $avatar = "../../img/avatar/avatar.jpg";
 
         $sql_check_exist = "SELECT email from users where email = '$email'";
         $result_check_exist = $conn->query($sql_check_exist);
@@ -20,7 +21,7 @@
             exit();
         } 
         else {
-            $sql = "INSERT INTO users (name, email, password) VALUES ('$name', '$email', '$hash_password')";
+            $sql = "INSERT INTO users (name, email, password, avatar) VALUES ('$name', '$email', '$hash_password', '$avatar')";
             $result_insert = $conn->query($sql);
             if ($result_insert){
                 echo "Signup successful<br>";

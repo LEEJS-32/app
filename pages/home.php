@@ -1,3 +1,8 @@
+<?php
+include_once('../_base.php');
+auth_user();
+?>
+
 <!DOCTYPE html>
 <html>
     <head>
