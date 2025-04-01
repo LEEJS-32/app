@@ -3,14 +3,9 @@ include_once '../../_base.php';
 require '../../db/db_connect.php';
 include '../../_header.php';
 
-// Check if the user is logged in
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
-//     die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
-// }
-
-$user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$user_name = $user['name'];
+$user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+$user_id = $user ? $user['user_id'] : 'Guest';
+$user_name = $user ? $user['name'] : 'Guest';
 
 // Fetch search query (if any)
 $search_query = "";
@@ -75,6 +70,13 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
         </form>
     </div>
 
+    <!-- View Cart Button -->
+    <div class="view-cart-container">
+        <a href="view_cart.php">
+            <button class="view-cart-btn">View Cart</button>
+        </a>
+    </div>
+
     <div class="product-container">
         <?php
         if ($result->num_rows > 0) {
@@ -89,6 +91,7 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
                     <p><strong>Stock: <?php echo $stock; ?></strong></p>
 
+                    <!-- Only show Add to Cart button if stock is available -->
                     <form action="add_to_cart.php" method="POST" class="product-form">
                         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">
                         <?php if ($stock > 0) { ?>

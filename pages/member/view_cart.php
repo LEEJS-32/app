@@ -1,23 +1,19 @@
 <?php
 include_once '../../_base.php';
-$servername = "localhost";
-$username = "root";
-$password = "";
-$database = "TESTING1";
+require '../../db/db_connect.php';
 
-// Connect to database
-$conn = new mysqli($servername, $username, $password, $database);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Check if user is logged in
+$user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+if (!$user) {
+    // If not logged in, prompt to login before checking out
+    $_SESSION['cart_message'] = "Please log in to proceed with checkout.";
+    header("Location: ../signup_login.php"); // Redirect to login page
+    exit();
 }
 
-// Ensure the user is logged in
-if (!isset($_SESSION['user'])) {
-    die("Error: User not logged in.");
-}
-
-$user = $_SESSION['user'];
-$user_email = $user['email']; // Get logged-in user email
+$user_id = $user['user_id'];
+$user_name = $user['name'];
+$user_email = $user['email'];
 
 // Retrieve user details (user_id and name)
 $sql_user = "SELECT user_id, name FROM users WHERE email = ?";
@@ -33,6 +29,36 @@ if ($result_user->num_rows === 0) {
 $user = $result_user->fetch_assoc();
 $user_id = $user['user_id'];
 $user_name = $user['name'];
+
+// Merge guest cart (session) with database cart if applicable
+if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $product_id => $session_quantity) {
+        // Check if product already in the database cart
+        $sql_check_cart = "SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?";
+        $stmt_check = $conn->prepare($sql_check_cart);
+        $stmt_check->bind_param("ii", $user_id, $product_id);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+
+        if ($result_check->num_rows > 0) {
+            // Update quantity if product exists
+            $row = $result_check->fetch_assoc();
+            $new_quantity = $row['quantity'] + $session_quantity;
+            $sql_update = "UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?";
+            $stmt_update = $conn->prepare($sql_update);
+            $stmt_update->bind_param("iii", $new_quantity, $user_id, $product_id);
+        } else {
+            // Insert new entry if product is not in the cart
+            $sql_insert = "INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+            $stmt_update = $conn->prepare($sql_insert);
+            $stmt_update->bind_param("iii", $user_id, $product_id, $session_quantity);
+        }
+        $stmt_update->execute();
+        $stmt_update->close();
+    }
+    // Clear session cart after merging
+    unset($_SESSION['cart']);
+}
 
 // Handle quantity update or item removal
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_id'], $_POST['action'])) {
@@ -87,7 +113,6 @@ $result_cart = $stmt_cart->get_result();
 
 $total_cart_price = 0;
 
-// Display user info
 echo "<h2>Shopping Cart</h2>";
 echo "<p><strong>User ID:</strong> $user_id</p>";
 echo "<p><strong>User Name:</strong> $user_name</p>";
@@ -121,25 +146,17 @@ if ($result_cart->num_rows > 0) {
                 </td>
               </tr>";
     }
-
-    echo "<tr>
-            <td colspan='3' align='right'><strong>Total Amount:</strong></td>
-            <td><strong>\$$total_cart_price</strong></td>
-            <td></td>
-          </tr>";
-
     echo "</table>";
 
-    // Checkout button
-    echo "<br>
-          <form action='create_payment.php' method='POST'>
-              <input type='hidden' name='user_id' value='$user_id'>
-              <input type='hidden' name='user_name' value='$user_name'>
-              <input type='hidden' name='total_amount' value='$total_cart_price'>
-              <button type='submit'>Checkout</button>
+    echo "<p><strong>Total Price: \${$total_cart_price}</strong></p>";
+
+    // Checkout Button (Only show if the user is logged in)
+    echo "<form action='checkout.php' method='POST'>
+            <button type='submit' class='checkout-btn'>Proceed to Checkout</button>
           </form>";
+
 } else {
-    echo "<p>Your cart is empty!</p>";
+    echo "<p>Your cart is empty.</p>";
 }
 
 $stmt_user->close();
