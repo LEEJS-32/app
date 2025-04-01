@@ -4,8 +4,12 @@ include '../_base.php';
 auth_user();
 auth();
 
+var_dump($_SESSION['user']);
+
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
+
+echo ($user_id);
 
 $servername = "localhost";
 $username = "root";
@@ -31,10 +35,10 @@ $stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
-    if (($_user) && ($_user['role'] = "member")) {
+    if (($_user) && ($_user['role'] == "member")) {
         redirect("../pages/member/member_profile.php");
     }
-    else if (($_user) && ($_user['role'] = "admin")) {
+    else if (($_user) && ($_user['role'] == "admin")) {
         redirect("../pages/member/admin_profile.php");
     }
     else{

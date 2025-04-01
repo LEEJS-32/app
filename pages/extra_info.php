@@ -30,12 +30,15 @@
 
 <?php
 session_start();
-if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
+if (!isset($_SESSION['user'])) {
     header("Location: /pages/signup_login.php");
     exit();
 }
-$email = $_SESSION['email'];
-$name = $_SESSION['name'];
+
+$user = $_SESSION['user'];
+print_r($user);
+$email = $user['email'];
+$name = $user['name'];
 ?>
 <form method="post" action="../backend/extra_info_process.php">
     <div class="wrapper">
