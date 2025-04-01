@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $_SESSION["error"] = "Invalid email or password.";
         // redirect("../pages/signup_login.php");
-        echo "invalid email";
+        echo "Invalid email or password.";
     }
 }
 ?>
