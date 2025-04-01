@@ -35,6 +35,34 @@
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $_SESSION["user"] = $user; // Store in session
+        $user_id = $user["user_id"];
+
+        // Merge guest cart into user's cart
+        if (isset($_SESSION["cart"]) && !empty($_SESSION["cart"])) {
+            foreach ($_SESSION["cart"] as $product_id => $guest_quantity) {
+                // Check if the product already exists in the user's cart
+                $stmt = $conn->prepare("SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?");
+                $stmt->bind_param("ii", $user_id, $product_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                    // Product exists in cart, update quantity
+                    $row = $result->fetch_assoc();
+                    $new_quantity = $row['quantity'] + $guest_quantity;
+                    $stmt = $conn->prepare("UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
+                    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
+                } else {
+                    // Product not in cart, insert new row
+                    $stmt = $conn->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
+                    $stmt->bind_param("iii", $user_id, $product_id, $guest_quantity);
+                }
+                $stmt->execute();
+            }
+
+            // Clear guest session cart after merging
+            unset($_SESSION["cart"]);
+        }
 
         if ($remember) {
             // Generate a secure token
