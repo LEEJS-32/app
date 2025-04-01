@@ -13,19 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     $result = $stmt->get_result();
 
-        if ($result_check_exist->num_rows == 0) {
-            $_SESSION['error_not_exist'] = 'Record not exists.';
-            if ($role == "member") {
-                redirect("../pages/signup_login.php");
-                exit();
-            } else {
-                echo "Record not exists";
-            }
-        } else {
-            // Check password
-            $sql_check_pwd = "SELECT * FROM users WHERE email = '$email' AND password = '$hash_password' AND role = '$role'";
-            $result_check_pwd = $conn->query($sql_check_pwd);
-
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $_SESSION["user"] = $user; // Store in session
@@ -68,37 +55,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("iss", $user_id, $token, $expiry);
             $stmt->execute();
 
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $_SESSION["user"] = $user; // Store in session
-
-        if ($remember) {
-            // Generate a secure token
-            $token = bin2hex(random_bytes(32));
-            $expiry = date("Y-m-d H:i:s", strtotime("+7 days")); // Valid for 7 days
-
-            // Store token in database
-            $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
-            $stmt->bind_param("iss", $user["user_id"], $token, $expiry);
-            $stmt->execute();
-
-
             // Store token in cookie
             setcookie("remember_me", $token, time() + (86400 * 7), "/", "", false, true);
         }
-
 
         // Redirect based on role
         $redirect_url = ($user['role'] == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
         redirect($redirect_url);
     } else {
         $_SESSION["error"] = "Invalid email or password.";
-
         echo "Invalid email or password.";
-
-        // redirect("../pages/signup_login.php");
-        echo "Invalid email or password.";
-
     }
 }
 ?>
