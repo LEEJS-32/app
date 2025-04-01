@@ -32,7 +32,7 @@ $stmt->bind_param("ssssss",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
-    //redirect("../pages/signup_login.php"); // Redirect to a success page
+    redirect("../pages/signup_login.php"); // Redirect to a success page
 } else {
     echo "Error: " . $stmt->error;
 }
