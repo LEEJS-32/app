@@ -35,87 +35,12 @@
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $_SESSION["user"] = $user; // Store in session
-        $user_id = $user["user_id"];
-<<<<<<< Updated upstream
-=======
 
-        // Merge guest cart into user's cart
-        if (isset($_SESSION["cart"]) && !empty($_SESSION["cart"])) {
-            foreach ($_SESSION["cart"] as $product_id => $guest_quantity) {
-                // Check if the product already exists in the user's cart
-                $stmt = $conn->prepare("SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?");
-                $stmt->bind_param("ii", $user_id, $product_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
+        if ($remember) {
+            // Generate a secure token
+            $token = bin2hex(random_bytes(32));
+            $expiry = date("Y-m-d H:i:s", strtotime("+7 days")); // Valid for 7 days
 
-                if ($result->num_rows > 0) {
-                    // Product exists in cart, update quantity
-                    $row = $result->fetch_assoc();
-                    $new_quantity = $row['quantity'] + $guest_quantity;
-                    $stmt = $conn->prepare("UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
-                    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
-                } else {
-                    // Product not in cart, insert new row
-                    $stmt = $conn->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-                    $stmt->bind_param("iii", $user_id, $product_id, $guest_quantity);
-                }
-                $stmt->execute();
-            }
-
-            // Clear guest session cart after merging
-            unset($_SESSION["cart"]);
-        }
->>>>>>> Stashed changes
-
-        // Merge guest cart into user's cart
-        if (isset($_SESSION["cart"]) && !empty($_SESSION["cart"])) {
-            foreach ($_SESSION["cart"] as $product_id => $guest_quantity) {
-                // Check if the product already exists in the user's cart
-                $stmt = $conn->prepare("SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?");
-                $stmt->bind_param("ii", $user_id, $product_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                    // Product exists in cart, update quantity
-                    $row = $result->fetch_assoc();
-                    $new_quantity = $row['quantity'] + $guest_quantity;
-                    $stmt = $conn->prepare("UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
-                    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
-                } else {
-                    // Product not in cart, insert new row
-                    $stmt = $conn->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-                    $stmt->bind_param("iii", $user_id, $product_id, $guest_quantity);
-                }
-                $stmt->execute();
-            }
-
-            // Clear guest session cart after merging
-            unset($_SESSION["cart"]);
-        }
->>>>>>> Stashed changes
-
-            if ($result_check_pwd->num_rows > 0) {
-                $user = $result_check_pwd->fetch_assoc();
-                $_SESSION['email'] = $email;
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['name'] = $user['name'];
-                $_SESSION['role'] = $role;
-
-<<<<<<< Updated upstream
-                if ($remember) {
-                    // Generate a secure token
-                    $token = bin2hex(random_bytes(32));
-                    $expiry = date('Y-m-d H:i:s', strtotime('+1 days'));
-        
-                    // Store token in database
-                    $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
-                    $stmt->execute([$user['user_id'], $token, $expiry]);
-        
-                    // Set a cookie with token
-                    setcookie("remember_me", $token, time() + (86400 * 1), "/", "", false, true);
-                }
-=======
             // Store token in database
             $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
             $stmt->bind_param("iss", $user_id, $token, $expiry);
