@@ -8,6 +8,9 @@ include ('../../_base.php');
 auth_user();
 auth('member');
 
+$new_user = false;
+$_SESSION["new_user"] = $new_user;
+
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
 $_genders = ['male' => 'Male', 'female' => 'Female'];

@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = $_POST['name'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    $hash_password = password_hash($password, PASSWORD_BCRYPT);
+    $hash_password = SHA1($password);
     $avatar = "../../img/avatar/avatar.jpg";
 
     // Check if email exists
