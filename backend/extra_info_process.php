@@ -31,10 +31,10 @@ $stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
-    if (($_user) && ($_user['role'] = "member")) {
+    if (($_user) && ($_user['role'] == "member")) {
         redirect("../pages/member/member_profile.php");
     }
-    else if (($_user) && ($_user['role'] = "admin")) {
+    else if (($_user) && ($_user['role'] == "admin")) {
         redirect("../pages/member/admin_profile.php");
     }
     else{
