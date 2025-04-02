@@ -38,3 +38,23 @@ Array
 
 ✅ Updated existing payment record: Order ID ORD67ebf6614da84, Status: Completed
 ✅ Order status updated: Order ID ORD67ebf6614da84, Status: processing
+2025-04-02 17:36:05 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504023909944332
+    [status] => 3
+    [reason] => Payment Unsuccessful
+    [billcode] => a4xdoe7w
+    [order_id] => ORD67ed594c13042
+    [amount] => 300.00
+    [status_id] => 3
+    [msg] => ok
+    [transaction_id] => TP2504023909944332
+    [fpx_transaction_id] => 2504021117376004
+    [hash] => 7c7df8f5482322653bc1db077cb76ebe
+    [transaction_time] => 2025-04-02 11:17:37
+)
+
+✅ Updated existing payment record: Order ID ORD67ed594c13042, Status: Failed
+⚠️ No changes made to order status for Order ID: ORD67ed594c13042

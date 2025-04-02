@@ -1,4 +1,5 @@
 <?php
+
 include_once '../../_base.php';
 require '../../db/db_connect.php';
 
@@ -42,8 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
     exit();
 }
 
-// Retrieve updated cart
+// Retrieve updated cart items for logged-in users or from session for guest users
 if ($user_id > 0) {
+    // Logged-in user: Get cart items from the database
     $sql_cart = "SELECT shopping_cart.cart_id, shopping_cart.quantity, 
                         products.product_id, products.name, products.price, products.image_url
                  FROM shopping_cart
@@ -53,9 +55,9 @@ if ($user_id > 0) {
     $stmt_cart->bind_param("i", $user_id);
     $stmt_cart->execute();
     $result_cart = $stmt_cart->get_result();
-
     $cart_items = $result_cart->num_rows > 0 ? $result_cart->fetch_all(MYSQLI_ASSOC) : [];
 } else {
+    // Guest user: Get cart items from session
     $cart_items = [];
     if (!empty($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $product_id => $quantity) {
@@ -109,10 +111,14 @@ if (!empty($cart_items)) {
 
     echo "</table>";
 
-    echo "<p><strong>Total Price:</strong> $total_cart_price</p>";
+    echo "<p><strong>Total Price:</strong> RM $total_cart_price</p>";
+
+    // Store cart data in session before proceeding to checkout
+    $_SESSION['cart_items'] = $cart_items;
+    $_SESSION['total_price'] = $total_cart_price;
 
     if ($user_id > 0) {
-        echo "<form action='create_payment.php' method='POST'>
+        echo "<form action='checkout.php' method='POST'>
         <button type='submit'>Proceed to Checkout</button>
       </form>";
     } else {
