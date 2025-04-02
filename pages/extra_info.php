@@ -1,3 +1,14 @@
+<?php
+require_once '../_base.php';
+auth_user();
+auth();
+
+$user = $_SESSION['user'];
+$name = $user['name'];
+$email = $user['email'];
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,15 +39,6 @@
 </head>
 <body>
 
-<?php
-session_start();
-if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
-    header("Location: /pages/signup_login.php");
-    exit();
-}
-$email = $_SESSION['email'];
-$name = $_SESSION['name'];
-?>
 <form method="post" action="../backend/extra_info_process.php">
     <div class="wrapper">
         <div class="container">
