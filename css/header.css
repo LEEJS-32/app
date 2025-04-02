@@ -47,6 +47,10 @@ nav div ul li a {
     /* background-color: yellow;     */
 }
 
+.other a {
+    color: black;
+}
+
 .other button {
     margin: 0px 10px;
 }
