@@ -11,6 +11,9 @@ $user_id = $user['user_id'];
 
 echo ($user_id);
 
+$new_user = $_SESSION['new_user'];
+
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -35,13 +38,20 @@ $stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation,
 // Execute SQL query
 if ($stmt->execute()) {
     echo "Data submitted successfully!";
+
     if (($_user) && ($_user['role'] == "member")) {
         redirect("../pages/member/member_profile.php");
     }
     else if (($_user) && ($_user['role'] == "admin")) {
+
+    if ((!$new_user) && ($_user) && ($_user['role'] == "member")) {
+        redirect("../pages/member/member_profile.php");
+    }
+    else if ((!$new_user) && ($_user) && ($_user['role'] == "admin")) {
+
         redirect("../pages/member/admin_profile.php");
     }
-    else{
+    else if ($new_user){
         redirect("../pages/signup_login.php"); // Redirect to a success page
     }
 }

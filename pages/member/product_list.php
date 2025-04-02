@@ -99,7 +99,6 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>
                     <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
                     <p><strong>Stock: <?php echo $stock; ?></strong></p>
-
                     <!-- Only show Add to Cart button if stock is available -->
                     <form action="add_to_cart.php" method="POST" class="product-form">
                         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">

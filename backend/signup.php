@@ -1,5 +1,6 @@
 <?php
-session_start();
+
+
 require_once '../_base.php';
 require '../database.php';
 
@@ -7,8 +8,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = $_POST['name'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    $hash_password = password_hash($password, PASSWORD_BCRYPT);
+    $hash_password = SHA1($password);
     $avatar = "../../img/avatar/avatar.jpg";
+
 
     // Check if email exists
     $stmt = $conn->prepare("SELECT email FROM users WHERE email = ?");
@@ -45,3 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 ?>
+
+</html>
+

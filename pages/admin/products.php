@@ -73,8 +73,13 @@ $role = $user['role'];
         <div class="right">
             <h1>Product Management</h1>
 
+
             <a href="adminCreateProduct.php">Create Product</a>
             <a href="adminProduct.php">Show Product</a>
+=======
+            <a href="createProduct.php">Create Product</a>
+            <a href="AdminProduct.php">Show Product</a>
+
             <a href="adminUpdateProduct.php">Update Product</a>
         </div>  
     </div>
