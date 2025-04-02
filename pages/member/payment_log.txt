@@ -5,3 +5,24 @@
 2025-03-19 15:47:13 - API Response: 						[{"BillCode":"wqv58y3t"}]
 2025-03-19 15:54:46 - API Response: 						[{"BillCode":"rr7vhnee"}]
 2025-03-19 16:06:37 - API Response: 						[{"BillCode":"ltfa6imx"}]
+
+2025-03-31 23:51:44 - API Response: 						{"status":"error","msg":"billEmail is invalid format"}
+Error: Unable to create payment.
+2025-04-01 00:04:47 - API Response: 						{"status":"error","msg":"billPhone parameter is empty"}
+Error: Unable to create payment.
+2025-04-01 00:05:52 - API Response: 						[{"BillCode":"rr9oks99"}]
+2025-04-01 00:11:06 - API Response: 						[{"BillCode":"ovteg9nq"}]
+2025-04-01 00:33:26 - API Response: 						[{"BillCode":"wwkf2qhr"}]
+
+2025-04-01 23:24:12 - API Response: 						[{"BillCode":"xcbe86e4"}]
+2025-04-02 00:59:14 - API Response: 						{"status":"error","msg":"billEmail is invalid format"}
+Error: Unable to create payment.
+2025-04-02 00:59:22 - API Response: 						{"status":"error","msg":"billEmail is invalid format"}
+Error: Unable to create payment.
+2025-04-02 01:01:11 - API Response: 						{"status":"error","msg":"billPhone parameter is empty"}
+Error: Unable to create payment.
+2025-04-02 01:01:44 - API Response: 						[{"BillCode":"ijylweu2"}]
+2025-04-02 01:02:25 - API Response: 						[{"BillCode":"hcmt5niu"}]
+2025-04-02 01:05:39 - API Response: 						{"status":"error","msg":"billPhone parameter is empty"}
+Error: Unable to create payment.
+2025-04-02 02:14:39 - API Response: 						[{"BillCode":"dc1ffj91"}]

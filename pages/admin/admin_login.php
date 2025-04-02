@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="\css\header.css">
     <link rel="stylesheet" href="\css\logo.css">
     <link rel="stylesheet" href="\css\style.css">
-    <link rel="stylesheet" href="\css\login.css">
+    <link rel="stylesheet" href="\css\admin_login.css">
     <script scr="../../js/validation.js"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,7 @@
     <main>
         <div class="login">
             <div class="left">
-                <img class="logo" src="../../img/logo4.png" alt="logo4.png">
+                <a href="../../index.php"><img class="logo" src="../../img/logo4.png" alt="logo4.png"></a>
                 <div class="form">
                     <h1>Admin Log In</h1>
                     <form method="post" action="../../backend/login.php" onsubmit="return validateForm()">

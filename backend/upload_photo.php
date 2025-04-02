@@ -3,7 +3,7 @@ include '../db/db_connect.php';
 include '../_base.php';
 
 auth_user();
-auth('admin');
+auth();
 
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
