@@ -7,8 +7,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = sha1($_POST["password"]);
     $remember = isset($_POST["remember"]); // Check if "Remember Me" is ticked
 
-    // Check user credentials
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+    // Check user credentials and activation status
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ? AND is_active = 1");
     $stmt->bind_param("ss", $email, $password);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -63,8 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $redirect_url = ($user['role'] == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
         redirect($redirect_url);
     } else {
-        $_SESSION["error"] = "Invalid email or password.";
-        echo "Invalid email or password.";
+        $_SESSION["error"] = "Invalid email, password, or account not activated.";
+        echo "Invalid email, password, or account not activated.";
     }
 }
 ?>

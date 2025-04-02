@@ -36,6 +36,7 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
     occupation VARCHAR(255),  
     avatar VARCHAR(255) NULL,  
     reward_pt FLOAT DEFAULT 0, 
+    is_active TINYINT(1) DEFAULT 0, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )";
@@ -49,6 +50,15 @@ $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 )";
 $conn->query($sql_create_token_table);
+
+// Create active_token table
+$sql_create_active_token_table = "CREATE TABLE IF NOT EXISTS active_token (
+    token_id VARCHAR(64) PRIMARY KEY, 
+    expire DATETIME NOT NULL, 
+    user_id INT NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+)";
+$conn->query($sql_create_active_token_table);
 
 // Create products table
 $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (

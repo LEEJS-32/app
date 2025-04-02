@@ -48,6 +48,16 @@ function temp($key, $value = null) {
     }
 }
 
+// Return local root path
+function root($path = '') {
+    return "$_SERVER[DOCUMENT_ROOT]/$path";
+}
+
+// Return base url (host + port)
+function base($path = '') {
+    return "http://$_SERVER[SERVER_NAME]:$_SERVER[SERVER_PORT]/$path";
+}
+
 // ============================================================================
 // HTML Helpers
 // ============================================================================
@@ -192,5 +202,32 @@ function auth_user() {
         }
     }
 
+}
+
+// ============================================================================
+// Email Functions
+// ============================================================================
+
+// Demo Accounts:
+// --------------
+// leejs-jm22@student.tarc.edu.ny   gqia feuv ypmk wdet
+
+
+// Initialize and return mail object
+function get_mail() {
+    require_once 'lib/PHPMailer.php';
+    require_once 'lib/SMTP.php';
+
+    $m = new PHPMailer(true);
+    $m->isSMTP();
+    $m->SMTPAuth = true;
+    $m->Host = 'smtp.gmail.com';
+    $m->Port = 587;
+    $m->Username = 'leejs-jm22@student.tarc.edu.my';
+    $m->Password = 'gqia feuv ypmk wdet';
+    $m->CharSet = 'utf-8';
+    $m->setFrom($m->Username, 'Admin');
+
+    return $m;
 }
 
