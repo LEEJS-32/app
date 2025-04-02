@@ -52,7 +52,7 @@ $_SESSION["new_user"] = $new_user;
     }
     </script>
 <body>
-<main>
+
 <form method="post" action="../backend/extra_info_process.php">
     <div class="wrapper">
         <h1>Let us Know More About You...</h1>
