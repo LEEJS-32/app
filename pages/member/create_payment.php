@@ -37,8 +37,9 @@ $query->bind_param("i", $user_id);
 $query->execute();
 $result = $query->get_result();
 $cart = $result->fetch_assoc();
-$total_amount = $cart['total_amount'] ?? 0;
 
+// Ensure total amount is valid
+$total_amount = $cart['total_amount'] ?? 0;
 if ($total_amount <= 0) {
     die("Error: Your cart is empty. Add items before proceeding to payment.");
 }
@@ -46,14 +47,24 @@ if ($total_amount <= 0) {
 // Generate a unique order ID
 $order_id = 'ORD' . uniqid();
 
-// Insert order into database
-$order_insert = $conn->prepare("
-    INSERT INTO orders (order_id, user_id, total_price, status) 
-    VALUES (?, ?, ?, 'pending')");
-$order_insert->bind_param("sid", $order_id, $user_id, $total_amount);
-$order_insert->execute();
+// Check if the order already exists for this user with a pending status
+$existing_order_query = $conn->prepare("SELECT order_id FROM orders WHERE user_id = ? AND status = 'pending'");
+$existing_order_query->bind_param("i", $user_id);
+$existing_order_query->execute();
+$existing_order_result = $existing_order_query->get_result();
+if ($existing_order_result->num_rows > 0) {
+    $existing_order = $existing_order_result->fetch_assoc();
+    $order_id = $existing_order['order_id'];
+} else {
+    // Insert new order
+    $order_insert = $conn->prepare("
+        INSERT INTO orders (order_id, user_id, total_price, status) 
+        VALUES (?, ?, ?, 'pending')");
+    $order_insert->bind_param("sid", $order_id, $user_id, $total_amount);
+    $order_insert->execute();
+}
 
-// Insert order items
+// Insert order items only if they don't exist
 $query_cart_items = $conn->prepare("
     SELECT sc.product_id, sc.quantity, (sc.quantity * p.price) AS subtotal
     FROM shopping_cart sc
@@ -64,11 +75,19 @@ $query_cart_items->execute();
 $result_items = $query_cart_items->get_result();
 
 while ($row = $result_items->fetch_assoc()) {
-    $insert_item = $conn->prepare("
-        INSERT INTO order_items (order_id, product_id, quantity, subtotal) 
-        VALUES (?, ?, ?, ?)");
-    $insert_item->bind_param("siid", $order_id, $row['product_id'], $row['quantity'], $row['subtotal']);
-    $insert_item->execute();
+    // Check if the item already exists for the order
+    $check_item = $conn->prepare("SELECT * FROM order_items WHERE order_id = ? AND product_id = ?");
+    $check_item->bind_param("si", $order_id, $row['product_id']);
+    $check_item->execute();
+    $check_result = $check_item->get_result();
+    
+    if ($check_result->num_rows === 0) {
+        $insert_item = $conn->prepare("
+            INSERT INTO order_items (order_id, product_id, quantity, subtotal) 
+            VALUES (?, ?, ?, ?)");
+        $insert_item->bind_param("siid", $order_id, $row['product_id'], $row['quantity'], $row['subtotal']);
+        $insert_item->execute();
+    }
 }
 
 // Convert total amount to cents (RM10.00 → 1000)
@@ -79,7 +98,7 @@ $api_key = "srlq0i5d-gfgf-ok6k-gy8j-92f18h7rhbw1"; // Replace with actual API ke
 $category_code = "vsofdz4y"; // Replace with actual category code
 
 // Ensure callback URL is correct (HTTPS required for production)
-$callback_url = "https://ex-becoming-scheduled-manually.trycloudflare.com /pages/member/payment_callback.php"; 
+$callback_url = "https://logged-stud-worse-za.trycloudflare.com/pages/member/payment_callback.php"; 
 $return_url = "http://localhost:8000/pages/member/order_history.php";
 
 // Payment details
@@ -120,12 +139,7 @@ file_put_contents($logFile, date("Y-m-d H:i:s") . " - API Response: " . $respons
 $response_data = json_decode($response, true);
 if ($http_code !== 200 || !$response_data || !isset($response_data[0]['BillCode'])) {
     file_put_contents($logFile, "Error: Unable to create payment.\n", FILE_APPEND);
-    echo "<h3>Error: Unable to create payment.</h3>";
-    echo "<pre>API Response:</pre>";
-    echo "<pre>";
-    print_r($response);
-    echo "</pre>";
-    exit();
+    die("Error: Unable to create payment.");
 }
 
 $bill_code = $response_data[0]['BillCode'];
