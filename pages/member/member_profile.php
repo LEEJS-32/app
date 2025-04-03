@@ -104,7 +104,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 <?php 
 
 require __DIR__ . '/../../db/db_connect.php';
-$sql = "SELECT gender, phonenum, dob, occupation FROM users WHERE user_id = ?";
+$sql = "SELECT password, gender, phonenum, dob, occupation FROM users WHERE user_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -137,6 +137,21 @@ if ($row = $result->fetch_assoc()) {
                 <button type="submit" id="confirm-btn" style="display: none;">Confirm</button>
     </form>
 
+    <!-- Reset password -->
+     <h1>Reset Password</h1>
+     <form method="post" action="../../backend/reset_password.php">
+        <label for="old-password">Old Password</label>
+        <br><?php html_text('old-password'); ?><br><br>
+        <label for="new-password">New Password</label>
+        <br><?php html_text('new-password'); ?><br><br>
+        <label for="confirm-password">Confirm New Password</label>
+        <br><?php html_text('confirm-password'); ?>
+        <br><br>
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+        <br><br>
+        <button type="submit" id="confirm-btn">Confirm</button>
+     </form>
+
     <script>
         function enableForm() {
     // Enable all input fields
@@ -149,6 +164,9 @@ if ($row = $result->fetch_assoc()) {
     document.getElementById("confirm-btn").style.display = "inline-block";
     }
     </script>
+
+    <!-- Load reCAPTCHA script -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     </main>
 

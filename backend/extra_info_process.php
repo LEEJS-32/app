@@ -58,6 +58,7 @@ if ($stmt->execute()) {
 else {
     echo "Error: " . $stmt->error;
 }
+}
 
 // Close connection
 $stmt->close();
