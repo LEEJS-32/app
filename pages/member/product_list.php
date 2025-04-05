@@ -1,15 +1,10 @@
-<?php
+<?php 
 require '../../db/db_connect.php';
 include '../../_header.php';
 
-// Check if the user is logged in
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['name'])) {
-//     die("You are not logged in. <a href='../signup_login.php'>Login here</a>");
-// }
-
-$user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$user_name = $user['name'];
+$user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+$user_id = $user ? $user['user_id'] : 'Guest';
+$user_name = $user ? $user['name'] : 'Guest';
 
 // Fetch search query (if any)
 $search_query = "";
@@ -74,6 +69,13 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
         </form>
     </div>
 
+    <!-- View Cart Button -->
+    <div class="view-cart-container">
+        <a href="view_cart.php">
+            <button class="view-cart-btn">View Cart</button>
+        </a>
+    </div>
+
     <div class="product-container">
         <?php
         if ($result->num_rows > 0) {
@@ -81,13 +83,24 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                 $stock = intval($row['stock']);
                 ?>
                 <div class="product-card">
-                    <img class="product-image" src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
+                    <?php
+                    $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
+                    if (is_array($image_urls) && !empty($image_urls)) {
+                        // Use the first image in the array as the product image
+                        $image_path = $image_urls[0];
+                        echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
+                    } else {
+                        // Fallback image if no image is available
+                        echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
+                    }
+                    ?>
                     <h3><?php echo htmlspecialchars($row['name']); ?></h3>
                     <p>Price: $<?php echo number_format($row['price'], 2); ?></p>
                     <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>
                     <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
                     <p><strong>Stock: <?php echo $stock; ?></strong></p>
 
+                    <!-- Only show Add to Cart button if stock is available -->
                     <form action="add_to_cart.php" method="POST" class="product-form">
                         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">
                         <?php if ($stock > 0) { ?>

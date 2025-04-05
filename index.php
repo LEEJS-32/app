@@ -1,3 +1,7 @@
+<?php
+include_once('_base.php');
+auth_user();
+?>
 <?php include '_header.php';?>
 
 <a href="delete_database.php">Delete database</a>

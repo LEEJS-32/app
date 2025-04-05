@@ -141,28 +141,28 @@ function auth(...$roles) {
     global $_user;
 
     if ($_user) {
-        echo "User is logged in. Role: " . $_user['role'] . "<br>";
+        // echo "User is logged in. Role: " . $_user['role'] . "<br>";
 
         if ($roles) {
-            echo "Roles required: ";
-            print_r($roles); // Display required roles
-            echo "<br>";
+            //echo "Roles required: ";
+           // print_r($roles); // Display required roles
+           // echo "<br>";
 
             if (in_array($_user['role'], $roles)) {
-                echo "✅ User role matches. Access granted.<br>";
+                // echo "✅ User role matches. Access granted.<br>";
                 return; // ✅ Allow access
             } else {
-                echo "❌ User role does NOT match. Access denied.<br>";
+                // echo "❌ User role does NOT match. Access denied.<br>";
             }
         } else {
-            echo "✅ No specific role required. Access granted.<br>";
+            // echo "✅ No specific role required. Access granted.<br>";
             return; // ✅ Allow access
         }
     } else {
-        echo "❌ User is NOT logged in. Access denied.<br>";
+        // echo "❌ User is NOT logged in. Access denied.<br>";
     }
 
-    redirect('/pages/admin/admin_login.php'); 
+    redirect('/pages/signup_login.php'); 
 }
 
 
