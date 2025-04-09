@@ -46,10 +46,20 @@
         
             <div class="nav-bar">
             <ul>
+            <?php if (($_user) && ($_user['role'] == 'admin')): ?>
                 <li><a href="/pages/home.php">Home</a></li>
                 <li><a href="">About us</a></li>
                 <li><a href="/pages/admin/products.php">Products</a></li>
                 <li><a href="">Contact</a></li>
+            <?php endif ?>
+
+            <?php if (($_user) && ($_user['role'] == 'member')): ?>
+                <li><a href="/pages/home.php">Home</a></li>
+                <li><a href="">About us</a></li>
+                <li><a href="/pages/member/product_list.php">Products</a></li>
+                <li><a href="">Contact</a></li>
+            <?php endif ?>
+
             </ul>
             </div>
 
