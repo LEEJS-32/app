@@ -1,11 +1,6 @@
 <?php 
 ob_start(); // Start output buffering
 include '../../_header.php'; 
-
-// Initialize variables to avoid undefined variable warnings
-$search_query = isset($_GET['search']) ? trim($_GET['search']) : "";
-$category_filter = isset($_GET['category']) ? trim($_GET['category']) : "";
-$status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
 ?>
 
 <!DOCTYPE html>
@@ -14,8 +9,36 @@ $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Product List</title>
-    <link rel="stylesheet" href="../../css/adminProduct.css">
-
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons a {
+            padding: 5px 10px;
+            text-decoration: none;
+            color: white;
+            background-color: blue;
+            border-radius: 5px;
+        }
+        .action-buttons a.delete {
+            background-color: red;
+        }
+        .sortable {
+            cursor: pointer;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -74,75 +97,67 @@ $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
 
             // Handle search
             $('#search').on('input', function() {
-                applyFilters();
+                var search = $(this).val();
+                $.ajax({
+                    url: 'fetchProducts.php',
+                    type: 'GET',
+                    data: { search: search },
+                    success: function(response) {
+                        $('tbody').html(response);
+                    }
+                });
             });
 
             // Handle category filter
             $('#categoryFilter').change(function() {
-                applyFilters();
+                var category = $(this).val();
+                $.ajax({
+                    url: 'fetchProducts.php',
+                    type: 'GET',
+                    data: { category: category },
+                    success: function(response) {
+                        $('tbody').html(response);
+                    }
+                });
             });
 
             // Handle status filter
             $('#statusFilter').change(function() {
-                applyFilters();
-            });
-
-            // Function to apply filters
-            function applyFilters() {
-                const search = $('#search').val();
-                const category = $('#categoryFilter').val();
-                const status = $('#statusFilter').val();
-
+                var status = $(this).val();
                 $.ajax({
-                    url: 'adminProduct.php',
+                    url: 'fetchProducts.php',
                     type: 'GET',
-                    data: {
-                        search: search,
-                        category: category,
-                        status: status
-                    },
-                    success: function (response) {
-                        // Replace the table body with the filtered results
-                        $('tbody').html($(response).find('tbody').html());
-                    },
-                    error: function () {
-                        alert('Error applying filters.');
+                    data: { status: status },
+                    success: function(response) {
+                        $('tbody').html(response);
                     }
                 });
-            }
+            });
         });
     </script>
 </head>
 <body>
     <h1>Product List</h1>
     <button onclick="window.location.href='adminCreateProduct.php'">Add New Product</button>
-
-    <!-- Search Bar -->
-    <input type="text" id="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
-
-    <!-- Category Filter -->
+    <input type="text" id="search" placeholder="Search products...">
     <select id="categoryFilter">
         <option value="">All Categories</option>
-        <option value="Sofas & armchairs" <?php echo $category_filter == "Sofas & armchairs" ? "selected" : ""; ?>>Sofas & armchairs</option>
-        <option value="Tables & chairs" <?php echo $category_filter == "Tables & chairs" ? "selected" : ""; ?>>Tables & chairs</option>
-        <option value="Storage & organisation" <?php echo $category_filter == "Storage & organisation" ? "selected" : ""; ?>>Storage & organisation</option>
-        <option value="Office furniture" <?php echo $category_filter == "Office furniture" ? "selected" : ""; ?>>Office furniture</option>
-        <option value="Beds & mattresses" <?php echo $category_filter == "Beds & mattresses" ? "selected" : ""; ?>>Beds & mattresses</option>
-        <option value="Textiles" <?php echo $category_filter == "Textiles" ? "selected" : ""; ?>>Textiles</option>
-        <option value="Rugs & mats & flooring" <?php echo $category_filter == "Rugs & mats & flooring" ? "selected" : ""; ?>>Rugs & mats & flooring</option>
-        <option value="Home decoration" <?php echo $category_filter == "Home decoration" ? "selected" : ""; ?>>Home decoration</option>
-        <option value="Lightning" <?php echo $category_filter == "Lightning" ? "selected" : ""; ?>>Lightning</option>
+        <option value="Sofas & armchairs">Sofas & armchairs</option>
+        <option value="Tables & chairs">Tables & chairs</option>
+        <option value="Storage & organisation">Storage & organisation</option>
+        <option value="Office furniture">Office furniture</option>
+        <option value="Beds & mattresses">Beds & mattresses</option>
+        <option value="Textiles">Textiles</option>
+        <option value="Rugs & mats & flooring">Rugs & mats & flooring</option>
+        <option value="Home decoration">Home decoration</option>
+        <option value="Lightning">Lightning</option>
     </select>
-
-    <!-- Status Filter -->
     <select id="statusFilter">
         <option value="">All Statuses</option>
-        <option value="active" <?php echo $status_filter == "active" ? "selected" : ""; ?>>Active</option>
-        <option value="inactive" <?php echo $status_filter == "inactive" ? "selected" : ""; ?>>Inactive</option>
-        <option value="discontinued" <?php echo $status_filter == "discontinued" ? "selected" : ""; ?>>Discontinued</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="discontinued">Discontinued</option>
     </select>
-
-    <!-- Table -->
     <table>
         <thead>
             <tr>
@@ -184,42 +199,20 @@ $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
                 die("Connection failed: " . $conn->connect_error);
             }
 
-            // Fetch filter values from GET parameters
-            $search_query = isset($_GET['search']) ? trim($_GET['search']) : "";
-            $category_filter = isset($_GET['category']) ? trim($_GET['category']) : "";
-            $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
-
-            // Build the SQL query with filters
-            $sql = "SELECT * FROM products WHERE 1=1"; // Start with a base query
-
-            if (!empty($search_query)) {
-                $sql .= " AND name LIKE '%" . $conn->real_escape_string($search_query) . "%'";
-            }
-
-            if (!empty($category_filter)) {
-                $sql .= " AND category = '" . $conn->real_escape_string($category_filter) . "'";
-            }
-
-            if (!empty($status_filter)) {
-                $sql .= " AND status = '" . $conn->real_escape_string($status_filter) . "'";
-            }
-
-            // Execute the query
+            // Fetch products from the database
+            $sql = "SELECT * FROM products";
             $result = $conn->query($sql);
-
-            if (!$result) {
-                die("Error fetching products: " . $conn->error);
-            }
 
             if ($result->num_rows > 0) {
                 // Output data of each row
                 while($row = $result->fetch_assoc()) {
                     echo "<tr>";
                     echo "<td>" . $row["product_id"] . "</td>";
-                    echo "<td>" . htmlspecialchars($row["name"]) . "</td>";
-                    echo "<td><div class='scrollable-description'>" . htmlspecialchars($row["description"]) . "</div></td>";                    echo "<td>" . $row["price"] . "</td>";
+                    echo "<td>" . $row["name"] . "</td>";
+                    echo "<td>" . $row["description"] . "</td>";
+                    echo "<td>" . $row["price"] . "</td>";
                     echo "<td>" . $row["stock"] . "</td>";
-                    echo "<td>" . htmlspecialchars($row["category"]) . "</td>";
+                    echo "<td>" . $row["category"] . "</td>";
 
                     // Decode the JSON-encoded image URLs
                     $image_urls = json_decode($row["image_url"]);
@@ -231,7 +224,7 @@ $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
                     }
                     echo "</td>";
 
-                    echo "<td>" . htmlspecialchars($row["status"]) . "</td>";
+                    echo "<td>" . $row["status"] . "</td>";
                     echo "<td>" . $row["discount"] . "</td>";
                     echo "<td>" . $row["discounted_price"] . "</td>";
                     echo "<td>" . $row["weight"] . "</td>";
