@@ -36,41 +36,10 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
     occupation VARCHAR(255),  
     avatar VARCHAR(255) NULL,  
     reward_pt FLOAT DEFAULT 0, 
-    is_active TINYINT(1) DEFAULT 0, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )";
 $conn->query($sql_create_users_table);
-
-// Create user address table
-$sql_create_address_table = "CREATE TABLE IF NOT EXISTS address (
-    address_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    address_line1 VARCHAR(255) NULL,
-    address_line2 VARCHAR(255),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-)";
-$conn->query($sql_create_address_table);
-
-// Create shipping address table
-$sql_create_shippingaddress_table = "CREATE TABLE IF NOT EXISTS shippingaddress (
-    shippingaddress_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    address_line1 VARCHAR(255) NOT NULL,
-    address_line2 VARCHAR(255) NULL,
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20) NOT NULL,
-    country VARCHAR(100) NOT NULL,
-    is_default TINYINT(1) DEFAULT 0,  -- 1 = default, 0 = non-default
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-)";
-$conn->query($sql_create_shippingaddress_table);
-
 
 // Create token table
 $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
@@ -80,15 +49,6 @@ $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 )";
 $conn->query($sql_create_token_table);
-
-// Create active_token table
-$sql_create_active_token_table = "CREATE TABLE IF NOT EXISTS active_token (
-    token_id VARCHAR(64) PRIMARY KEY, 
-    expire DATETIME NOT NULL, 
-    user_id INT NOT NULL, 
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-)";
-$conn->query($sql_create_active_token_table);
 
 // Create products table
 $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
@@ -129,21 +89,11 @@ $conn->query($sql_create_cart_table);
 
 // Create orders table
 $sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (
-    order_id VARCHAR(50) PRIMARY KEY,
+    order_id VARCHAR(50) PRIMARY KEY,  -- Changed from INT to VARCHAR(50)
     user_id INT NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-    
-    -- Store the shipping address used for this order (not just a reference ID)
-    shipping_address_line1 VARCHAR(255) NOT NULL,
-    shipping_address_line2 VARCHAR(255) NULL,
-    shipping_city VARCHAR(100) NOT NULL,
-    shipping_state VARCHAR(100) NOT NULL,
-    shipping_postal_code VARCHAR(20) NOT NULL,
-    shipping_country VARCHAR(100) NOT NULL,
-    comment TEXT NULL,
-
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 )";
 $conn->query($sql_create_orders_table);
