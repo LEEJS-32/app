@@ -1,21 +1,51 @@
+body {
+    /* background-color: rgb(234, 234, 234); */
+    /* background: linear-gradient(to right, rgb(188, 188, 188), white); */
+    /* background: radial-gradient(circle, grey, white); */
+    /* background: linear-gradient(to right, grey, white); */
+    /* background: linear-gradient(to top, rgb(188, 188, 188), white); */
+    height: 93.8vh;
+
+}
+
+h1 {
+    font-size: 42px;
+    text-align: center;
+}
+
 
 
 .wrapper {
     overflow: hidden;
-    width: 100%;
+    width: 65%;
+    margin: 50px 17.5%;
+    align-items: center;
 }
 
 .container {
     display: flex;
     width: 300%; /* Three sections */
+    margin-top: 0px;
     transition: transform 0.5s ease-in-out;
+    justify-content: space-around;
 }
 
+
+
 .section {
-    width: 33.33%;
-    padding: 20px;
+    font-size: 20px;
+    font-weight: 500;
+    width: 30%;
+    height: 72vh;
+    margin: 20px;
     box-sizing: border-box;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+    align-items: center;
 }
+
+
 
 .furniture-options {
     display: flex;
@@ -45,7 +75,7 @@
 
 .furniture-option {
     padding: 10px 20px;
-    border: 2px solid #007bff;
+    border: 2px solid black;
     border-radius: 20px;
     cursor: pointer;
     background: white;
@@ -53,11 +83,67 @@
 }
 
 .furniture-option.selected {
-    background: #007bff;
+    background: black;
     color: white;
 }
 
-.section {
-    height: 100vh;
-    width: 100%;
+input[type=text], input[type=tel], input[type=date], input[type=number]{
+    margin-top: 10px;
+    width: 70%;
+    font-size: 15px;
+    padding: 9px 0 9px 10px;
+    border-radius: 15px;
+    border: 1.7px solid grey;
+    background-color: white;
 }
+
+input[type=radio] {
+    margin-top: 10px;
+}
+
+.subtitle {
+    text-align: center;
+}
+
+h2 {
+    margin: 20px 0;
+}
+
+.form {
+    display: block;
+    /* background-color: #007bff; */
+    width: 80%;
+    margin-left:21%;
+}
+
+button {
+    font-size: 20px;
+    width: auto;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1.5px solid black;
+    background-color: black;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.buttons {
+    margin-left: 22.5%;
+}
+
+.divider {
+    display: flex;
+    
+}
+
+input#country {
+    width: 115%;
+}
+
+
+
+
+
+
+

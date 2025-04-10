@@ -21,13 +21,12 @@ if (!$conn->query($sql_db)) {
 // Select the database
 $conn->select_db($database);
 
-// Create users table with InnoDB engine
+// Create users table
 $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    profile_photo VARCHAR(255) NULL,
     role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
     status ENUM('active', 'blocked') NOT NULL DEFAULT 'active',
     preference TEXT NULL,
@@ -39,19 +38,17 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
     reward_pt FLOAT DEFAULT 0, 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB";
-
+)";
 $conn->query($sql_create_users_table);
 
-// Create token table with InnoDB engine
+// Create token table
 $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
     token_id VARCHAR(100) PRIMARY KEY, 
     expire DATETIME NOT NULL, 
     user_id INT NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB";
+)";
 $conn->query($sql_create_token_table);
-
 
 // Create products table
 $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
