@@ -22,10 +22,11 @@
         <div class="login">
             <div class="left">
                 <a href="../../index.php"><img class="logo" src="../../img/logo4.png" alt="logo4.png"></a>
-                <!-- login -->
+                
+                <!-- Login Form -->
                 <div class="form" id="login">
                     <h1>Member Log In</h1>
-                    <form method="post" action="../../backend/login.php" >
+                    <form method="post" action="../../backend/login.php">
                         <?php include ('../_base.php') ?>
                         <div class="input">
                             <label for="email">Email*</label><br>
@@ -42,14 +43,13 @@
                 
                         <div class="rmb-forgot">
                             <div class="remember">
-                                <input type="checkbox" id="remember" name="remember"><label class="rmb" for="remember">Remember Me</label>
+                                <input type="checkbox" id="remember" name="remember">
+                                <label class="rmb" for="remember">Remember Me</label>
                             </div>
-
                             <div class="forgot">
                                 <a href="" class="forgot">Forgot Password?</a>
                             </div>
                         </div>
-                        <br><br>
                         
                         <button type="submit">Submit</button>
                     </form>
@@ -57,10 +57,10 @@
                     <p>Admin? <a href="admin/admin_login.php">Admin Log In</a></p>
                 </div>
 
-                <!-- Sign Up -->
+                <!-- Sign Up Form -->
                 <div class="form" id="sign-up">
                     <h1>Member Sign Up</h1>
-                    <form method="post" action="../../backend/signup.php" >
+                    <form method="post" action="../../backend/signup.php" enctype="multipart/form-data">
                         <div class="input">
                             <label for="name">Name*</label><br>
                             <?php html_text('name'); ?>
@@ -79,7 +79,12 @@
                             <span id="pwd_error1" style="color:red;"></span>
                             <span id="pwd_error2" style="color:red;"></span>
                         </div>
-            
+
+                        <div class="input">
+                            <label for="profile_photo">Profile Photo*</label><br>
+                            <input type="file" name="profile_photo" accept="image/*" required>
+                            <span id="photo_error" style="color:red;"></span>
+                        </div>
                         
                         <button type="submit">Submit</button>
                     </form>
@@ -97,18 +102,28 @@
         function toggleForm() {
             const loginForm = document.getElementById('login');
             const signupForm = document.getElementById('sign-up');
+            const leftPanel = document.querySelector('.left');
 
             if (loginForm.style.transform === 'translateX(0px)') {
-                // If login form is currently in view, slide it out and bring sign-up form in
                 loginForm.style.transform = 'translateX(-110%)';
                 signupForm.style.transform = 'translateX(0)';
+                // Scroll to bottom after transition
+                setTimeout(() => {
+                    leftPanel.scrollTo({
+                        top: leftPanel.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                }, 300);
             } else {
-                // If sign-up form is in view, slide it out and bring login form back
                 loginForm.style.transform = 'translateX(0)';
                 signupForm.style.transform = 'translateX(110%)';
+                // Reset scroll position
+                leftPanel.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             }
         }
     </script>
 </body>
-
 </html>
