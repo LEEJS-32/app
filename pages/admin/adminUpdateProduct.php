@@ -140,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../../css/adminUpdateProduct.css">
     <style>
         #drop_zone {
             border: 2px dashed #ccc;

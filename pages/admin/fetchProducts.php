@@ -25,8 +25,7 @@ if ($result->num_rows > 0) {
         echo "<tr>";
         echo "<td>" . $row["product_id"] . "</td>";
         echo "<td>" . $row["name"] . "</td>";
-        echo "<td>" . $row["description"] . "</td>";
-        echo "<td>" . $row["price"] . "</td>";
+        echo "<td><div class='scrollable-description'>" . htmlspecialchars($row["description"]) . "</div></td>";        echo "<td>" . $row["price"] . "</td>";
         echo "<td>" . $row["stock"] . "</td>";
         echo "<td>" . $row["category"] . "</td>";
 
@@ -35,7 +34,7 @@ if ($result->num_rows > 0) {
         echo "<td>";
         if (is_array($image_urls)) {
             foreach ($image_urls as $image_url) {
-                echo "<img src='" . $image_url . "' alt='Product Image' style='max-width: 100px; max-height: 100px; margin: 5px;'>";
+                echo "<img src='/" . $image_url . "' alt='Product Image' style='max-width: 100px; max-height: 100px; margin: 5px;'>";
             }
         }
         echo "</td>";
