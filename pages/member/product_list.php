@@ -1,4 +1,4 @@
-<?php 
+<?php  
 require '../../db/db_connect.php';
 include '../../_header.php';
 
@@ -86,20 +86,17 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     <?php
                     $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
                     if (is_array($image_urls) && !empty($image_urls)) {
-                        // Use the first image in the array as the product image
                         $image_path = $image_urls[0];
                         echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
                     } else {
-                        // Fallback image if no image is available
                         echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
                     }
                     ?>
                     <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                    <p>Price: $<?php echo number_format($row['price'], 2); ?></p>
+                    <p>Price: $<?php echo number_format($row['discounted_price'], 2); ?></p>
                     <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>
                     <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
                     <p><strong>Stock: <?php echo $stock; ?></strong></p>
-                    <!-- Only show Add to Cart button if stock is available -->
                     <form action="add_to_cart.php" method="POST" class="product-form">
                         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">
                         <?php if ($stock > 0) { ?>
