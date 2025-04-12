@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
     exit();
 }
 
-// Retrieve updated cart items for logged-in users or from session for guest users
+// Retrieve updated cart items
 if ($user_id > 0) {
-    // Logged-in user: Get cart items from the database
+    // Logged-in user
     $sql_cart = "SELECT shopping_cart.cart_id, shopping_cart.quantity, 
-                        products.product_id, products.name, products.price, products.image_url
+                        products.product_id, products.name, products.discounted_price, products.image_url
                  FROM shopping_cart
                  JOIN products ON shopping_cart.product_id = products.product_id
                  WHERE shopping_cart.user_id = ?";
@@ -57,11 +57,11 @@ if ($user_id > 0) {
     $result_cart = $stmt_cart->get_result();
     $cart_items = $result_cart->num_rows > 0 ? $result_cart->fetch_all(MYSQLI_ASSOC) : [];
 } else {
-    // Guest user: Get cart items from session
+    // Guest user
     $cart_items = [];
     if (!empty($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $product_id => $quantity) {
-            $sql_product = "SELECT product_id, name, price, image_url FROM products WHERE product_id = ?";
+            $sql_product = "SELECT product_id, name, discounted_price, image_url FROM products WHERE product_id = ?";
             $stmt_product = $conn->prepare($sql_product);
             $stmt_product->bind_param("i", $product_id);
             $stmt_product->execute();
@@ -87,17 +87,19 @@ if ($user_id > 0) {
 
 if (!empty($cart_items)) {
     echo "<table border='1'>
-            <tr><th>Product</th><th>Price</th><th>Quantity</th><th>Total</th><th>Actions</th></tr>";
+            <tr><th>Product</th><th>Discounted Price</th><th>Quantity</th><th>Total</th><th>Actions</th></tr>";
 
     foreach ($cart_items as $row) {
-        $total_price = $row['price'] * $row['quantity'];
+        $price = $row['discounted_price'];
+        $quantity = $row['quantity'];
+        $total_price = $price * $quantity;
         $total_cart_price += $total_price;
 
         echo "<tr>
                 <td>{$row['name']}<br><img src='{$row['image_url']}' width='50'></td>
-                <td>{$row['price']}</td>
-                <td>{$row['quantity']}</td>
-                <td>{$total_price}</td>
+                <td>RM {$price}</td>
+                <td>{$quantity}</td>
+                <td>RM {$total_price}</td>
                 <td>
                     <form action='view_cart.php' method='POST'>
                         <input type='hidden' name='product_id' value='{$row['product_id']}'>
@@ -113,14 +115,14 @@ if (!empty($cart_items)) {
 
     echo "<p><strong>Total Price:</strong> RM $total_cart_price</p>";
 
-    // Store cart data in session before proceeding to checkout
+    // Store in session
     $_SESSION['cart_items'] = $cart_items;
     $_SESSION['total_price'] = $total_cart_price;
 
     if ($user_id > 0) {
         echo "<form action='checkout.php' method='POST'>
-        <button type='submit'>Proceed to Checkout</button>
-      </form>";
+                <button type='submit'>Proceed to Checkout</button>
+              </form>";
     } else {
         echo "<p>You must <a href='../signup_login.php'>log in</a> to proceed to checkout.</p>";
     }

@@ -1,21 +1,20 @@
-<?php
+<?php 
 include_once '../../_base.php';
-require '../../db/db_connect.php'; // Include your database connection file
+require '../../db/db_connect.php';
 
-// Enable error reporting
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Check if the user is logged in
 $user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
-$user_id = $user ? $user['user_id'] : 0;  // 0 for guest
+$user_id = $user ? $user['user_id'] : 0;
 
-// Retrieve cart items and total price from session
 $cart_items = isset($_SESSION['cart_items']) ? $_SESSION['cart_items'] : [];
-$total_price = isset($_SESSION['total_price']) ? $_SESSION['total_price'] : 0;
+$total_price = 0;
+foreach ($cart_items as $item) {
+    $total_price += $item['discounted_price'] * $item['quantity'];
+}
 
-// Get user and address details if logged in
 if ($user_id > 0) {
     $sql_user = "SELECT name, phonenum, email FROM users WHERE user_id = ?";
     $stmt_user = $conn->prepare($sql_user);
@@ -29,9 +28,22 @@ if ($user_id > 0) {
     $stmt_address->bind_param("i", $user_id);
     $stmt_address->execute();
     $address_info = $stmt_address->get_result()->fetch_assoc();
+
+    $vouchers = [];
+    $sql_vouchers = "SELECT * FROM vouchers 
+                     WHERE user_id = ? 
+                     AND quantity > 0 
+                     AND start_date <= CURDATE() 
+                     AND end_date >= CURDATE()";
+    $stmt_voucher = $conn->prepare($sql_vouchers);
+    $stmt_voucher->bind_param("i", $user_id);
+    $stmt_voucher->execute();
+    $result_vouchers = $stmt_voucher->get_result();
+    $vouchers = $result_vouchers->fetch_all(MYSQLI_ASSOC);
 } else {
     $user_info = null;
     $address_info = null;
+    $vouchers = [];
 }
 ?>
 
@@ -48,79 +60,90 @@ if ($user_id > 0) {
 <h3>Shopping Cart</h3>
 <?php if (!empty($cart_items)): ?>
     <table border='1'>
-        <tr><th>Product</th><th>Price</th><th>Quantity</th><th>Total</th></tr>
+        <tr><th>Product</th><th>Discounted Price</th><th>Quantity</th><th>Total</th></tr>
         <?php foreach ($cart_items as $row): ?>
             <tr>
                 <td><?= htmlspecialchars($row['name']) ?><br><img src='<?= htmlspecialchars($row['image_url']) ?>' width='50'></td>
-                <td><?= number_format($row['price'], 2) ?></td>
+                <td><?= number_format($row['discounted_price'], 2) ?></td>
                 <td><?= $row['quantity'] ?></td>
-                <td><?= number_format($row['price'] * $row['quantity'], 2) ?></td>
+                <td><?= number_format($row['discounted_price'] * $row['quantity'], 2) ?></td>
             </tr>
         <?php endforeach; ?>
     </table>
+    <p><strong>Shipping Fee:</strong> RM 0.00</p>
     <p><strong>Total Price:</strong> RM <?= number_format($total_price, 2) ?></p>
 <?php else: ?>
     <p>Your cart is empty!</p>
 <?php endif; ?>
 
 <h3>Shipping Information</h3>
-<form action="checkout.php" method="POST">
-    <label for="address_line1">Address Line 1:</label><br>
+<!-- ✅ CHANGED action to create_payment.php -->
+<form action="create_payment.php" method="POST">
+    <label>Address Line 1:</label><br>
     <input type="text" name="address_line1" value="<?= htmlspecialchars($address_info['address_line1'] ?? '') ?>" required><br>
-    
-    <label for="address_line2">Address Line 2:</label><br>
+
+    <label>Address Line 2:</label><br>
     <input type="text" name="address_line2" value="<?= htmlspecialchars($address_info['address_line2'] ?? '') ?>"><br>
-    
-    <label for="city">City:</label><br>
+
+    <label>City:</label><br>
     <input type="text" name="city" value="<?= htmlspecialchars($address_info['city'] ?? '') ?>" required><br>
-    
-    <label for="state">State:</label><br>
+
+    <label>State:</label><br>
     <input type="text" name="state" value="<?= htmlspecialchars($address_info['state'] ?? '') ?>" required><br>
-    
-    <label for="postal_code">Postal Code:</label><br>
+
+    <label>Postal Code:</label><br>
     <input type="text" name="postal_code" value="<?= htmlspecialchars($address_info['postal_code'] ?? '') ?>" required><br>
-    
-    <label for="country">Country:</label><br>
+
+    <label>Country:</label><br>
     <input type="text" name="country" value="<?= htmlspecialchars($address_info['country'] ?? '') ?>" required><br>
-    
-    <label for="comment">Comment to Seller:</label><br>
+
+    <label>Comment to Seller:</label><br>
     <textarea name="comment"><?= htmlspecialchars($_POST['comment'] ?? '') ?></textarea><br>
-    
-    <button type="submit" name="place_order">Place Order</button>
+
+    <label>Select Voucher:</label><br>
+    <select name="voucher_code" id="voucher_code" onchange="applyVoucher()">
+        <option value="" data-type="" data-value="0">-- No Voucher --</option>
+        <?php foreach ($vouchers as $voucher): ?>
+            <option value="<?= $voucher['code'] ?>" 
+                    data-type="<?= $voucher['type'] ?>" 
+                    data-value="<?= $voucher['value'] ?>">
+                <?= $voucher['description'] ?> (<?= $voucher['type'] === 'rm' ? 'RM' : '%' ?><?= $voucher['value'] ?>)
+            </option>
+        <?php endforeach; ?>
+    </select><br><br>
+
+    <input type="hidden" name="discount_amount" id="discount_amount" value="0">
+    <input type="hidden" name="final_total_price" id="final_total_price" value="<?= $total_price ?>">
+
+    <p><strong id="discount_info"></strong></p>
+    <p><strong>Total After Discount:</strong> RM <span id="final_price"><?= number_format($total_price, 2) ?></span></p>
+
+    <button type="submit" name="place_order">Checkout</button>
 </form>
 
-<?php
-if (isset($_POST['place_order'])) {
-    $order_id = 'ORD' . uniqid();
-    $address_line1 = $_POST['address_line1'];
-    $address_line2 = !empty($_POST['address_line2']) ? $_POST['address_line2'] : NULL;
-    $city = $_POST['city'];
-    $state = $_POST['state'];
-    $postal_code = $_POST['postal_code'];
-    $country = $_POST['country'];
-    $comment = !empty($_POST['comment']) ? $_POST['comment'] : NULL;
-    
-    $sql_order = "INSERT INTO orders (order_id, user_id, total_price, status, 
-                        shipping_address_line1, shipping_address_line2, 
-                        shipping_city, shipping_state, shipping_postal_code, 
-                        shipping_country, comment) 
-                VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)";
-    
-    $stmt_order = $conn->prepare($sql_order);
-    if (!$stmt_order) {
-        die("Prepare failed: " . $conn->error);
+<script>
+    const originalTotal = <?= $total_price ?>;
+
+    function applyVoucher() {
+        const select = document.getElementById('voucher_code');
+        const type = select.options[select.selectedIndex].getAttribute('data-type');
+        const value = parseFloat(select.options[select.selectedIndex].getAttribute('data-value'));
+
+        let discount = 0;
+        if (type === 'rm') {
+            discount = value;
+        } else if (type === 'percent') {
+            discount = (originalTotal * value) / 100;
+        }
+
+        const final = Math.max(originalTotal - discount, 0);
+        document.getElementById('final_price').innerText = final.toFixed(2);
+        document.getElementById('discount_amount').value = discount.toFixed(2);
+        document.getElementById('final_total_price').value = final.toFixed(2);
+        document.getElementById('discount_info').innerText = discount > 0 
+            ? `Discount Applied: RM ${discount.toFixed(2)}` 
+            : '';
     }
-    
-    $stmt_order->bind_param("sissssssss", 
-        $order_id, $user_id, $total_price, 
-        $address_line1, $address_line2, $city, 
-        $state, $postal_code, $country, $comment);
-    
-    if ($stmt_order->execute()) {
-        header("Location: create_payment.php?order_id=$order_id");
-        exit();
-    } else {
-        echo "Error: " . $stmt_order->error;
-    }
-}
-?>
+</script>
+
+

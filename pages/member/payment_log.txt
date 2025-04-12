@@ -1,0 +1,191 @@
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+Voucher code received: Raya
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:40:12 - API Response: 						[{"BillCode":"yvlqt6k5"}]
+Voucher code received: Raya
+Voucher code received: Raya
+Voucher code received: Raya
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:48:37 - API Response: 						[{"BillCode":"9k5jkzd5"}]
+Error: Unknown column 'voucher_code' in 'where clause'
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:48:48 - API Response: 						[{"BillCode":"57tikgsv"}]
+Error: Unknown column 'voucher_code' in 'where clause'
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:50:48 - API Response: 						[{"BillCode":"rdjvj3u9"}]
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:51:41 - API Response: 						[{"BillCode":"6x3jao5d"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 02:52:01 - API Response: 						[{"BillCode":"7r3edbw7"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:00:41 - API Response: 						[{"BillCode":"jey64rta"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:02:17 - API Response: 						[{"BillCode":"bpy318z3"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:04:11 - API Response: 						[{"BillCode":"opmf5ybx"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:06:19 - API Response: 						[{"BillCode":"e34st6vu"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 0
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:06:58 - API Response: 						[{"BillCode":"cvzopam6"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:08:06 - API Response: 						[{"BillCode":"cymbk30e"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:09:00 - API Response: 						[{"BillCode":"840z84hk"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:12:22 - API Response: 						[{"BillCode":"1339frh2"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:14:31 - API Response: 						[{"BillCode":"9wi3cwyo"}]
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:18:45 - API Response: 						[{"BillCode":"94dsxo2u"}]
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:19:45 - API Response: 						[{"BillCode":"f77nv7iw"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:22:43 - API Response: 						[{"BillCode":"jxfewba5"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:26:27 - API Response: 						[{"BillCode":"k610kaeo"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 03:30:50 - API Response: 						[{"BillCode":"aii4qq5c"}]
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 03:31:40 - API Response: 						[{"BillCode":"3sh389zl"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 04:00:00 - API Response: 						[{"BillCode":"q3g4txih"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: Raya
+Voucher type: rm
+Voucher discount applied: 10.00
+Total amount before discount: 50.00
+Total amount after discount: 40
+2025-04-13 04:09:18 - API Response: 						[{"BillCode":"wvqgxvso"}]
+Voucher Raya used and quantity reduced.
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 04:11:04 - API Response: 						[{"BillCode":"ys84une6"}]
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-13 04:16:31 - API Response: 						[{"BillCode":"elm5h40f"}]
