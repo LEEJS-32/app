@@ -14,13 +14,11 @@ body {
 }
 
 .left {
-    width: 53%;
+    width: 50%;
     background-color: white;
     margin: 20px 40px;
     overflow: hidden; /* Prevent overflow issues when sliding */
     position: relative; /* Ensure both forms align and slide within this space */
-    overflow-y: auto; /* Allow vertical scrolling if content overflows */
-    padding: 2rem;
 }
 
 .right {
