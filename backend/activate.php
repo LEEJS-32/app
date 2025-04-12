@@ -31,8 +31,8 @@ if ($row = $result->fetch_assoc()) {
         $stmt->bind_param("s", $token);
         $stmt->execute();
 
-        echo "Account activated successfully! Redirecting to login...";
-        header("refresh:3;url=../pages/signup_login.php");
+        echo "Account activated successfully! Redirecting...";
+        header("refresh:3;url=../pages/extra_info.php");
         exit();
     }
 } else {
