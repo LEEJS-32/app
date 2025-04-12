@@ -6,23 +6,26 @@ include ('../../_base.php');
 
 //member role
 auth_user();
-auth('admin');
+auth('member');
+
+$new_user = false;
+$_SESSION["new_user"] = $new_user;
 
 $user = $_SESSION['user'];
 $user_id = $user['user_id'];
 $name = $user['name'];
 $role = $user['role'];
-
+$_genders = ['male' => 'Male', 'female' => 'Female'];
 // ----------------------------------------------------------------------------
 ?>
 </script>
 <head>
-    <title>Product</title>
+    <title>Member Profile</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </head>
 
 <body>
@@ -35,7 +38,7 @@ $role = $user['role'];
     <main>
     <?php
         require '../../db/db_connect.php';
-    
+
         // Fetch avatar from database
         $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
         $result = $conn->query($sql);
@@ -50,6 +53,9 @@ $role = $user['role'];
             }
         }
     ?>
+    
+
+    
     <div class="container">
         <div class="left">
             <div class="profile">
@@ -61,26 +67,43 @@ $role = $user['role'];
             </div>
 
             <ul class="nav">
-                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
-                <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
-                <li><a href="products.php" class="active"><i class='bx bx-chair'></i>Products</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="member_profile.php"><i class='bx bxs-user-detail' ></i>My Profile</a></li>
+                <li><a href="reset_password.php" class="active"><i class='bx bx-lock-alt' ></i>Password </a></li>
+                <li><a href="member_address.php"><i class='bx bx-home-alt-2' ></i>My Address</a></li>
+                <li><a href="view_cart.php"><i class='bx bx-shopping-bag' ></i>Shopping Cart</a></li>
+                <li><a href="#"><i class='bx bx-heart' ></i>Wishlist</a></li>
+                <li><a href="#"><i class='bx bx-food-menu'></i>My Orders</a></li>
             </ul>
         </div>
 
         <div class="divider"></div>
 
         <div class="right">
-            <h1>Product Management</h1>
+            <h1>Password Reset</h1>
 
+            <!-- Reset password -->
+            <form method="post" action="../../backend/reset_password.php">
+                <label for="old-password">Old Password</label>
+                <br><?php html_text('old-password'); ?><br><br>
+                <label for="new-password">New Password</label>
+                <br><?php html_text('new-password'); ?><br><br>
+                <label for="confirm-password">Confirm New Password</label>
+                <br><?php html_text('confirm-password'); ?>
+                <br><br>
+                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                <br><br>
+                <button type="submit" id="confirm-btn">Confirm</button>
+            </form>
 
-            <a href="adminCreateProduct.php">Create Product</a>
-            <a href="adminProduct.php">Show Product</a>
-            <a href="adminUpdateProduct.php">Update Product</a>
+            
         </div>  
     </div>
 
+    <!-- Load reCAPTCHA  -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     </main>
+
     <footer>
         <?php
             include __DIR__ . '/../../_footer.php';
