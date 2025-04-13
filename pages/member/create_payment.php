@@ -1,8 +1,4 @@
 <?php
-
-?>
-
-<?php
 include_once '../../_base.php';
 require '../../database.php'; // Include database connection
 
@@ -42,8 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $voucher_code = !empty($_POST['voucher_code']) ? $_POST['voucher_code'] : NULL;
     $discount_amount = !empty($_POST['discount_amount']) ? floatval($_POST['discount_amount']) : 0;
 
+    echo "Discount amount: $discount_amount\n";
+    echo "Voucher code: $voucher_code\n";
+
     // Use the final total price after discount
     $final_total_price = isset($_POST['final_total_price']) ? floatval($_POST['final_total_price']) : $total_price;
+
+    // Start transaction to ensure consistency
+    $conn->begin_transaction();
 
     // Insert order into the database
     $sql_order = "INSERT INTO orders (order_id, user_id, total_price, status, 
@@ -52,11 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         shipping_country, comment, voucher_code) 
                 VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt_order = $conn->prepare($sql_order);
-    $stmt_order->bind_param("sisssssssss", 
+    $stmt_order->bind_param("sidssssssss", 
         $order_id, $user_id, $final_total_price, 
         $address_line1, $address_line2, $city, 
         $state, $postal_code, $country, $comment, $voucher_code);
-    
+
     if ($stmt_order->execute()) {
         // Reduce voucher quantity if used
         if ($voucher_code) {
@@ -65,102 +67,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_voucher_update->bind_param("s", $voucher_code);
             $stmt_voucher_update->execute();
         }
-
-        // Redirect to payment page
-        header("Location: create_payment.php?order_id=$order_id&voucher_code=$voucher_code");
-        exit();
     } else {
         echo "Error: " . $stmt_order->error;
+        $conn->rollback(); // Rollback transaction if order insert fails
+        die("Error creating order.");
     }
-}
 
+    // Fetch cart total amount
+    $query = $conn->prepare("
+        SELECT SUM(p.discounted_price * sc.quantity) AS total_amount 
+        FROM shopping_cart sc
+        JOIN products p ON sc.product_id = p.product_id
+        WHERE sc.user_id = ?");
+    $query->bind_param("i", $user_id);
+    $query->execute();
+    $result = $query->get_result();
+    $cart = $result->fetch_assoc();
 
-// Fetch cart total amount
-$query = $conn->prepare("
-    SELECT SUM(p.discounted_price * sc.quantity) AS total_amount 
-    FROM shopping_cart sc
-    JOIN products p ON sc.product_id = p.product_id
-    WHERE sc.user_id = ?");
-$query->bind_param("i", $user_id);
-$query->execute();
-$result = $query->get_result();
-$cart = $result->fetch_assoc();
+    // Ensure total amount is valid
+    $total_amount = $cart['total_amount'] ?? 0;
+    if ($total_amount <= 0) {
+        die("Error: Your cart is empty. Add items before proceeding to payment.");
+    }
 
-// Ensure total amount is valid
-$total_amount = $cart['total_amount'] ?? 0;
-if ($total_amount <= 0) {
-    die("Error: Your cart is empty. Add items before proceeding to payment.");
-}
+    // Check if voucher code is passed and valid
+    $voucher_discount = 0;
+    file_put_contents("payment_log.txt", "Voucher code received: $voucher_code\n", FILE_APPEND);
 
-// Check if voucher code is passed and valid
-$voucher_code = isset($_POST['voucher_code']) ? $_POST['voucher_code'] : null;
-$voucher_discount = 0;
+    if ($voucher_code) {
+        // Query voucher details
+        $voucher_query = $conn->prepare("SELECT type, value, quantity FROM vouchers WHERE code = ? AND quantity > 0 AND NOW() BETWEEN start_date AND end_date");
+        $voucher_query->bind_param("s", $voucher_code);
+        $voucher_query->execute();
+        $voucher_result = $voucher_query->get_result();
+        
+        if ($voucher_result->num_rows > 0) {
+            $voucher = $voucher_result->fetch_assoc();
+            $discount_type = $voucher['type']; // 'RM' or 'percent'
+            $discount_value = $voucher['value']; // e.g., 10 for RM10 or 10 for 10%
 
-// Log voucher code if received
-file_put_contents("payment_log.txt", "Voucher code received: $voucher_code\n", FILE_APPEND);
+            // Apply discount based on type
+            if ($discount_type === 'rm') {
+                echo ($discount_value);
+                $voucher_discount = $discount_value;
+            } elseif ($discount_type === 'percent') {
+                $voucher_discount = ($total_amount * $discount_value) / 100;
+            }
 
-if ($voucher_code) {
-    // Query voucher details
-    $voucher_query = $conn->prepare("SELECT type, value, quantity FROM vouchers WHERE code = ? AND quantity > 0 AND NOW() BETWEEN start_date AND end_date");
-    $voucher_query->bind_param("s", $voucher_code);
-    $voucher_query->execute();
-    $voucher_result = $voucher_query->get_result();
-    
-    if ($voucher_result->num_rows > 0) {
-        $voucher = $voucher_result->fetch_assoc();
-        $discount_type = $voucher['type']; // 'RM' or '%'
-        $discount_value = $voucher['value']; // e.g., 10 for RM10 or 10 for 10%
-
-
-
-        // Apply discount based on type
-        if ($discount_type === 'rm') {
-            echo ($discount_value);
-            $voucher_discount = $discount_value;
-        } elseif ($discount_type === '%') {
-            $voucher_discount = ($total_amount * $discount_value) / 100;
+            // Log voucher discount details
+            file_put_contents("payment_log.txt", "Voucher type: $discount_type\n", FILE_APPEND);
+            file_put_contents("payment_log.txt", "Voucher discount applied: $voucher_discount\n", FILE_APPEND);
+        } else {
+            file_put_contents("payment_log.txt", "Voucher code is invalid or expired.\n", FILE_APPEND);
         }
-
-        // Log voucher discount details
-        file_put_contents("payment_log.txt", "Voucher type: $discount_type\n", FILE_APPEND);
-        file_put_contents("payment_log.txt", "Voucher discount applied: $voucher_discount\n", FILE_APPEND);
-    } else {
-        file_put_contents("payment_log.txt", "Voucher code is invalid or expired.\n", FILE_APPEND);
     }
-}
 
-// Apply the voucher discount to the total amount
-$total_amount_after_discount = $total_amount - $voucher_discount;
-$total_amount_after_discount = max(0, $total_amount_after_discount); // Ensure the amount doesn't go negative
+    // Apply the voucher discount to the total amount
+    $total_amount_after_discount = $total_amount - $voucher_discount;
+    $total_amount_after_discount = max(0, $total_amount_after_discount); // Ensure the amount doesn't go negative
 
-// Log the total amount after discount
-file_put_contents("payment_log.txt", "Total amount before discount: $total_amount\n", FILE_APPEND);
-file_put_contents("payment_log.txt", "Total amount after discount: $total_amount_after_discount\n", FILE_APPEND);
-
-// Generate a unique order ID
-$order_id = 'ORD' . uniqid();
-
-// Start transaction to ensure consistency
-$conn->begin_transaction();
-
-// try {
-    // Check if the order already exists for this user with a pending status
-    $existing_order_query = $conn->prepare("SELECT order_id FROM orders WHERE user_id = ? AND status = 'pending'");
-    $existing_order_query->bind_param("i", $user_id);
-    $existing_order_query->execute();
-    $existing_order_result = $existing_order_query->get_result();
-    
-    // if ($existing_order_result->num_rows > 0) {
-    //     $existing_order = $existing_order_result->fetch_assoc();
-    //     $order_id = $existing_order['order_id'];
-    // } else {
-        // Insert new order including voucher code if provided
-        $order_insert = $conn->prepare("
-            INSERT INTO orders (order_id, user_id, total_price, status, voucher_code) 
-            VALUES (?, ?, ?, 'pending', ?)");
-        $order_insert->bind_param("sids", $order_id, $user_id, $total_amount_after_discount, $voucher_code);
-        $order_insert->execute();
-    // }
+    // Log the total amount after discount
+    file_put_contents("payment_log.txt", "Total amount before discount: $total_amount\n", FILE_APPEND);
+    file_put_contents("payment_log.txt", "Total amount after discount: $total_amount_after_discount\n", FILE_APPEND);
 
     // Insert order items only if they don't exist
     $query_cart_items = $conn->prepare("
@@ -196,7 +164,7 @@ $conn->begin_transaction();
     $category_code = "vsofdz4y"; // Replace with actual category code
 
     // Ensure callback URL is correct (HTTPS required for production)
-    $callback_url = "https://opinion-cancellation-persian-contrast.trycloudflare.com/pages/member/payment_callback.php"; 
+    $callback_url = "https://proper-phrases-nano-recognize.trycloudflare.com/pages/member/payment_callback.php"; 
     $return_url = "http://localhost:8000/pages/member/order_history.php";
 
     // Payment details
@@ -253,20 +221,6 @@ $conn->begin_transaction();
     $insert_payment->bind_param("sidsss", $order_id, $user_id, $total_amount_after_discount, $payment_status, $bill_code, $transaction_id);
     $insert_payment->execute();
 
-    // Update voucher quantity only after payment success (during callback)
-    if ($voucher_code) {
-        $sql_update_voucher = "UPDATE vouchers SET quantity = quantity - 1 WHERE code = ? AND quantity > 0";
-        $stmt_update_voucher = $conn->prepare($sql_update_voucher);
-        $stmt_update_voucher->bind_param("s", $voucher_code);
-        
-        if (!$stmt_update_voucher->execute()) {
-            file_put_contents($logFile, "Error updating voucher: " . $stmt_update_voucher->error . "\n", FILE_APPEND);
-        } else {
-            // Log voucher deduction
-            file_put_contents($logFile, "Voucher $voucher_code used and quantity reduced.\n", FILE_APPEND);
-        }
-    }
-
     // Commit transaction if everything is successful
     $conn->commit();
 
@@ -274,13 +228,7 @@ $conn->begin_transaction();
     header("Location: " . $payment_url);
     exit();
 
-// } catch (Exception $e) {
-//     // Rollback in case of error
-//     $conn->rollback();
-//     file_put_contents("payment_log.txt", "Error: " . $e->getMessage() . "\n", FILE_APPEND);
-//     die("Error: Something went wrong. Please try again.");
-// }
+} else {
+    die("Invalid request method.");
+}
 ?>
-
-
-
