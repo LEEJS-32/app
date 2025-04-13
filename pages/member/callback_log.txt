@@ -1,0 +1,20 @@
+2025-04-13 12:47:11 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504134329734824
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 20p4wd9v
+    [order_id] => ORD67fb960d75ef7
+    [amount] => 40.00
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504134329734824
+    [fpx_transaction_id] => 2504130628143594
+    [hash] => 599661287cf50e2cbf6fa50507cd8e20
+    [transaction_time] => 2025-04-13 06:28:14
+)
+
+✅ Updated existing payment record: Order ID ORD67fb960d75ef7, Status: Completed
+✅ Order status updated: Order ID ORD67fb960d75ef7, Status: processing
