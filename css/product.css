@@ -108,6 +108,15 @@ a:hover {
     margin-bottom: 10px;
 }
 
+/* Style for product images */
+.product-image {
+    max-width: 150px; /* Set the maximum width */
+    max-height: 150px; /* Set the maximum height */
+    object-fit: cover; /* Ensure the image fits within the dimensions without distortion */
+    margin: 10px auto; /* Center the image and add spacing */
+    display: block; /* Ensure the image is treated as a block element */
+}
+
 /* Product Details */
 .product-card h3 {
     font-size: 18px;
