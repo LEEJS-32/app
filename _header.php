@@ -58,6 +58,12 @@
                 <li><a href="">About us</a></li>
                 <li><a href="/pages/member/product_list.php">Products</a></li>
                 <li><a href="">Contact</a></li>
+
+            <?php else: ?>
+                <li><a href="/pages/home.php">Home</a></li>
+                <li><a href="">About us</a></li>
+                <li><a href="/pages/member/product_list.php">Products</a></li>
+                <li><a href="">Contact</a></li>
             <?php endif ?>
 
             </ul>
