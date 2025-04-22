@@ -23,6 +23,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <title>Member Profile</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="../../css/member/member.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
     
@@ -69,8 +70,8 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 
             <ul class="nav">
                 <li><a href="member_profile.php"><i class='bx bxs-user-detail' ></i>My Profile</a></li>
-                <li><a href="reset_password.php" class="active"><i class='bx bx-lock-alt' ></i>Password </a></li>
-                <li><a href="member_address.php"><i class='bx bx-home-alt-2' ></i>My Address</a></li>
+                <li><a href="reset_password.php"><i class='bx bx-lock-alt' ></i>Password </a></li>
+                <li><a href="member_address.php"  class="active"><i class='bx bx-home-alt-2' ></i>My Address</a></li>
                 <li><a href="view_cart.php"><i class='bx bx-shopping-bag' ></i>Shopping Cart</a></li>
                 <li><a href="#"><i class='bx bx-heart' ></i>Wishlist</a></li>
                 <li><a href="#"><i class='bx bx-food-menu'></i>My Orders</a></li>
@@ -97,10 +98,12 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
                 <br><input type="text" id="country" name="country">
                 <br><br>
                 <label for="postcode">Post Code</label>
-                <br><input type="number" id="postcode" name="postcode">
+                <br><input type="number" id="postcode" name="postcode" min="0" max="99999">
                 <br><br>
-
+                <!-- <div class="buttons"> -->
                 <button type="submit">Confirm</button>
+                <button type="reset">Cancel</button>
+                <!-- </div> -->
             </form>
 
             

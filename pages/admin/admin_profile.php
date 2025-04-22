@@ -62,7 +62,7 @@ $role = $user['role'];
 
             <ul class="nav">
                 <li><a href="admin_profile.php" class="active"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
-                <li><a href="#"><i class='bx bxs-user-account' ></i>Members</a></li>
+                <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
                 <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
             </ul>

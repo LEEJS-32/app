@@ -23,6 +23,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <title>Member Profile</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="../../css/member/member.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
     
