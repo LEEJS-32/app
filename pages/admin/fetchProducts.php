@@ -42,10 +42,6 @@ if ($result->num_rows > 0) {
         echo "<td>" . $row["status"] . "</td>";
         echo "<td>" . $row["discount"] . "</td>";
         echo "<td>" . $row["discounted_price"] . "</td>";
-        echo "<td>" . $row["weight"] . "</td>";
-        echo "<td>" . $row["length"] . "</td>";
-        echo "<td>" . $row["width"] . "</td>";
-        echo "<td>" . $row["height"] . "</td>";
         echo "<td>" . $row["brand"] . "</td>";
         echo "<td>" . $row["color"] . "</td>";
         echo "<td>" . $row["rating"] . "</td>";

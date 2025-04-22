@@ -180,10 +180,10 @@ $products = $pager->result;
                 <th>Status</th>
                 <th>Discount (%)</th>
                 <th>Discounted Price</th>
-                <th>Weight</th>
+                <!-- <th>Weight</th>
                 <th>Length</th>
                 <th>Width</th>
-                <th>Height</th>
+                <th>Height</th> -->
                 <th>Brand</th>
                 <th>Color</th>
                 <th>Rating</th>
@@ -216,10 +216,6 @@ $products = $pager->result;
                         <td><?php echo htmlspecialchars($product['status']); ?></td>
                         <td><?php echo $product['discount']; ?></td>
                         <td><?php echo $product['discounted_price']; ?></td>
-                        <td><?php echo $product['weight']; ?></td>
-                        <td><?php echo $product['length']; ?></td>
-                        <td><?php echo $product['width']; ?></td>
-                        <td><?php echo $product['height']; ?></td>
                         <td><?php echo htmlspecialchars($product['brand']); ?></td>
                         <td><?php echo htmlspecialchars($product['color']); ?></td>
                         <td><?php echo $product['rating']; ?></td>

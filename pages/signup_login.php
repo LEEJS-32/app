@@ -95,7 +95,7 @@
                 echo "<p style='color:red;'>".$_SESSION['error_not_exist']."</p>";
                 unset($_SESSION['error_not_exist']); 
             }
-
+?>
                 <!-- Sign Up -->
                 <div class="form" id="sign-up">
                     <h1>Member Sign Up</h1>

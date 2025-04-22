@@ -1,15 +1,10 @@
 <?php  
 require '../../db/db_connect.php';
-include '../../_header.php'
+include '../../_header.php';
 // Check if the user is logged in
-$user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$user_name = $user['name'];
-
 $user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
 $user_id = $user ? $user['user_id'] : 'Guest';
 $user_name = $user ? $user['name'] : 'Guest';
-
 
 // Fetch filter values from GET parameters
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : "";
@@ -102,7 +97,6 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
         </form>
     </div>
 
-
     <div class="main-container">
         <!-- Filter Section -->
         <div class="filter-section">
@@ -114,45 +108,6 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     <label for="priceRange">Price:</label>
                     <input type="range" id="priceRange" name="price" min="0" max="1000" step="10" value="1000">
                     <span id="priceValue">$1000</span>
-
-    <!-- View Cart Button -->
-    <div class="view-cart-container">
-        <a href="view_cart.php">
-            <button class="view-cart-btn">View Cart</button>
-        </a>
-    </div>
-
-    <div class="product-container">
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $stock = intval($row['stock']);
-                ?>
-                <div class="product-card">
-                    <?php
-                    $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
-                    if (is_array($image_urls) && !empty($image_urls)) {
-                        $image_path = $image_urls[0];
-                        echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
-                    } else {
-                        echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
-                    }
-                    ?>
-                    <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                    <p>Price: $<?php echo number_format($row['discounted_price'], 2); ?></p>
-                    <p>Brand: <?php echo htmlspecialchars($row['brand']); ?></p>
-                    <p>Color: <?php echo htmlspecialchars($row['color']); ?></p>
-                    <p><strong>Stock: <?php echo $stock; ?></strong></p>
-                    <form action="add_to_cart.php" method="POST" class="product-form">
-                        <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($row['product_id']); ?>">
-                        <?php if ($stock > 0) { ?>
-                            <label>Quantity: <input type="number" name="quantity" value="1" min="1" max="<?php echo $stock; ?>"></label>
-                            <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-                        <?php } else { ?>
-                            <button type="button" class="out-of-stock-btn" disabled>Out of Stock</button>
-                        <?php } ?>
-                    </form>
-
                 </div>
 
                 <!-- Brand Filter -->
