@@ -87,6 +87,22 @@ $sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (
 )";
 $conn->query($sql_create_cart_table);
 
+// Create vouchers table
+$sql_create_vouchers_table = "CREATE TABLE IF NOT EXISTS vouchers (
+    voucher_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,  -- NULL = public voucher, or FK if assigned to a specific user
+    code VARCHAR(50) NOT NULL UNIQUE,
+    type ENUM('rm', 'percent') NOT NULL,
+    value DECIMAL(10,2) NOT NULL,
+    quantity INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    description TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+)";
+$conn->query($sql_create_vouchers_table);
+
+
 // Create orders table
 $sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (
     order_id VARCHAR(50) PRIMARY KEY,  -- Changed from INT to VARCHAR(50)
@@ -94,6 +110,19 @@ $sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (
     total_price DECIMAL(10,2) NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+
+    
+    -- Store the shipping address used for this order (not just a reference ID)
+    shipping_address_line1 VARCHAR(255) NOT NULL,
+    shipping_address_line2 VARCHAR(255) NULL,
+    shipping_city VARCHAR(100) NOT NULL,
+    shipping_state VARCHAR(100) NOT NULL,
+    shipping_postal_code VARCHAR(20) NOT NULL,
+    shipping_country VARCHAR(100) NOT NULL,
+    comment TEXT NULL,
+    voucher_code VARCHAR(50) NULL,
+
+
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 )";
 $conn->query($sql_create_orders_table);

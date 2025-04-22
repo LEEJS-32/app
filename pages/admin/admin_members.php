@@ -26,7 +26,7 @@ if ($search) {
     $params = array_fill(0, 3, "%$search%");
 }
 
-$sql = "SELECT user_id, name, email, role, status FROM users";
+$sql = "SELECT user_id, name, email, role, status, avatar FROM users"; // Added photo field
 if ($where) {
     $sql .= " WHERE " . implode(' AND ', $where);
 }
@@ -36,7 +36,6 @@ if ($params) {
 }
 $stmt->execute();
 $result = $stmt->get_result();
-
 // ----------------------------------------------------------------------------
 ?>
 <head>
@@ -90,6 +89,7 @@ $result = $stmt->get_result();
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
+                        <th>Photo</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -102,6 +102,15 @@ $result = $stmt->get_result();
                         <td><?= $row['role'] ?></td>
                         <td><?= $row['status'] ?></td>
                         <td>
+                            <?php if (!empty($row['profile_photo'])): ?>
+                                <img src="../../uploads/profile_photos/<?= htmlspecialchars($row['profile_photo']) ?>" 
+                                     class="thumbnail popup-thumb"
+                                     alt="User Photo">
+                            <?php else: ?>
+                                <span class="no-photo">No Photo</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
                             <a href="admin_member_detail.php?id=<?= $row['user_id'] ?>" class="btn-view">View Details</a>
                         </td>
                     </tr>
@@ -110,6 +119,36 @@ $result = $stmt->get_result();
             </table>
         </div>  
     </div>
+
+    <!-- Photo Modal -->
+    <div id="popupModal" class="popup-modal">
+        <span class="close">&times;</span>
+        <img class="popup-modal-content" id="popupImage">
+    </div>
+
+    <script>
+        // Add click handlers for all thumbnails
+        document.querySelectorAll('.popup-thumb').forEach(img => {
+            img.onclick = function() {
+                const modal = document.getElementById('popupModal');
+                const modalImg = document.getElementById('popupImage');
+                modal.style.display = "block";
+                modalImg.src = this.src;
+            }
+        });
+
+        // Close modal handlers
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('popupModal').style.display = "none";
+        };
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('popupModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+    </script>
     </main>
 
     <footer>

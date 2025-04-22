@@ -120,3 +120,54 @@ td img {
     font-size: 14px;
     line-height: 1.5;
 }
+
+table { 
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid black;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+.action-buttons a {
+    padding: 5px 10px;
+    text-decoration: none;
+    color: white;
+    background-color: blue;
+    border-radius: 5px;
+}
+.action-buttons a.delete {
+    background-color: red;
+}
+.sortable {
+    cursor: pointer;
+}
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
+.pagination a {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #007bff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.pagination a.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+.pagination a:hover {
+    background-color: #0056b3;
+    color: white;
+}
