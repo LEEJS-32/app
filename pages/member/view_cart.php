@@ -1,18 +1,23 @@
 <?php
-
 include_once '../../_base.php';
 require '../../db/db_connect.php';
 
-$user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
-$user_id = $user ? $user['user_id'] : 0;  // 0 for guest
+// ----------------------------------------------------------------------------
+// Check session/cookie
+// auth_user();
+// auth(''); // Accept any authenticated user
+// ----------------------------------------------------------------------------
 
-// Handle cart actions: Increase, Decrease, Remove
+$user = $_SESSION['user'] ?? null;
+$user_id = $user ? $user['user_id'] : 0;
+
+// Handle cart actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
     $product_id = intval($_POST['product_id']);
     $action = $_POST['action'];
 
     if ($user_id > 0) {
-        // Logged-in user: Modify cart in the database
+        // Logged-in user: Update DB
         if ($action === 'increase') {
             $sql = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?";
         } elseif ($action === 'decrease') {
@@ -26,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
         $stmt->execute();
         $stmt->close();
     } else {
-        // Guest user: Modify cart in session
+        // Guest user: Update session
         if (isset($_SESSION['cart'][$product_id])) {
             if ($action === 'increase') {
                 $_SESSION['cart'][$product_id]++;
@@ -38,14 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
         }
     }
 
-    // Redirect to avoid form resubmission issues
     header("Location: view_cart.php");
     exit();
 }
 
-// Retrieve updated cart items
+// Retrieve cart items
+$cart_items = [];
 if ($user_id > 0) {
-    // Logged-in user
     $sql_cart = "SELECT shopping_cart.cart_id, shopping_cart.quantity, 
                         products.product_id, products.name, products.discounted_price, products.image_url
                  FROM shopping_cart
@@ -57,8 +61,6 @@ if ($user_id > 0) {
     $result_cart = $stmt_cart->get_result();
     $cart_items = $result_cart->num_rows > 0 ? $result_cart->fetch_all(MYSQLI_ASSOC) : [];
 } else {
-    // Guest user
-    $cart_items = [];
     if (!empty($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $product_id => $quantity) {
             $sql_product = "SELECT product_id, name, discounted_price, image_url FROM products WHERE product_id = ?";
@@ -75,58 +77,123 @@ if ($user_id > 0) {
     }
 }
 
+// Store total price
 $total_cart_price = 0;
+?>
 
-echo "<h2>Shopping Cart</h2>";
-if ($user_id > 0) {
-    echo "<p><strong>User ID:</strong> $user_id</p>";
-    echo "<p><strong>User Name:</strong> {$user['name']}</p>";
-} else {
-    echo "<p><strong>Guest Cart</strong></p>";
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/member/cart.css">
+    <title>Shopping Cart</title>
+</head>
 
-if (!empty($cart_items)) {
-    echo "<table border='1'>
-            <tr><th>Product</th><th>Discounted Price</th><th>Quantity</th><th>Total</th><th>Actions</th></tr>";
+<body>
+    <header>
+        <?php include '../../_header.php'; ?>
+    </header>
 
-    foreach ($cart_items as $row) {
-        $price = $row['discounted_price'];
-        $quantity = $row['quantity'];
-        $total_price = $price * $quantity;
-        $total_cart_price += $total_price;
+    <main>
+        <h2>Shopping Cart</h2>
+        <div class="content">
+        <div class="cart-list">
 
-        echo "<tr>
-                <td>{$row['name']}<br><img src='{$row['image_url']}' width='50'></td>
-                <td>RM {$price}</td>
-                <td>{$quantity}</td>
-                <td>RM {$total_price}</td>
-                <td>
-                    <form action='view_cart.php' method='POST'>
-                        <input type='hidden' name='product_id' value='{$row['product_id']}'>
-                        <button type='submit' name='action' value='increase'>+</button>
-                        <button type='submit' name='action' value='decrease'>-</button>
-                        <button type='submit' name='action' value='remove'>Remove</button>
-                    </form>
-                </td>
-              </tr>";
-    }
+            <?php if (!empty($cart_items)): ?>
+                <table class="cart-product">
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                    <?php 
+                    $total_cart_price = 0;
+                    $total_item_count = 0;
+                    
+                    foreach ($cart_items as $row): 
+                        $price = $row['discounted_price'];
+                        $quantity = $row['quantity'];
+                        $total_price = $price * $quantity;
+                        $total_cart_price += $total_price;
+                        $total_item_count += $quantity;
+                    ?>
+                    
+                    <tr>
+                        <td><img src="<?= $row['image_url'] ?>" width="50"><?= htmlspecialchars($row['name']) ?></td>
+                        <td>RM <?= number_format($price, 2) ?></td>
+                        <form method="POST" action="view_cart.php">
+                            <input type="hidden" name="product_id" value="<?= $row['product_id'] ?>">
+                        <td>
+                        <div class="qty">
+                            <button type="submit" name="action" value="decrease">−</button>
+                            <span class="qty-number"><?= $quantity ?></span>
+                            <button type="submit" name="action" value="increase">+</button>
+                        </div>
+                        </td>
+                        <td>
+                                RM <?= number_format($total_price, 2) ?>          
+                        </td>
+                        <td>
+                            <button type="submit" name="action" value="remove" class="remove-btn"><i class='bx bx-x'></i></button>
+                            </form>
+                        </td>
+                        
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+        </div>
 
-    echo "</table>";
+        <div class="summary">
+    <h3>Order Summary</h3>
+    
+    <div class="summary-row">
+        <span>Items</span>
+        <span><?= $total_item_count ?></span>
+    </div>
+    <div class="summary-row">
+        <span>Sub Total</span>
+        <span>RM <?= number_format($total_cart_price, 2) ?></span>
+    </div>
+    <div class="summary-row">
+        <span>Shipping</span>
+        <span>RM 00.00</span>
+    </div>
+    <div class="summary-row">
+        <span>SST</span>
+        <span>RM 00.00</span>
+    </div>
 
-    echo "<p><strong>Total Price:</strong> RM $total_cart_price</p>";
+    <hr>
 
-    // Store in session
+    <div class="summary-row total">
+        <strong>Total</strong>
+        <strong>RM <?= number_format($total_cart_price, 2) ?></strong>
+    </div>
+
+    <?php
     $_SESSION['cart_items'] = $cart_items;
     $_SESSION['total_price'] = $total_cart_price;
+    ?>
 
-    if ($user_id > 0) {
-        echo "<form action='checkout.php' method='POST'>
-                <button type='submit'>Proceed to Checkout</button>
-              </form>";
-    } else {
-        echo "<p>You must <a href='../signup_login.php'>log in</a> to proceed to checkout.</p>";
-    }
-} else {
-    echo "<p>Your cart is empty!</p>";
-}
-?>
+    <?php if ($user_id > 0): ?>
+        <form action="checkout.php" method="POST">
+            <button type="submit" class="checkout-btn">Proceed to Checkout</button>
+        </form>
+    <?php else: ?>
+        <p style="margin-top: 10px;">You must <a href="../signup_login.php">log in</a> to proceed to checkout.</p>
+    <?php endif; ?>
+    <?php else: ?>
+                <p>Your cart is empty!</p>
+            <?php endif; ?>
+</div>
+
+        </div>
+    </main>
+
+    <footer>
+        <?php include '../../_footer.php'; ?>
+    </footer>
+</body>
+</html>

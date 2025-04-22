@@ -42,6 +42,7 @@ $result = $stmt->get_result();
     <title>Member Maintenance</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="../../css/admin_member.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
 </head>
 

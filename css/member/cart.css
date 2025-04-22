@@ -1,0 +1,189 @@
+.content {
+    display: flex;
+    justify-content: space-around;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.cart-list {
+    width: 60%;
+    /* background-color: aqua; */
+}
+
+.summary {
+    width: 30%;
+    border: 0.5px solid rgb(199, 199, 199); 
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 18px;
+    /* background: red; */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    /* border: 1px solid #ccc; */
+}
+
+td {
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+th {
+    background-color: black;
+    color: white;
+
+}
+
+tr td {
+    border-bottom: 1.5px solid grey;
+}
+
+th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+td img {
+    max-width: 50px;
+    height: auto;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* Optional column widths */
+th:nth-child(1), td:nth-child(1) {  /* Product column */
+    text-align: left;
+    width: 35%;
+}
+
+th:nth-child(2), td:nth-child(2) {  /* Price */
+    width: 18%;
+}
+
+th:nth-child(3), td:nth-child(3) {  /* Quantity */
+    width: 17%;
+}
+
+th:nth-child(4), td:nth-child(4) {  /* Subtotal */
+    width: 15%;
+}
+
+th:nth-child(5), td:nth-child(5) {  /* Actions */
+    width: 7%;
+}
+
+/* Optional: style buttons inside quantity */
+td form button {
+    padding: 5px 8px;
+    margin: 0 2px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+}
+
+td form button:hover {
+    background-color: #f0f0f0;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+
+    font-size: 25px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+}
+
+.qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    overflow: hidden;
+    padding: 0 10px;
+    height: 40px;
+    gap: 10px;
+}
+
+.qty button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    font-weight: 500;
+    line-height: 1;
+    transition: background-color 0.2s;
+}
+
+.qty button:hover {
+    background-color: #f0f0f0;
+    border-radius: 50%;
+}
+
+.qty-number {
+    font-size: 18px;
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
+}
+
+.summary h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.summary-row.total {
+    font-size: 18px;
+    border-top: 1px solid #ddd;
+    margin-top: 15px;
+    padding-top: 10px;
+}
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    background-color: black;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.checkout-btn:hover {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+}
+
