@@ -15,10 +15,10 @@ if (!isset($product)) {
         'category' => '',
         'status' => '',
         'discount' => '',
-        'weight' => '',
-        'length' => '',
-        'width' => '',
-        'height' => '',
+        // 'weight' => '',
+        // 'length' => '',
+        // 'width' => '',
+        // 'height' => '',
         'brand' => '',
         'color' => '',
         'rating' => '',
@@ -58,10 +58,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     $category = $_POST['category'] ?? '';
     $status = $_POST['status'] ?? '';
     $discount = (float)$_POST['discount'] ?? 0.0;
-    $weight = (float)$_POST['weight'] ?? 0.0;
-    $length = (float)$_POST['length'] ?? 0.0;
-    $width = (float)$_POST['width'] ?? 0.0;
-    $height = (float)$_POST['height'] ?? 0.0;
+    // $weight = (float)$_POST['weight'] ?? 0.0;
+    // $length = (float)$_POST['length'] ?? 0.0;
+    // $width = (float)$_POST['width'] ?? 0.0;
+    // $height = (float)$_POST['height'] ?? 0.0;
     $brand = $_POST['brand'] ?? '';
     $color = $_POST['color'] ?? '';
     $rating = (float)$_POST['rating'] ?? 0.0;
@@ -110,10 +110,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
                 category = '" . $category . "',
                 status = '" . $status . "',
                 discount = " . $discount . ",
-                weight = " . $weight . ",
-                length = " . $length . ",
-                width = " . $width . ",
-                height = " . $height . ",
                 brand = '" . $brand . "',
                 color = '" . $color . "',
                 rating = " . $rating . ",
@@ -249,22 +245,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
         <label for="discount">Discount (%):</label><br>
         <input type="number" step="0.01" id="discount" name="discount"
             value="<?php echo htmlspecialchars($product['discount']); ?>"><br><br>
-
-        <label for="weight">Weight (kg):</label><br>
-        <input type="number" step="0.01" id="weight" name="weight"
-            value="<?php echo htmlspecialchars($product['weight']); ?>"><br><br>
-
-        <label for="length">Length (cm):</label><br>
-        <input type="number" step="0.01" id="length" name="length"
-            value="<?php echo htmlspecialchars($product['length']); ?>"><br><br>
-
-        <label for="width">Width (cm):</label><br>
-        <input type="number" step="0.01" id="width" name="width"
-            value="<?php echo htmlspecialchars($product['width']); ?>"><br><br>
-
-        <label for="height">Height (cm):</label><br>
-        <input type="number" step="0.01" id="height" name="height"
-            value="<?php echo htmlspecialchars($product['height']); ?>"><br><br>
 
         <label for="brand">Brand:</label><br>
         <input type="text" id="brand" name="brand" value="<?php echo htmlspecialchars($product['brand']); ?>"><br><br>

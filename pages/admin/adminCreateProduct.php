@@ -32,10 +32,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = $_POST['category'];
     $status = $_POST['status'];
     $discount = $_POST['discount'];
-    $weight = $_POST['weight'];
-    $length = $_POST['length'];
-    $width = $_POST['width'];
-    $height = $_POST['height'];
+    // $weight = $_POST['weight'];
+    // $length = $_POST['length'];
+    // $width = $_POST['width'];
+    // $height = $_POST['height'];
     $brand = $_POST['brand'];
     $color = $_POST['color'];
     $rating = $_POST['rating'];
@@ -66,11 +66,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $image_urls_json = json_encode($image_urls);
 
     // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, weight, length, width, height, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
     if (!$stmt) {
         echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
     }
-    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $weight, $length, $width, $height, $brand, $color, $rating, $reviews_count);
+    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $brand, $color, $rating, $reviews_count);
 
     // Execute the statement
     if ($stmt->execute()) {
@@ -141,10 +141,10 @@ $conn->close();
                 var rating = parseFloat($("#rating").val());
                 var price = parseFloat($("#price").val());
                 var stock = parseInt($("#stock").val());
-                var weight = parseFloat($("#weight").val());
-                var length = parseFloat($("#length").val());
-                var width = parseFloat($("#width").val());
-                var height = parseFloat($("#height").val());
+                // var weight = parseFloat($("#weight").val());
+                // var length = parseFloat($("#length").val());
+                // var width = parseFloat($("#width").val());
+                // var height = parseFloat($("#height").val());
                 var reviews_count = parseInt($("#reviews_count").val());
 
                 var isValid = true;
@@ -160,7 +160,7 @@ $conn->close();
                     errorMessage += "Rating must be between 0 and 5.\n";
                 }
 
-                if (discount < 0 || rating < 0 || price < 0 || stock < 0 || weight < 0 || length < 0 || width < 0 || height < 0 || reviews_count < 0) {
+                if (discount < 0 || rating < 0 || price < 0 || stock < 0 || reviews_count < 0) {
                     isValid = false;
                     errorMessage += "Values cannot be negative.\n";
                 }
@@ -262,7 +262,7 @@ $conn->close();
         <label for="discounted_price">Discounted Price:</label><br>
         <input type="text" id="discounted_price" name="discounted_price" readonly><br><br>
 
-        <label for="weight">Weight:</label><br>
+        <!-- <label for="weight">Weight:</label><br>
         <input type="number" step="0.01" id="weight" name="weight"><br><br>
 
         <label for="length">Length:</label><br>
@@ -272,7 +272,7 @@ $conn->close();
         <input type="number" step="0.01" id="width" name="width"><br><br>
 
         <label for="height">Height:</label><br>
-        <input type="number" step="0.01" id="height" name="height"><br><br>
+        <input type="number" step="0.01" id="height" name="height"><br><br> -->
 
         <label for="brand">Brand:</label><br>
         <input type="text" id="brand" name="brand"><br><br>

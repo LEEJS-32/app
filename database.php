@@ -62,10 +62,10 @@ $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
     status ENUM('active', 'inactive', 'discontinued') DEFAULT 'active',
     discount DECIMAL(5, 2) DEFAULT 0.00,
     discounted_price DECIMAL(10, 2) DEFAULT 0.00,
-    weight DECIMAL(10, 2),
-    length DECIMAL(10, 2),
-    width DECIMAL(10, 2),
-    height DECIMAL(10, 2),
+    -- weight DECIMAL(10, 2),
+    -- length DECIMAL(10, 2),
+    -- width DECIMAL(10, 2),
+    -- height DECIMAL(10, 2),
     brand VARCHAR(50),
     color VARCHAR(50),
     rating DECIMAL(3, 2) DEFAULT 0.00,
@@ -74,6 +74,28 @@ $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )";
 $conn->query($sql_create_products_table);
+
+
+// Remember to delete !!!!
+// Check if the products table exists
+$table_check_query = "SHOW TABLES LIKE 'products'";
+$table_check_result = $conn->query($table_check_query);
+
+if ($table_check_result && $table_check_result->num_rows > 0) {
+    // Drop columns if the table exists
+    $sql_drop_columns = "ALTER TABLE products 
+        DROP COLUMN IF EXISTS weight,
+        DROP COLUMN IF EXISTS length,
+        DROP COLUMN IF EXISTS width,
+        DROP COLUMN IF EXISTS height";
+
+    if ($conn->query($sql_drop_columns) === TRUE) {
+    } else {
+        echo "Error dropping columns: " . $conn->error;
+    }
+} else {
+    echo "Table 'products' does not exist.";
+}
 
 // Create shopping_cart table
 $sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (
