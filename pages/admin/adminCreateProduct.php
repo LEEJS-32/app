@@ -32,18 +32,38 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Fetch categories
+$categories_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+if (!$categories_result) {
+    die("Error fetching categories: " . $conn->error);
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $description = $_POST['description'];
     $price = $_POST['price'];
     $stock = $_POST['stock'];
-    $category = $_POST['category'];
+    $category = isset($_POST['category']) ? intval($_POST['category']) : 0;
     $status = $_POST['status'];
     $discount = $_POST['discount'];
     $brand = $_POST['brand'];
     $color = $_POST['color'];
-    // $rating = $_POST['rating'];
-    // $reviews_count = $_POST['reviews_count'];
+
+    // Validate category
+    if ($category <= 0) {
+        $_err['category'] = "Invalid category selected.";
+    } else {
+        // Check if the category exists in the database
+        $stmt = $conn->prepare("SELECT id FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $category);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows === 0) {
+            $_err['category'] = "Selected category does not exist.";
+        }
+        $stmt->close();
+    }
 
     // Calculate discounted price
     $discounted_price = $price - ($price * ($discount / 100));
@@ -54,11 +74,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_err = [];
 
     if (isset($_FILES['image_url']) && count($_FILES['image_url']['name']) > 0) {
-        foreach ($_FILES['image_url']['name'] as $key => $fileName) { // Use $fileName instead of $name
+        foreach ($_FILES['image_url']['name'] as $key => $fileName) {
             $fileType = $_FILES['image_url']['type'][$key];
             $fileSize = $_FILES['image_url']['size'][$key];
             $fileTmpName = $_FILES['image_url']['tmp_name'][$key];
-            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); // Get the file extension
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
 
             if ($_FILES['image_url']['error'][$key] != 0) {
                 $_err['photo'] = "Error uploading file: $fileName";
@@ -67,12 +87,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else if ($fileSize > 1 * 1024 * 1024) { // 1MB limit
                 $_err['photo'] = "File $fileName exceeds the maximum size of 1MB.";
             } else {
-                // Generate a unique filename using uniqid()
                 $uniqueFileName = uniqid('img_', true) . '.' . $fileExtension;
                 $target_file = $target_dir . $uniqueFileName;
 
                 if (move_uploaded_file($fileTmpName, $target_file)) {
-                    $image_urls[] = $target_file; // Store the unique file path
+                    $image_urls[] = $target_file;
                 } else {
                     $_err['photo'] = "Sorry, there was an error uploading your file: $fileName";
                 }
@@ -82,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_err['photo'] = "At least one image is required.";
     }
 
-    $video_url = null; // Default to null if no video is uploaded
+    $video_url = null;
     $target_video_dir = "../../videos/";
     if (isset($_FILES['video_url']) && $_FILES['video_url']['error'] == 0) {
         $videoFileName = $_FILES['video_url']['name'];
@@ -91,53 +110,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $videoTmpName = $_FILES['video_url']['tmp_name'];
         $videoFileExtension = pathinfo($videoFileName, PATHINFO_EXTENSION);
 
-        // Validate video file type
         $allowedVideoTypes = ['mp4', 'avi', 'mov', 'wmv'];
         if (!in_array(strtolower($videoFileExtension), $allowedVideoTypes)) {
             $_err['video'] = "Invalid video format. Allowed formats: mp4, avi, mov, wmv.";
         } elseif ($videoFileSize > 10 * 1024 * 1024) { // 10MB limit
             $_err['video'] = "Video file size exceeds the maximum limit of 10MB.";
         } else {
-            // Generate a unique filename for the video
             $uniqueVideoName = uniqid('video_', true) . '.' . $videoFileExtension;
             $target_video_file = $target_video_dir . $uniqueVideoName;
 
             if (move_uploaded_file($videoTmpName, $target_video_file)) {
-                $video_url = $target_video_file; // Store the video file path
+                $video_url = $target_video_file;
             } else {
                 $_err['video'] = "Error uploading the video file.";
             }
         }
     }
 
-    // If there are errors, store them in the session and redirect back to the same page
     if (!empty($_err)) {
         $_SESSION['form_errors'] = $_err;
-        $_SESSION['form_data'] = $_POST; // Store form data in the session
+        $_SESSION['form_data'] = $_POST;
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
 
-    // Convert image URLs array to JSON
-    $name = $_POST['name']; 
     $image_urls_json = json_encode($image_urls);
 
     // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, video_url,status, discount, discounted_price, brand, color, created_at, updated_at) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt = $conn->prepare("
+        INSERT INTO products 
+        (name, description, price, stock, category_id, image_url, video_url, status, discount, discounted_price, brand, color, created_at, updated_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ");
     if (!$stmt) {
-        echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+        die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
     }
-    $stmt->bind_param("ssdissssddss", $name, $description, $price, $stock, $category, $image_urls_json, $video_url,$status, $discount, $discounted_price, $brand, $color);
-    // Execute the statement
+    $stmt->bind_param(
+        "ssdissssddss", 
+        $name, 
+        $description, 
+        $price, 
+        $stock, 
+        $category, 
+        $image_urls_json, 
+        $video_url, 
+        $status, 
+        $discount, 
+        $discounted_price, 
+        $brand, 
+        $color
+    );
+
     if ($stmt->execute()) {
         $_SESSION['success_message'] = "Product added successfully!";
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } else {
-        echo "Error: " . $stmt->error;
+        die("Error executing query: " . $stmt->error);
     }
 
-    // Close the statement
     $stmt->close();
 }
 
@@ -162,22 +193,39 @@ $conn->close();
             line-height: 200px;
             color: #ccc;
             font-size: 20px;
+            cursor: pointer;
         }
+
         #drop_zone.dragover {
             border-color: #000;
             color: #000;
         }
+
         .image-preview {
             display: inline-block;
             margin: 10px;
+            position: relative;
         }
+
         .image-preview img {
             max-width: 100px;
             max-height: 100px;
         }
+
+        .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            cursor: pointer;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 5px;
+            font-size: 12px;
+        }
     </style>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             function calculateDiscountedPrice() {
                 var price = parseFloat($("#price").val());
                 var discount = parseFloat($("#discount").val());
@@ -186,109 +234,90 @@ $conn->close();
                     $("#discounted_price").val(discountedPrice.toFixed(2));
                 } else {
                     $("#discounted_price").val("");
-
-            $("form").submit(function(event) {
-                var discount = parseFloat($("#discount").val());
-                // var rating = parseFloat($("#rating").val());
-                var price = parseFloat($("#price").val());
-                var stock = parseInt($("#stock").val());
-                // var reviews_count = parseInt($("#reviews_count").val());
-
-                var isValid = true;
-                var errorMessage = "";
-
-                if (isNaN(discount) || discount < 1 || discount > 100) {
-                    isValid = false;
-                    errorMessage += "Discount must be between 1 and 100.\n";
-                }
-
-                // if (isNaN(rating) || rating < 0 || rating > 5) {
-                //     isValid = false;
-                //     errorMessage += "Rating must be between 0 and 5.\n";
-                // }
-
-                if (discount < 0 || price < 0 || stock < 0 ) {
-                    isValid = false;
-                    errorMessage += "Values cannot be negative.\n";
-                }
-
-                if (!isValid) {
-                    alert(errorMessage);
-                    event.preventDefault();
-                }
-            });
                 }
             }
 
             $("#price, #discount").on("input", calculateDiscountedPrice);
 
-            $("form").submit(function(event) {
-                var discount = parseFloat($("#discount").val());
-                var price = parseFloat($("#price").val());
-                var stock = parseInt($("#stock").val());
+            let uploadedFiles = new Set();
 
-                var isValid = true;
-                var errorMessage = "";
+            function handleFiles(files) {
+                let uniqueFiles = Array.from(files).filter(file => {
+                    if (uploadedFiles.has(file.name)) {
+                        return false;
+                    }
+                    uploadedFiles.add(file.name);
+                    return true;
+                });
 
-                if (isNaN(discount) || discount < 0 || discount > 100) {
-                    isValid = false;
-                    errorMessage += "Discount must be between 0 and 100.\n";
-                }
+                // Clear existing previews
+                $('#imagePreview').empty();
 
+                // Add new image previews
+                uniqueFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const preview = $('<div>').addClass('image-preview');
+                        const img = $('<img>').attr('src', e.target.result);
+                        const removeBtn = $('<span>').addClass('remove-image').text('×');
+                        preview.append(img).append(removeBtn);
+                        $('#imagePreview').append(preview);
+                    };
+                    reader.readAsDataURL(file);
+                });
 
+                return uniqueFiles;
+            }
 
-                if (discount < 0 || price < 0 || stock < 0 ) {
-                    isValid = false;
-                    errorMessage += "Values cannot be negative.\n";
-                }
+            // Drag-and-drop functionality
+            const dropZone = $('#drop_zone');
 
-                if (!isValid) {
-                    alert(errorMessage);
-                    event.preventDefault();
-                }
-            });
-
-            $("#image_url").change(function() {
-                handleFiles(this.files);
-            });
-
-            var dropZone = $('#drop_zone');
-            var fileInput = $('#image_url');
-
-            dropZone.on('dragover', function(e) {
+            dropZone.on('dragover', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 dropZone.addClass('dragover');
             });
 
-            dropZone.on('dragleave', function(e) {
+            dropZone.on('dragleave', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 dropZone.removeClass('dragover');
             });
 
-            dropZone.on('drop', function(e) {
+            dropZone.on('drop', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 dropZone.removeClass('dragover');
-                var files = e.originalEvent.dataTransfer.files;
-                fileInput[0].files = files;
-                handleFiles(files);
+
+                const files = e.originalEvent.dataTransfer.files;
+                const uniqueFiles = handleFiles(files);
+
+                // Add files to the input element
+                const fileInput = $('#image_url')[0];
+                const dt = new DataTransfer();
+                uniqueFiles.forEach(file => dt.items.add(file));
+                fileInput.files = dt.files;
             });
 
-            function handleFiles(files) {
-                $('#imagePreview').empty();
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        var img = $('<img>').attr('src', e.target.result);
-                        var preview = $('<div>').addClass('image-preview').append(img);
-                        $('#imagePreview').append(preview);
-                    }
-                    reader.readAsDataURL(file);
-                }
-            }
+            // Click to upload
+            dropZone.click(function () {
+                $('#image_url').click();
+            });
+
+            // File input change
+            $('#image_url').change(function () {
+                const uniqueFiles = handleFiles(this.files);
+                const dt = new DataTransfer();
+                uniqueFiles.forEach(file => dt.items.add(file));
+                this.files = dt.files;
+            });
+
+            // Remove image
+            $(document).on('click', '.remove-image', function () {
+                $(this).parent('.image-preview').remove();
+                const removedSrc = $(this).data('src');
+                uploadedFiles.delete(removedSrc);
+            });
         });
     </script>
 </head>
@@ -314,16 +343,18 @@ $conn->close();
         <input type="number" id="stock" name="stock" value="<?php echo isset($form_data['stock']) ? htmlspecialchars($form_data['stock']) : ''; ?>" required><br><br>
 
         <label for="category">Category:</label><br>
-        <select id="category" name="category">
-            <option value="Sofas & armchairs" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Sofas & armchairs') ? 'selected' : ''; ?>>Sofas & armchairs</option>
-            <option value="Tables & chairs" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Tables & chairs') ? 'selected' : ''; ?>>Tables & chairs</option>
-            <option value="Storage & organisation" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Storage & organisation') ? 'selected' : ''; ?>>Storage & organisation</option>
-            <option value="Office furniture" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Office furniture') ? 'selected' : ''; ?>>Office furniture</option>
-            <option value="Beds & mattresses" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Beds & mattresses') ? 'selected' : ''; ?>>Beds & mattresses</option>
-            <option value="Textiles" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Textiles') ? 'selected' : ''; ?>>Textiles</option>
-            <option value="Rugs & mats & flooring" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Rugs & mats & flooring') ? 'selected' : ''; ?>>Rugs & mats & flooring</option>
-            <option value="Home decoration" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Home decoration') ? 'selected' : ''; ?>>Home decoration</option>
-            <option value="Lightning" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Lightning') ? 'selected' : ''; ?>>Lightning</option>
+        <select id="category" name="category" required>
+            <option value="">Select a Category</option>
+            <?php
+            if ($categories_result->num_rows > 0) {
+                while ($row = $categories_result->fetch_assoc()) {
+                    $selected = (isset($form_data['category']) && $form_data['category'] == $row['id']) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['name']) . "</option>";
+                }
+            } else {
+                echo "<option value=''>No categories available</option>";
+            }
+            ?>
         </select><br><br>
 
         <label for="image_url">Image URL:</label><br>

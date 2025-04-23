@@ -32,5 +32,22 @@ if ($conn->query($sql_insert_member) === TRUE) {
     echo "Error: " . $conn->error;
 }
 
+$sql_insert_categories = "INSERT IGNORE INTO categories (name) VALUES
+('Sofas & armchairs'),
+('Tables & chairs'),
+('Storage & organisation'),
+('Office furniture'),
+('Beds & mattresses'),
+('Textiles'),
+('Rugs & mats & flooring'),
+('Home decoration'),
+('Lightning')";
+
+if ($conn->query($sql_insert_categories) === TRUE) {
+    // echo "Admin data inserted successfully";
+} else {
+    echo "Error: " . $conn->error;
+}
+
 $conn->close();
 ?>

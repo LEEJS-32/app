@@ -125,6 +125,37 @@ if ($column_check_result && $column_check_result->num_rows == 0) {
 } else {
 }
 
+$sql_create_categories = "CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+)";
+$conn->query($sql_create_categories); 
+
+// $sql_drop_category ="ALTER TABLE products
+// DROP COLUMN category,
+// ADD COLUMN category_id INT,
+// ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL";
+// $conn->query($sql_drop_category);
+
+// Update products table to use category_id as a foreign key
+$column_check_query = "SHOW COLUMNS FROM products LIKE 'category_id'";
+$column_check_result = $conn->query($column_check_query);
+
+if ($column_check_result && $column_check_result->num_rows == 0) {
+    // Add category_id column and foreign key
+    $sql_update_products_table = "
+        ALTER TABLE products
+        ADD COLUMN category_id INT,
+        ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+    ";
+    if ($conn->query($sql_update_products_table) === TRUE) {
+        echo "Products table updated successfully.";
+    } else {
+        echo "Error updating products table: " . $conn->error;
+    }
+}
+
+
 // Create shopping_cart table
 $sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (
     cart_id INT PRIMARY KEY AUTO_INCREMENT,
