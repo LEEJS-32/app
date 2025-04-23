@@ -46,7 +46,7 @@
                             </div>
 
                             <div class="forgot">
-                                <a href="" class="forgot">Forgot Password?</a>
+                                <a href="forgot_password.php" class="forgot">Forgot Password?</a>
                             </div>
                         </div>
                         <br><br>
