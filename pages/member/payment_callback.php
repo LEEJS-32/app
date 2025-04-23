@@ -24,7 +24,7 @@ $bill_code = $_POST['billcode'] ?? null;
 $order_id = $_POST['order_id'] ?? null; 
 $amount = $_POST['amount'] ?? null;
 $transaction_time = $_POST['transaction_time'] ?? null;
-$payment_method = "Credit Card"; // Adjust if necessary
+$payment_method = "ToyyibPay"; // Adjust if necessary
 
 // Validate required fields
 if (!$ref_no || !$bill_code || !$order_id || !$amount || !$transaction_time) {

@@ -92,7 +92,7 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
     <!-- Search Bar -->
     <div class="search-container">
         <form method="GET" action="product_list.php">
-            <input type="text" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
+            <input type="search" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
             <button type="submit">Search</button>
         </form>
     </div>
