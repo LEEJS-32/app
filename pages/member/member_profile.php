@@ -25,74 +25,6 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <link rel="stylesheet" href="../../css/admin_profile.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
-    <style>
-  .profile-wrapper {
-    position: relative;
-    width: 100px;
-    height: 150px;
-    margin: 0 auto;
-  }
-
-  .profile-container {
-    position: relative;
-    width: 150px;
-    height: 150px;
-  }
-
-  .profile-image {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #fff;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .upload-btn {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: black;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 20px;
-    z-index: 2;
-    transition: all 0.3s ease;
-  }
-
-  .options {
-    position: absolute;
-    top: 160px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-    z-index: 1;
-  }
-
-  .options.show {
-    display: flex;
-  }
-
-  .options button {
-    padding: 8px 14px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    font-size: 14px;
-  }
-</style>
 
 </head>
 
@@ -108,7 +40,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         require '../../db/db_connect.php';
 
         // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
+        $sql = "SELECT * FROM users WHERE user_id = '$user_id'";
         $result = $conn->query($sql);
         $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
         
@@ -147,7 +79,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         <div class="divider"></div>
 
         <div class="right">
-            <h1>Member Profile</h1>
+            <h1>My Profile</h1>
 
 
             <div class="profile-wrapper">
@@ -190,7 +122,7 @@ if ($row = $result->fetch_assoc()) {
 }
 
 ?> 
-    <h1>Update Your Profile</h1>
+    <h1>Personal Information</h1>
     <form method="post" id="#editForm" action="../../backend/extra_info_process.php">
     <label for="gender">Gender:</label>
                 <?php html_radios('gender', $_genders, true, 'disabled')?>
