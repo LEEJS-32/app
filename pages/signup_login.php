@@ -57,45 +57,6 @@
                     <p>Admin? <a href="admin/admin_login.php">Admin Log In</a></p>
                 </div>
 
-
-<main>
-            <h1>Sign Up</h1>
-            <!-- Add enctype for file upload -->
-            <form method="post" action="../backend/signup.php" onsubmit="return validateForm()" enctype="multipart/form-data">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name">
-                <span id="name_error1" style="color:red;"></span>
-                <br><br>
-                
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email">
-                <span id="email_error1" style="color:red;"></span>
-                <br><br>
-                
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password">
-                <span id="pwd_error1" style="color:red;"></span>
-                <span id="pwd_error2" style="color:red;"></span>
-                <br><br>
-                
-                <!-- Add profile photo upload field -->
-                <label for="profile_photo">Profile Photo:</label>
-                <input type="file" id="profile_photo" name="profile_photo" 
-                       accept="image/jpeg, image/png, image/gif" required>
-                <br><br>
-                
-                <button type="submit">Submit</button>
-                <button type="reset">Cancel</button>
-            </form>
-            <br><br><br>
-
-
-            <?php
-            if (isset($_SESSION['error_not_exist'])) {
-                echo "<p style='color:red;'>".$_SESSION['error_not_exist']."</p>";
-                unset($_SESSION['error_not_exist']); 
-            }
-?>
                 <!-- Sign Up -->
                 <div class="form" id="sign-up">
                     <h1>Member Sign Up</h1>
