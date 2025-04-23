@@ -2,10 +2,11 @@
     display: flex;
     gap: 30px;
     width: 98%;
+    height: 200px;
     margin: 15px 0 25px 0;
     padding: 0 10px;
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
 }
 
 .avatar-section {
@@ -25,9 +26,7 @@
     height: 130px;
     border-radius: 50%;
     object-fit: cover;
-    background-color: #d3d3d3;
     border: 3px solid #fff;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
 .avatar-upload-btn {
@@ -58,9 +57,40 @@
     padding: 20px 0;
 }
 
-.general-infos {
-    font-size: 18px;
+.head{
+    display: flex;
+    margin-top:25px;
 }
+
+.general-infos {
+    margin-top: 13px;
+    font-size: 18px;
+
+}
+
+.general-infos p:nth-child(1){
+    font-size: 18px;
+    color: black;
+    font-weight: 450;
+}
+
+.general-infos p:nth-child(2){
+    font-size: 20px;
+    color: black;
+    font-weight: 650;
+}
+
+
+.g-info {
+    padding: 0 0 0 60px;
+    text-align: left;
+    border-left: 2px solid #ddd;
+  }
+  
+  .g-info:first-child {
+    padding: 0;
+    border-left: none; /* no border on the first column */
+  }
 
 .upload-title {
     font-weight: bold;
@@ -69,13 +99,42 @@
 }
 
 .options {
+    position: absolute;
+    left: 75;
     display: none;
+    flex-direction: column;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.2);
+    width: 100px;
+    z-index: 999;
 }
 
 .options.show {
     display: flex;
+}
+
+.options button,
+.options label {
+    all: unset;
+    display: flex;
+    align-items: center; /* vertically center */
+    gap: 10px;            /* spacing between icon and text */
+    width: 100%;
+    padding: 10px 20px;
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    color: #111;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+button#openCamera {
+    margin-left: 17px;
 }
 
 .general-infos {
@@ -86,7 +145,7 @@
 
 
 .info-card {
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
     border-radius: 12px;
     padding: 20px;
     background-color: #fff;
@@ -146,7 +205,7 @@
     padding: 8px;
     font-size: 14px;
     font-weight: 450;
-    border: 1px solid #ccc;
+    border: 2px solid #ddd;
     border-radius: 6px;
 }
 
@@ -181,4 +240,10 @@ input[type="radio"] {
 #editForm {
     transition: all 0.3s ease;
 }
+
+.upload-label {
+    cursor: pointer;
+    font-size: 24px;
+}
+
 

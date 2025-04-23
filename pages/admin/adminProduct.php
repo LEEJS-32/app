@@ -1,7 +1,6 @@
 <?php 
 ob_start(); // Start output buffering
 include '../../_header.php'; 
-require '../../lib/SimplePager.php'; // Include the SimplePager class
 
 // Database connection
 $servername = "localhost";
@@ -18,27 +17,79 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : "";
 $category_filter = isset($_GET['category']) ? trim($_GET['category']) : "";
 $status_filter = isset($_GET['status']) ? trim($_GET['status']) : "";
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$limit = 10; // Number of items per page
+$offset = ($page - 1) * $limit;
 
 // Build the base SQL query
-$query = "SELECT * FROM products WHERE 1=1";
+$query = "SELECT p.*, c.name AS category_name 
+          FROM products p 
+          LEFT JOIN categories c ON p.category_id = c.id 
+          WHERE 1=1";
 $params = [];
+$types = "";
 
+// Add filters to the query
 if (!empty($search_query)) {
-    $query .= " AND name LIKE ?";
+    $query .= " AND p.name LIKE ?";
     $params[] = "%" . $search_query . "%";
+    $types .= "s";
 }
 if (!empty($category_filter)) {
-    $query .= " AND category = ?";
+    $query .= " AND p.category_id = ?";
     $params[] = $category_filter;
+    $types .= "i";
 }
 if (!empty($status_filter)) {
-    $query .= " AND status = ?";
+    $query .= " AND p.status = ?";
     $params[] = $status_filter;
+    $types .= "s";
 }
 
-// Use SimplePager for pagination
-$pager = new SimplePager($query, $params, 10, $page); // 10 items per page
-$products = $pager->result;
+// Validate sorting column and order
+$sort_column = isset($_GET['column']) ? $_GET['column'] : 'product_id';
+$sort_order = isset($_GET['order']) ? $_GET['order'] : 'asc';
+
+$allowed_columns = ['product_id', 'price', 'stock', 'rating'];
+$allowed_order = ['asc', 'desc'];
+
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'product_id';
+}
+if (!in_array($sort_order, $allowed_order)) {
+    $sort_order = 'asc';
+}
+
+// Add sorting to the query
+$query .= " ORDER BY $sort_column $sort_order";
+
+// Count total items
+$count_query = "SELECT COUNT(*) FROM ($query) AS subquery";
+$stmt = $conn->prepare($count_query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$stmt->bind_result($total_items);
+$stmt->fetch();
+$stmt->close();
+
+// Calculate total pages
+$total_pages = ceil($total_items / $limit);
+
+// Fetch paginated results
+$query .= " LIMIT ? OFFSET ?";
+$params[] = $limit;
+$params[] = $offset;
+$types .= "ii";
+
+$stmt = $conn->prepare($query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
+$products = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -51,21 +102,21 @@ $products = $pager->result;
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Handle delete action
-            $('body').on('click', '.delete', function(e) {
+            // Handle disable action (turn status to inactive)
+            $('body').on('click', '.disable', function(e) {
                 e.preventDefault();
                 var productId = $(this).data('id');
-                if (confirm('Are you sure you want to delete this product?')) {
+                if (confirm('Are you sure you want to disable this product?')) {
                     $.ajax({
-                        url: 'adminDeleteProduct.php',
-                        type: 'GET',
+                        url: 'adminDisableProduct.php',
+                        type: 'POST',
                         data: { product_id: productId },
                         success: function(response) {
-                            alert('Product deleted successfully');
+                            alert('Product disabled successfully');
                             location.reload();
                         },
                         error: function() {
-                            alert('Error deleting product');
+                            alert('Error disabling product');
                         }
                     });
                 }
@@ -76,32 +127,6 @@ $products = $pager->result;
                 e.preventDefault();
                 var productId = $(this).data('id');
                 window.location.href = 'adminUpdateProduct.php?product_id=' + productId;
-            });
-
-            // Handle sorting
-            $('.sortable').click(function() {
-                var column = $(this).data('column');
-                var order = $(this).data('order');
-                var text = $(this).html();
-                text = text.substring(0, text.length - 1);
-
-                if (order == 'desc') {
-                    $(this).data('order', 'asc');
-                    text += '&#9650;';
-                } else {
-                    $(this).data('order', 'desc');
-                    text += '&#9660;';
-                }
-                $(this).html(text);
-
-                $.ajax({
-                    url: 'fetchProducts.php',
-                    type: 'GET',
-                    data: { column: column, order: order },
-                    success: function(response) {
-                        $('tbody').html(response);
-                    }
-                });
             });
 
             // Handle search
@@ -142,24 +167,35 @@ $products = $pager->result;
                     }
                 });
             });
+
+            $('#sortOptions').change(function () {
+            const selectedOption = $(this).val();
+            const [column, order] = selectedOption.split('_');
+            const search = $('#search').val();
+            const category = $('#categoryFilter').val();
+            const status = $('#statusFilter').val();
+
+            // Redirect with sorting parameters
+            window.location.href = `?column=${column}&order=${order}&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&status=${encodeURIComponent(status)}`;
+        });
         });
     </script>
 </head>
 <body>
     <h1>Product List</h1>
     <button onclick="window.location.href='adminCreateProduct.php'">Add New Product</button>
+    <button onclick="window.location.href='adminCreateCategory.php'">Add New Category</button>
+
     <input type="text" id="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
     <select id="categoryFilter">
         <option value="">All Categories</option>
-        <option value="Sofas & armchairs" <?php echo $category_filter == "Sofas & armchairs" ? "selected" : ""; ?>>Sofas & armchairs</option>
-        <option value="Tables & chairs" <?php echo $category_filter == "Tables & chairs" ? "selected" : ""; ?>>Tables & chairs</option>
-        <option value="Storage & organisation" <?php echo $category_filter == "Storage & organisation" ? "selected" : ""; ?>>Storage & organisation</option>
-        <option value="Office furniture" <?php echo $category_filter == "Office furniture" ? "selected" : ""; ?>>Office furniture</option>
-        <option value="Beds & mattresses" <?php echo $category_filter == "Beds & mattresses" ? "selected" : ""; ?>>Beds & mattresses</option>
-        <option value="Textiles" <?php echo $category_filter == "Textiles" ? "selected" : ""; ?>>Textiles</option>
-        <option value="Rugs & mats & flooring" <?php echo $category_filter == "Rugs & mats & flooring" ? "selected" : ""; ?>>Rugs & mats & flooring</option>
-        <option value="Home decoration" <?php echo $category_filter == "Home decoration" ? "selected" : ""; ?>>Home decoration</option>
-        <option value="Lightning" <?php echo $category_filter == "Lightning" ? "selected" : ""; ?>>Lightning</option>
+        <?php
+        $categories_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+        while ($row = $categories_result->fetch_assoc()) {
+            $selected = ($category_filter == $row['id']) ? "selected" : "";
+            echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['name']) . "</option>";
+        }
+        ?>
     </select>
     <select id="statusFilter">
         <option value="">All Statuses</option>
@@ -167,6 +203,18 @@ $products = $pager->result;
         <option value="inactive" <?php echo $status_filter == "inactive" ? "selected" : ""; ?>>Inactive</option>
         <option value="discontinued" <?php echo $status_filter == "discontinued" ? "selected" : ""; ?>>Discontinued</option>
     </select>
+
+    <select id="sortOptions">
+    <option hidden value="product_id_asc" <?php echo ($sort_column == 'product_id' && $sort_order == 'asc') ? 'selected' : ''; ?>>Product ID (Ascending)</option>
+    <option hidden value="product_id_desc" <?php echo ($sort_column == 'product_id' && $sort_order == 'desc') ? 'selected' : ''; ?>>Product ID (Descending)</option>
+    <option value="price_asc" <?php echo ($sort_column == 'price' && $sort_order == 'asc') ? 'selected' : ''; ?>>Price (Low to High)</option>
+    <option value="price_desc" <?php echo ($sort_column == 'price' && $sort_order == 'desc') ? 'selected' : ''; ?>>Price (High to Low)</option>
+    <option value="stock_asc" <?php echo ($sort_column == 'stock' && $sort_order == 'asc') ? 'selected' : ''; ?>>Stock (Low to High)</option>
+    <option value="stock_desc" <?php echo ($sort_column == 'stock' && $sort_order == 'desc') ? 'selected' : ''; ?>>Stock (High to Low)</option>
+    <option value="rating_asc" <?php echo ($sort_column == 'rating' && $sort_order == 'asc') ? 'selected' : ''; ?>>Rating (Low to High)</option>
+    <option value="rating_desc" <?php echo ($sort_column == 'rating' && $sort_order == 'desc') ? 'selected' : ''; ?>>Rating (High to Low)</option>
+    </select>
+
     <table>
         <thead>
             <tr>
@@ -177,7 +225,7 @@ $products = $pager->result;
                 <th>Stock</th>
                 <th>Category</th>
                 <th>Images</th>
-                <th>Video</th> <!-- New column for video -->
+                <th>Video</th>
                 <th>Status</th>
                 <th>Discount (%)</th>
                 <th>Discounted Price</th>
@@ -199,7 +247,7 @@ $products = $pager->result;
                         <td><?php echo htmlspecialchars($product['description']); ?></td>
                         <td><?php echo $product['price']; ?></td>
                         <td><?php echo $product['stock']; ?></td>
-                        <td><?php echo htmlspecialchars($product['category']); ?></td>
+                        <td><?php echo htmlspecialchars($product['category_name']); ?></td>
                         <td>
                             <?php
                             $image_urls = json_decode($product['image_url']);
@@ -212,7 +260,7 @@ $products = $pager->result;
                         </td>
                         <td>
                             <?php if (!empty($product['video_url'])): ?>
-                                <video controls style="max-width: 150px; max-height: 150x;">
+                                <video controls style="max-width: 150px; max-height: 150px;">
                                     <source src="/<?php echo htmlspecialchars($product['video_url']); ?>" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
@@ -230,8 +278,8 @@ $products = $pager->result;
                         <td><?php echo $product['created_at']; ?></td>
                         <td><?php echo $product['updated_at']; ?></td>
                         <td>
-                            <a href="#" class="update" data-id="<?php echo $product['product_id']; ?>">Update</a>
-                            <a href="#" class="delete" data-id="<?php echo $product['product_id']; ?>">Delete</a>
+                            <a href="adminUpdateProduct.php?product_id=<?php echo $product['product_id']; ?>">Update</a>
+                            <a href="#" class="disable" data-id="<?php echo $product['product_id']; ?>">Disable</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -240,8 +288,17 @@ $products = $pager->result;
             <?php endif; ?>
         </tbody>
     </table>
+
+    <!-- Pagination -->
     <div class="pagination">
-        <?php echo $pager->html(); ?>
+        <?php if ($total_pages > 1): ?>
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search_query); ?>&category=<?php echo urlencode($category_filter); ?>&status=<?php echo urlencode($status_filter); ?>" 
+                   class="<?php echo $i == $page ? 'active' : ''; ?>">
+                   <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+        <?php endif; ?>
     </div>
 </body>
 </html>
