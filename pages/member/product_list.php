@@ -106,8 +106,8 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                 <!-- Price Filter -->
                 <div class="filter-group">
                     <label for="priceRange">Price:</label>
-                    <input type="range" id="priceRange" name="price" min="0" max="1000" step="10" value="1000">
-                    <span id="priceValue">$1000</span>
+                    <input type="range" id="priceRange" name="price" min="0" max="10000" step="100" value="0">
+                    <span id="priceValue">$0</span>
                 </div>
 
                 <!-- Brand Filter -->

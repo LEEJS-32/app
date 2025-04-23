@@ -120,8 +120,13 @@ $total_cart_price = 0;
                         $total_item_count += $quantity;
                     ?>
                     
-                    <tr>
-                        <td><img src="<?= $row['image_url'] ?>" width="50"><?= htmlspecialchars($row['name']) ?></td>
+                    <tr>                  
+                        <?php
+                            $image_urls = json_decode($row['image_url']);
+                            $image_url = $image_urls[0]; 
+                            echo "<td>" . htmlspecialchars($row['name']) . "<br><img src='/" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($row['name']) . "'></td>";
+
+                        ?>
                         <td>RM <?= number_format($price, 2) ?></td>
                         <form method="POST" action="view_cart.php">
                             <input type="hidden" name="product_id" value="<?= $row['product_id'] ?>">

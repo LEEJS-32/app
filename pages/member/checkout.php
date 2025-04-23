@@ -83,10 +83,13 @@ if ($user_id > 0) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($cart_items as $row): ?>
+                        <?php foreach ($cart_items as $row):
+                                                        $image_urls = json_decode($row['image_url']);
+                                                        $image_url = $image_urls[0]; // Assuming you want the first image URL          
+                            ?>
                             <tr>
-                                <td><?= htmlspecialchars($row['name']) ?><br><img src='/<?= htmlspecialchars($row['image_url']) ?>' class="cart-image"></td>
-                                <td>RM <?= number_format($row['discounted_price'], 2) ?></td>
+                            <?php echo "<td>". htmlspecialchars($row['name']) . "<br><img width='200px' height='200px' src='/" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($row['name']) . "'</td>"; ?>
+                            <td>RM <?= number_format($row['discounted_price'], 2) ?></td>
                                 <td><?= $row['quantity'] ?></td>
                                 <td>RM <?= number_format($row['discounted_price'] * $row['quantity'], 2) ?></td>
                             </tr>
