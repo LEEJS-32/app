@@ -99,6 +99,15 @@ $sql_create_active_token_table = "CREATE TABLE IF NOT EXISTS active_token (
 )";
 $conn->query($sql_create_active_token_table);
 
+//forget/reset password_otp table
+$sql_create_verify_otp_table = "CREATE TABLE IF NOT EXISTS verify_otp (
+    verify_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    otp_code VARCHAR(10) NOT NULL,
+    expire_at DATETIME NOT NULL
+)";
+$conn->query($sql_create_verify_otp_table);
+
 // Remember to delete !!!!
 // Check if the products table exists
 $table_check_query = "SHOW TABLES LIKE 'products'";

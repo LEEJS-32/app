@@ -1,74 +1,52 @@
 <?php
-include_once '_base.php';
+require '../_base.php';
+require '../database.php';
 
-// ----------------------------------------------------------------------------
-// Check session/cookie
-auth_user();
+$message = "";
 
-// ----------------------------------------------------------------------------
-?>
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = $_POST['email'] ?? '';
 
+    // Check if email exists
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-<?php
-
-require 'db_connection.php';
-
-// Your SMS API settings
-$SMS_API_URL = "https://api.example.com/send-sms"; 
-$SMS_API_KEY = "your_sms_api_key";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['phone'])) {
-        // Step 1: User enters phone number
-        $phone = $_POST['phone'];
-
-        // Check if phone exists in database
-        $stmt = $conn->prepare("SELECT id FROM users WHERE phone = ?");
-        $stmt->bind_param("s", $phone);
-        $stmt->execute();
-        $stmt->store_result();
-
-        if ($stmt->num_rows == 0) {
-            die("❌ Phone number not found.");
-        }
-
-        $stmt->bind_result($user_id);
-        $stmt->fetch();
-        $stmt->close();
+    if ($row = $result->fetch_assoc()) {
+        $email = $row['email'];
+        $name = $row['name'];
 
         // Generate 6-digit OTP
-        $otp = rand(100000, 999999);
-        $_SESSION['otp'] = $otp;
-        $_SESSION['phone'] = $phone;
-        $_SESSION['user_id'] = $user_id;
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expire = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-        // Send OTP via SMS
-        $message = "Your OTP code is: $otp";
-        $sms_data = [
-            'api_key' => $SMS_API_KEY,
-            'to' => $phone,
-            'message' => $message
-        ];
+        // Store OTP
+        $stmt = $conn->prepare("INSERT INTO verify_otp (otp_code, email, expire_at) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $otp, $email, $expire);
+        $stmt->execute();
 
-        // Send request to SMS API
-        $ch = curl_init($SMS_API_URL);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($sms_data));
-        $response = curl_exec($ch);
-        curl_close($ch);
+        // Send OTP email
+        $mail = get_mail();
+        $mail->addAddress($email);
+        $mail->Subject = "Password Reset OTP";
+        $mail->isHTML(true);
+        $mail->Body = "
+            <p>Hello <strong>$name</strong>,</p>
+            <p>Your OTP for password reset is:</p>
+            <h2>$otp</h2>
+            <p>This OTP will expire in 5 minutes.</p>
+            <p>Furniture.os</p>";
 
-        echo "✅ OTP sent! Check your SMS.";
-    } elseif (isset($_POST['otp'])) {
-        // Step 2: User enters OTP
-        $entered_otp = $_POST['otp'];
-
-        if (!isset($_SESSION['otp']) || $entered_otp != $_SESSION['otp']) {
-            die("❌ Invalid OTP. Try again.");
+        if ($mail->send()) {
+            $_SESSION['otp_email'] = $email;
+            header("Location: verify_otp.php"); // redirect to OTP verification page
+            exit();
+        } else {
+            $message = "Failed to send email. Please try again.";
         }
-
-        echo "✅ OTP Verified! <a href='reset_password.html'>Reset Password</a>";
-        exit();
+    } else {
+        $message = "Email not found.";
     }
 }
 ?>
@@ -77,27 +55,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password</title>
+    <style>
+        body { font-family: Arial; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+        form { max-width: 400px; width: 100%; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        input[type="email"], button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
+        .message { color: red; margin-top: 10px; text-align: center; }
+    </style>
 </head>
 <body>
     <h2>Forgot Password</h2>
-    
-    <?php if (!isset($_SESSION['otp'])) { ?>
-        <!-- Step 1: User enters phone number -->
-        <form method="post">
-            <label for="phone">Enter your phone number:</label><br>
-            <input type="text" name="phone" required placeholder="Enter your phone number">
-            <button type="submit">Send OTP</button>
-        </form>
-    <?php } else { ?>
-        <!-- Step 2: User enters OTP -->
-        <form method="post">
-            <label for="otp">Enter OTP:</label><br>
-            <input type="text" name="otp" required placeholder="Enter OTP">
-            <button type="submit">Verify OTP</button>
-        </form>
-    <?php } ?>
+    <form method="post">
+        <label for="email">Enter your email:</label>
+        <input type="email" name="email" required>
+        <button type="submit">Send OTP</button>
+        <?php if ($message): ?>
+            <p class="message"><?= $message ?></p>
+        <?php endif; ?>
+    </form>
 </body>
 </html>
-
