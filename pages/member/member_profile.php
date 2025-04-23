@@ -62,7 +62,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
                     <h3><?php echo ($name); ?></h3>
                     <p><?php echo ($role); ?></p>
@@ -88,13 +88,13 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             <div class="profile-wrapper">
     <div class="avatar-section">
         <div class="avatar-container">
-            <img id="avatar" src="<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
+            <img id="avatar" src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
             <video id="video" autoplay class="profile-avatar" style="display: none;"></video>
             <button class="avatar-upload-btn" id="toggleOptions">+</button>
         </div>
     </div>
     <div class="upload-guideline">
-    <?php echo ($row['name']) ?>
+    <h2 class="head"><?php echo ($row['name']) ?><img src="../../img/tick.jpg" width="38px" height="38px"></h2>
         <div class="general-infos">
             <div class="g-info">
                 <p>Role</p>
@@ -111,17 +111,28 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         </div>
 
         <div class="options" id="uploadOptions">
-            <button id="openCamera" type="button"><i class='bx bx-camera'></i></button>
-            <button onclick="document.getElementById('fileInput').click()" type="button"><i class='bx bxs-folder-plus'></i></button>
-            <input type="file" id="fileInput" style="display: none;" onchange="document.getElementById('uploadForm').submit();">
-        </div>
+  <form id="fileUploadForm" action="../../backend/file_upload_photo.php" method="POST" enctype="multipart/form-data">
+    <label for="fileInput">
+      <i class='bx bxs-folder-plus'></i> Upload
+    </label>
+    <input type="file" id="fileInput" name="profile_photo" accept="image/*" hidden>
+  </form>
+
+  <button id="openCamera" type="button">
+    <i class='bx bx-camera'></i> Camera
+  </button>
+</div>
+
+
+
     </div>
     <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
 
-<form id="uploadForm" action="../../backend/upload_photo.php" method="POST">
-<input type="hidden" name="image" id="imageData">
-<button type="submit" id="upload" style="display: none;">Upload</button>
-</form>
+    <form id="webcamUploadForm" action="../../backend/upload_photo.php" method="POST">
+        <input type="hidden" name="image" id="imageData">
+        <button type="submit" id="upload" style="display: none;">Upload</button>
+    </form>
+
 </div>
 
 
@@ -224,7 +235,24 @@ if ($row = $result->fetch_assoc()) {
     </div>
 
     <!-- adding  -->
-     
+    <script>
+        document.getElementById("fileInput").addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+
+                // Live preview
+                reader.onload = function (e) {
+                    document.getElementById("avatar").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Submit form after preview
+                document.getElementById("fileUploadForm").submit();
+            }
+        });
+    </script>
+
     
 
     <script>
@@ -234,36 +262,57 @@ if ($row = $result->fetch_assoc()) {
         const avatar = document.getElementById('avatar');
         const canvas = document.getElementById('canvas');
         const imageData = document.getElementById('imageData');
-        const uploadForm = document.getElementById('uploadForm');
+        const webcamUploadForm = document.getElementById('webcamUploadForm'); // ✅ changed form ID
+        const fileInput = document.getElementById('fileInput');
+        const fileUploadForm = document.getElementById('fileUploadForm'); // ✅ new ID for file form
 
         let cameraOn = false;
 
+        // 🔘 Toggle camera/capture action
         toggleBtn.addEventListener('click', () => {
             if (cameraOn) {
-            // Capture the photo
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/png');
-            imageData.value = dataURL;
-            uploadForm.submit();
+                // Capture photo from webcam
+                canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataURL = canvas.toDataURL('image/png');
+                imageData.value = dataURL;
+
+                // Submit the correct form (webcam)
+                webcamUploadForm.submit();
             } else {
-            options.classList.toggle('show');
+                options.classList.toggle('show');
             }
         });
 
+        // 🎥 Open webcam
         document.getElementById('openCamera').addEventListener('click', async () => {
             try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-            video.style.display = 'block';
-            avatar.style.display = 'none';
-            options.classList.remove('show');
-            toggleBtn.textContent = '📸';
-            cameraOn = true;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                avatar.style.display = 'none';
+                options.classList.remove('show');
+                toggleBtn.textContent = '📸';
+                cameraOn = true;
             } catch (err) {
-            alert('Failed to access camera: ' + err.message);
+                alert('Failed to access camera: ' + err.message);
+            }
+        });
+
+        // 📁 Handle file input upload with preview and auto-submit
+        fileInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    avatar.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                fileUploadForm.submit(); // ✅ use correct form
             }
         });
     </script>
+
 
 <script>
 document.getElementById("toggleEdit").addEventListener("click", function () {
