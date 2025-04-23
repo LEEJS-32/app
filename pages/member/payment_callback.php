@@ -101,6 +101,25 @@ try {
         file_put_contents($logFile, "⚠️ No changes made to order status for Order ID: $order_id\n", FILE_APPEND);
     }
 
+    // **Reduce stock for each product in the order**
+    $stmt = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+    $stmt->bind_param("s", $order_id);
+    $stmt->execute();
+    $order_items = $stmt->get_result();
+
+    while ($item = $order_items->fetch_assoc()) {
+        $product_id = $item['product_id'];
+        $quantity = $item['quantity'];
+
+        // Reduce the quantity in the products table
+        $stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE product_id = ?");
+        $stmt->bind_param("ii", $quantity, $product_id);
+        $stmt->execute();
+
+        // Log stock reduction
+        file_put_contents($logFile, "✅ Reduced stock for Product ID $product_id, Quantity: $quantity\n", FILE_APPEND);
+    }
+
     // Commit transaction
     $conn->commit();
 

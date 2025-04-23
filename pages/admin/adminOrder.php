@@ -1,24 +1,28 @@
 <?php
-// filepath: c:\Users\shenl\app\pages\admin\adminOrder.php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-include '../../_header.php';
-ob_start();
+include_once '../../_base.php';
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
+// Check if user is authenticated
+auth_user(); // Assuming this function checks if the user is an admin
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+require '../../database.php';
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Fetch all orders
+$sql = "SELECT o.order_id, o.status, o.total_price, o.order_date, u.name AS user_name
+        FROM orders o
+        JOIN users u ON o.user_id = u.user_id";
+$result = $conn->query($sql);
+
+// If the form has been submitted to update order status
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset($_POST['status'])) {
+    // Update order status
+    $order_id = $_POST['order_id'];
+    $new_status = $_POST['status'];
+
+    $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE order_id = ?");
+    $stmt->bind_param("ss", $new_status, $order_id);
+    $stmt->execute();
 }
 
-// Fetch orders from the database
-$sql = "SELECT * FROM orders ORDER BY created_at DESC";
-$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -26,121 +30,168 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Order Management</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .action-buttons a {
-            padding: 5px 10px;
-            text-decoration: none;
-            color: white;
-            background-color: blue;
-            border-radius: 5px;
-        }
-        .action-buttons a.delete {
-            background-color: red;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Handle delete action
-            $('body').on('click', '.delete', function(e) {
-                e.preventDefault();
-                var orderId = $(this).data('id');
-                if (confirm('Are you sure you want to delete this order?')) {
-                    $.ajax({
-                        url: 'adminDeleteOrder.php',
-                        type: 'GET',
-                        data: { order_id: orderId },
-                        success: function(response) {
-                            alert('Order deleted successfully');
-                            location.reload();
-                        },
-                        error: function() {
-                            alert('Error deleting order');
-                        }
-                    });
-                }
-            });
-
-            // Handle update action
-            $('body').on('click', '.update', function(e) {
-                e.preventDefault();
-                var orderId = $(this).data('id');
-                window.location.href = 'adminUpdateOrder.php?order_id=' + orderId;
-            });
-        });
-    </script>
+    <title>Admin - Manage Orders</title>
+    <link rel="stylesheet" href="../../css/adminOrder.css">
 </head>
 <body>
-    <h1>Order Management</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer Name</th>
-                <th>Products</th>
-                <th>Total Price</th>
-                <th>Status</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $row["order_id"] . "</td>";
-                    echo "<td>" . htmlspecialchars($row["customer_name"]) . "</td>";
+<header>
+    <?php include '../../_header.php'; ?>
+</header>
 
-                    // Fetch products for this order
-                    $order_id = $row["order_id"];
-                    $product_sql = "SELECT * FROM order_items WHERE order_id = $order_id";
-                    $product_result = $conn->query($product_sql);
+<main>
+    <div class="container">
+        <h2>Manage Orders</h2>
 
-                    echo "<td>";
-                    if ($product_result->num_rows > 0) {
-                        while ($product = $product_result->fetch_assoc()) {
-                            echo htmlspecialchars($product["product_name"]) . " (x" . $product["quantity"] . ")<br>";
-                        }
-                    } else {
-                        echo "No products";
-                    }
-                    echo "</td>";
+        <!-- Orders Table -->
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User Name</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Order Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($order = $result->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($order['order_id']) ?></td>
+                        <td><?= htmlspecialchars($order['user_name']) ?></td>
+                        <td>RM <?= number_format($order['total_price'], 2) ?></td>
+                        <td><?= htmlspecialchars($order['status']) ?></td>
+                        <td><?= htmlspecialchars($order['order_date']) ?></td>
+                        <td>
+                            <!-- Form to change order status -->
+                            <form action="adminOrder.php" method="POST" style="display:inline;">
+                                <select name="status" class="status-dropdown">
+                                    <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
+                                    <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : '' ?>>Processing</option>
+                                    <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : '' ?>>Shipped</option>
+                                    <option value="delivered" <?= $order['status'] == 'delivered' ? 'selected' : '' ?>>Delivered</option>
+                                    <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                </select>
+                                <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
+                                <button type="submit" class="btn update-btn">Update</button>
+                            </form>
 
-                    echo "<td>$" . number_format($row["total_price"], 2) . "</td>";
-                    echo "<td>" . htmlspecialchars($row["status"]) . "</td>";
-                    echo "<td>" . $row["created_at"] . "</td>";
-                    echo "<td class='action-buttons'>";
-                    echo "<a href='#' class='update' data-id='" . $row["order_id"] . "'>Update</a>";
-                    echo "<a href='#' class='delete' data-id='" . $row["order_id"] . "'>Delete</a>";
-                    echo "</td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='7'>No orders found</td></tr>";
+                            <!-- View Order Details Link -->
+                            <a href="adminOrder.php?view=<?= $order['order_id'] ?>" class="view-link">View</a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+
+        <?php
+        // If the admin is viewing an order's details
+        if (isset($_GET['view'])) {
+            $order_id = $_GET['view'];
+
+            // Fetch order details
+            $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ?");
+            $stmt->bind_param("s", $order_id);
+            $stmt->execute();
+            $order = $stmt->get_result()->fetch_assoc();
+
+            // Check if order exists
+            if (!$order) {
+                echo "<p>Error: Order not found.</p>";
+                exit;
+            }
+
+            // Fetch the items in the order
+            $stmt = $conn->prepare("SELECT oi.product_id, oi.quantity, oi.subtotal, p.name AS product_name
+                                    FROM order_items oi
+                                    JOIN products p ON oi.product_id = p.product_id
+                                    WHERE oi.order_id = ?");
+            $stmt->bind_param("s", $order_id);
+            $stmt->execute();
+            $order_items = $stmt->get_result();
+
+            // Check if there are order items
+            if ($order_items->num_rows == 0) {
+                echo "<p>No items found for this order.</p>";
+                exit;
+            }
+
+            // Fetch payment information
+            $stmt = $conn->prepare("SELECT * FROM payments WHERE order_id = ?");
+            $stmt->bind_param("s", $order_id);
+            $stmt->execute();
+            $payment = $stmt->get_result()->fetch_assoc();
+
+            // Check if payment information is found
+            if (!$payment) {
+                echo "<p>Payment information not found for this order.</p>";
+                exit;
             }
             ?>
-        </tbody>
-    </table>
+
+            <h2 class="details">Order Details - <?= htmlspecialchars($order['order_id']) ?></h2>
+
+            
+
+            <div class="order-details">
+                <div class="order-summary">
+                    <h4>Order Summary</h4>
+                    <p><strong>Status:</strong> <?= htmlspecialchars($order['status']) ?></p>
+                    <p><strong>Total Price:</strong> RM <?= number_format($order['total_price'], 2) ?></p>
+                    <p><strong>Shipping Address:</strong></p>
+                    <p><?= htmlspecialchars($order['shipping_address_line1']) ?><br>
+                       <?= htmlspecialchars($order['shipping_address_line2']) ?><br>
+                       <?= htmlspecialchars($order['shipping_city']) ?>, <?= htmlspecialchars($order['shipping_state']) ?><br>
+                       <?= htmlspecialchars($order['shipping_postal_code']) ?>, <?= htmlspecialchars($order['shipping_country']) ?></p>
+                </div>
+
+                <div class="order-items">
+                    <h4>Order Items</h4>
+                    <table class="order-items-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while ($item = $order_items->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($item['product_name']) ?></td>
+                                    <td><?= htmlspecialchars($item['quantity']) ?></td>
+                                    <td>RM <?= number_format($item['subtotal'], 2) ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="payment-info">
+                    <h4>Payment Information</h4>
+                    <p><strong>Payment Method:</strong> <?= htmlspecialchars($payment['payment_method']) ?></p>
+                    <p><strong>Payment Status:</strong> <?= htmlspecialchars($payment['payment_status']) ?></p>
+                    <p><strong>Amount Paid:</strong> RM <?= number_format($payment['amount'], 2) ?></p>
+                </div>
+            </div>
+            <!-- Close Order Details Button -->
+            <button class="close-btn" onclick="closeOrderDetails()">Close Details</button>
+
+        <?php } ?>
+
+    </div>
+</main>
+
+<footer>
+    <?php include '../../_footer.php'; ?>
+</footer>
+
+<script>
+    // Function to close the order details view
+    function closeOrderDetails() {
+        window.location.href = "adminOrder.php"; // Redirect back to the main orders page
+    }
+</script>
+
 </body>
 </html>
-
-<?php
-$conn->close();
-?>

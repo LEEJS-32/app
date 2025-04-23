@@ -18,3 +18,46 @@ Array
 
 ✅ Updated existing payment record: Order ID ORD67fb960d75ef7, Status: Completed
 ✅ Order status updated: Order ID ORD67fb960d75ef7, Status: processing
+2025-04-23 20:27:09 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504242744045573
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 3i0i0e6u
+    [order_id] => ORD680930e513d0c
+    [amount] => 3694.80
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504242744045573
+    [fpx_transaction_id] => 2504240208057839
+    [hash] => e0f93e4d30a6a6457d329445db576357
+    [transaction_time] => 2025-04-24 02:08:05
+)
+
+✅ Updated existing payment record: Order ID ORD680930e513d0c, Status: Completed
+✅ Order status updated: Order ID ORD680930e513d0c, Status: processing
+❌ Database error: Unknown column 'quantity' in 'field list'
+2025-04-23 20:32:08 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504241836039041
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => k6v4ommk
+    [order_id] => ORD68093212d182d
+    [amount] => 3694.80
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504241836039041
+    [fpx_transaction_id] => 2504240213047764
+    [hash] => 289ef02e5185c1bc53d92c5d70dcf9bf
+    [transaction_time] => 2025-04-24 02:13:04
+)
+
+✅ Updated existing payment record: Order ID ORD68093212d182d, Status: Completed
+✅ Order status updated: Order ID ORD68093212d182d, Status: processing
+✅ Reduced stock for Product ID 1, Quantity: 1
+✅ Reduced stock for Product ID 2, Quantity: 1
