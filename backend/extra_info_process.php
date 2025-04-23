@@ -21,6 +21,8 @@ $database = "TESTING1";
 
 $conn = new mysqli($servername, $username, $password, $database);
 
+$name = post('name') ?? null;
+$email = post('email') ?? null;
 $gender = post('gender') ?? null;
 $phonenum = post('phonenum') ?? null;
 $dob = post('dob') ?? null;
@@ -32,8 +34,8 @@ $country = post('country') ?? null;
 $postcode = post('postcode') ?? null;
 $preference = post('preference') ?? null;
 
-$stmt = $conn->prepare("UPDATE users SET gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE user_id=?");
-$stmt->bind_param("sssssi",  $gender, $phonenum, $preference, $dob, $occupation, $user_id);
+$stmt = $conn->prepare("UPDATE users SET name=?, email=?, gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE user_id=?");
+$stmt->bind_param("sssssssi", $name, $email, $gender, $phonenum, $preference, $dob, $occupation, $user_id);
 
 // Execute SQL query
 if ($stmt->execute()) {
