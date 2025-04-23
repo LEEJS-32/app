@@ -360,3 +360,29 @@ Voucher discount applied: 10.00
 Total amount before discount: 50.00
 Total amount after discount: 40
 2025-04-13 18:46:37 - API Response: 						[{"BillCode":"20p4wd9v"}]
+Voucher code received: 
+Total amount before discount: 50.00
+Total amount after discount: 50
+2025-04-23 20:44:01 - API Response: 						[{"BillCode":"3g52cezk"}]
+Voucher code received: 
+Total amount before discount: 125.00
+Total amount after discount: 125
+2025-04-23 22:05:19 - API Response: 						[{"BillCode":"2u928uu0"}]
+Voucher code received: 
+Total amount before discount: 125.00
+Total amount after discount: 125
+2025-04-23 22:05:33 - API Response: 						[{"BillCode":"w3uufytn"}]
+Voucher code received: Chrismast
+Voucher type: percent
+Voucher discount applied: 62.5
+Total amount before discount: 125.00
+Total amount after discount: 62.5
+2025-04-23 23:28:44 - API Response: 						[{"BillCode":"pc3ajc5h"}]
+Voucher code received: 
+Total amount before discount: 125.00
+Total amount after discount: 125
+2025-04-23 23:39:44 - API Response: 						[{"BillCode":"yqv5rh1h"}]
+Voucher code received: 
+Total amount before discount: 125.00
+Total amount after discount: 125
+2025-04-23 23:47:05 - API Response: 						[{"BillCode":"t67gafid"}]

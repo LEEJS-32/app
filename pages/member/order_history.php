@@ -145,7 +145,7 @@ while ($row = $result->fetch_assoc()) {
                                 </tr>
                             </thead>
                             <tbody id="items-list-<?= $order['order_id']; ?>">
-                                <!-- Items will be loaded here via AJAX -->
+                               
                             </tbody>
                         </table>
                     </td>
