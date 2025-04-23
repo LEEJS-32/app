@@ -41,6 +41,21 @@ $sql_create_users_table = "CREATE TABLE IF NOT EXISTS users (
 )";
 $conn->query($sql_create_users_table);
 
+
+// Check if the 'is_active' column exists in the 'users' table
+$column_check_query = "SHOW COLUMNS FROM users LIKE 'is_active'";
+$column_check_result = $conn->query($column_check_query);
+
+if ($column_check_result && $column_check_result->num_rows == 0) {
+    // Add the 'is_active' column if it does not exist
+    $sql_add_is_active_column = "ALTER TABLE users ADD COLUMN is_active TINYINT(1) DEFAULT 1";
+    if ($conn->query($sql_add_is_active_column) === TRUE) {
+    } else {
+        $conn->error;
+    }
+} else {
+}
+
 // Create token table
 $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
     token_id VARCHAR(100) PRIMARY KEY, 
@@ -95,6 +110,19 @@ if ($table_check_result && $table_check_result->num_rows > 0) {
     }
 } else {
     echo "Table 'products' does not exist.";
+}
+
+// Add 'video_url' column if it does not exist
+$column_check_query = "SHOW COLUMNS FROM products LIKE 'video_url'";
+$column_check_result = $conn->query($column_check_query);
+
+if ($column_check_result && $column_check_result->num_rows == 0) {
+    $sql_add_video_url_column = "ALTER TABLE products ADD COLUMN video_url VARCHAR(255) NULL";
+    if ($conn->query($sql_add_video_url_column) === TRUE) {
+    } else {
+        echo "Error adding column 'video_url': " . $conn->error;
+    }
+} else {
 }
 
 // Create shopping_cart table

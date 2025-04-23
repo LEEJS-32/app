@@ -1,10 +1,19 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['email']) || !isset($_SESSION['name'])) {
-//     header("Location: /pages/signup_login.php");
-//     exit();
-// }
 require_once '../../_base.php';
+
+if (isset($_SESSION['form_errors'])) {
+    foreach ($_SESSION['form_errors'] as $error) {
+        echo "<p style='color: red;'>$error</p>";
+    }
+    unset($_SESSION['form_errors']); // Clear errors after displaying them
+}
+
+if (isset($_SESSION['form_data'])) {
+    $form_data = $_SESSION['form_data'];
+    unset($_SESSION['form_data']); // Clear form data after using it
+} else {
+    $form_data = [];
+}
 
 auth_user();
 auth('admin');
@@ -14,7 +23,6 @@ $username = "root";
 $password = "";
 $dbname = "TESTING1";
 include '../../_header.php';
-
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -32,18 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = $_POST['category'];
     $status = $_POST['status'];
     $discount = $_POST['discount'];
-    // $weight = $_POST['weight'];
-    // $length = $_POST['length'];
-    // $width = $_POST['width'];
-    // $height = $_POST['height'];
     $brand = $_POST['brand'];
     $color = $_POST['color'];
-    $rating = $_POST['rating'];
-    $reviews_count = $_POST['reviews_count'];
-
-    // image_url also used the $name variable
-    // so we need to store the $name variable in another variable
-    $product_name = $name;
+    // $rating = $_POST['rating'];
+    // $reviews_count = $_POST['reviews_count'];
 
     // Calculate discounted price
     $discounted_price = $price - ($price * ($discount / 100));
@@ -51,32 +51,88 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Handle file uploads
     $image_urls = [];
     $target_dir = "../../img/";
-    foreach ($_FILES['image_url']['name'] as $key => $name) {
-        if ($_FILES['image_url']['error'][$key] == 0) {
-            $target_file = $target_dir . basename($name);
-            if (move_uploaded_file($_FILES['image_url']['tmp_name'][$key], $target_file)) {
-                $image_urls[] = $target_file;
+    $_err = [];
+
+    if (isset($_FILES['image_url']) && count($_FILES['image_url']['name']) > 0) {
+        foreach ($_FILES['image_url']['name'] as $key => $fileName) { // Use $fileName instead of $name
+            $fileType = $_FILES['image_url']['type'][$key];
+            $fileSize = $_FILES['image_url']['size'][$key];
+            $fileTmpName = $_FILES['image_url']['tmp_name'][$key];
+            $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); // Get the file extension
+
+            if ($_FILES['image_url']['error'][$key] != 0) {
+                $_err['photo'] = "Error uploading file: $fileName";
+            } else if (!str_starts_with($fileType, 'image/')) {
+                $_err['photo'] = "File $fileName must be an image.";
+            } else if ($fileSize > 1 * 1024 * 1024) { // 1MB limit
+                $_err['photo'] = "File $fileName exceeds the maximum size of 1MB.";
             } else {
-                echo "Sorry, there was an error uploading your file: $name<br>";
+                // Generate a unique filename using uniqid()
+                $uniqueFileName = uniqid('img_', true) . '.' . $fileExtension;
+                $target_file = $target_dir . $uniqueFileName;
+
+                if (move_uploaded_file($fileTmpName, $target_file)) {
+                    $image_urls[] = $target_file; // Store the unique file path
+                } else {
+                    $_err['photo'] = "Sorry, there was an error uploading your file: $fileName";
+                }
+            }
+        }
+    } else {
+        $_err['photo'] = "At least one image is required.";
+    }
+
+    $video_url = null; // Default to null if no video is uploaded
+    $target_video_dir = "../../videos/";
+    if (isset($_FILES['video_url']) && $_FILES['video_url']['error'] == 0) {
+        $videoFileName = $_FILES['video_url']['name'];
+        $videoFileType = $_FILES['video_url']['type'];
+        $videoFileSize = $_FILES['video_url']['size'];
+        $videoTmpName = $_FILES['video_url']['tmp_name'];
+        $videoFileExtension = pathinfo($videoFileName, PATHINFO_EXTENSION);
+
+        // Validate video file type
+        $allowedVideoTypes = ['mp4', 'avi', 'mov', 'wmv'];
+        if (!in_array(strtolower($videoFileExtension), $allowedVideoTypes)) {
+            $_err['video'] = "Invalid video format. Allowed formats: mp4, avi, mov, wmv.";
+        } elseif ($videoFileSize > 10 * 1024 * 1024) { // 10MB limit
+            $_err['video'] = "Video file size exceeds the maximum limit of 10MB.";
+        } else {
+            // Generate a unique filename for the video
+            $uniqueVideoName = uniqid('video_', true) . '.' . $videoFileExtension;
+            $target_video_file = $target_video_dir . $uniqueVideoName;
+
+            if (move_uploaded_file($videoTmpName, $target_video_file)) {
+                $video_url = $target_video_file; // Store the video file path
+            } else {
+                $_err['video'] = "Error uploading the video file.";
             }
         }
     }
 
+    // If there are errors, store them in the session and redirect back to the same page
+    if (!empty($_err)) {
+        $_SESSION['form_errors'] = $_err;
+        $_SESSION['form_data'] = $_POST; // Store form data in the session
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    }
+
     // Convert image URLs array to JSON
+    $name = $_POST['name']; 
     $image_urls_json = json_encode($image_urls);
 
     // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, status, discount, discounted_price, brand, color, rating, reviews_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock, category, image_url, video_url,status, discount, discounted_price, brand, color, created_at, updated_at) VALUES (?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
     if (!$stmt) {
         echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
     }
-    $stmt->bind_param("ssdissssdddddssdi", $product_name, $description, $price, $stock, $category, $image_urls_json, $status, $discount, $discounted_price, $brand, $color, $rating, $reviews_count);
-
+    $stmt->bind_param("ssdissssddss", $name, $description, $price, $stock, $category, $image_urls_json, $video_url,$status, $discount, $discounted_price, $brand, $color);
     // Execute the statement
     if ($stmt->execute()) {
-        temp('info', 'Record inserted');
-        // redirect('/');
-
+        $_SESSION['success_message'] = "Product added successfully!";
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
     } else {
         echo "Error: " . $stmt->error;
     }
@@ -96,7 +152,6 @@ $conn->close();
     <title>Add Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../../css/adminCreate.css">
-
     <style>
         #drop_zone {
             border: 2px dashed #ccc;
@@ -131,21 +186,13 @@ $conn->close();
                     $("#discounted_price").val(discountedPrice.toFixed(2));
                 } else {
                     $("#discounted_price").val("");
-                }
-            }
-
-            $("#price, #discount").on("input", calculateDiscountedPrice);
 
             $("form").submit(function(event) {
                 var discount = parseFloat($("#discount").val());
-                var rating = parseFloat($("#rating").val());
+                // var rating = parseFloat($("#rating").val());
                 var price = parseFloat($("#price").val());
                 var stock = parseInt($("#stock").val());
-                // var weight = parseFloat($("#weight").val());
-                // var length = parseFloat($("#length").val());
-                // var width = parseFloat($("#width").val());
-                // var height = parseFloat($("#height").val());
-                var reviews_count = parseInt($("#reviews_count").val());
+                // var reviews_count = parseInt($("#reviews_count").val());
 
                 var isValid = true;
                 var errorMessage = "";
@@ -155,12 +202,42 @@ $conn->close();
                     errorMessage += "Discount must be between 1 and 100.\n";
                 }
 
-                if (isNaN(rating) || rating < 0 || rating > 5) {
+                // if (isNaN(rating) || rating < 0 || rating > 5) {
+                //     isValid = false;
+                //     errorMessage += "Rating must be between 0 and 5.\n";
+                // }
+
+                if (discount < 0 || price < 0 || stock < 0 ) {
                     isValid = false;
-                    errorMessage += "Rating must be between 0 and 5.\n";
+                    errorMessage += "Values cannot be negative.\n";
                 }
 
-                if (discount < 0 || rating < 0 || price < 0 || stock < 0 || reviews_count < 0) {
+                if (!isValid) {
+                    alert(errorMessage);
+                    event.preventDefault();
+                }
+            });
+                }
+            }
+
+            $("#price, #discount").on("input", calculateDiscountedPrice);
+
+            $("form").submit(function(event) {
+                var discount = parseFloat($("#discount").val());
+                var price = parseFloat($("#price").val());
+                var stock = parseInt($("#stock").val());
+
+                var isValid = true;
+                var errorMessage = "";
+
+                if (isNaN(discount) || discount < 0 || discount > 100) {
+                    isValid = false;
+                    errorMessage += "Discount must be between 0 and 100.\n";
+                }
+
+
+
+                if (discount < 0 || price < 0 || stock < 0 ) {
                     isValid = false;
                     errorMessage += "Values cannot be negative.\n";
                 }
@@ -175,7 +252,6 @@ $conn->close();
                 handleFiles(this.files);
             });
 
-            // Drag and drop functionality
             var dropZone = $('#drop_zone');
             var fileInput = $('#image_url');
 
@@ -218,30 +294,36 @@ $conn->close();
 </head>
 <body>
     <h1>Add New Product</h1>
+    <?php
+    if (isset($_SESSION['success_message'])) {
+        echo "<p style='color: green;'>" . $_SESSION['success_message'] . "</p>";
+        unset($_SESSION['success_message']);
+    }
+    ?>
     <form action="adminCreateProduct.php" method="POST" enctype="multipart/form-data">
         <label for="name">Product Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="text" id="name" name="name" value="<?php echo isset($form_data['name']) ? htmlspecialchars($form_data['name']) : ''; ?>" required><br><br>
 
         <label for="description">Description:</label><br>
-        <textarea id="description" name="description" required></textarea><br><br>
+        <textarea id="description" name="description" required><?php echo isset($form_data['description']) ? htmlspecialchars($form_data['description']) : ''; ?></textarea><br><br>
 
         <label for="price">Price:</label><br>
-        <input type="number" step="0.01" id="price" name="price" required><br><br>
+        <input type="number" step="0.01" id="price" name="price" value="<?php echo isset($form_data['price']) ? htmlspecialchars($form_data['price']) : ''; ?>" required><br><br>
 
         <label for="stock">Stock:</label><br>
-        <input type="number" id="stock" name="stock" required><br><br>
+        <input type="number" id="stock" name="stock" value="<?php echo isset($form_data['stock']) ? htmlspecialchars($form_data['stock']) : ''; ?>" required><br><br>
 
         <label for="category">Category:</label><br>
         <select id="category" name="category">
-            <option value="Sofas & armchairs">Sofas & armchairs</option>
-            <option value="Tables & chairs">Tables & chairs</option>
-            <option value="Storage & organisation">Storage & organisation</option>
-            <option value="Office furniture">Office furniture</option>
-            <option value="Beds & mattresses">Beds & mattresses</option>
-            <option value="Textiles">Textiles</option>
-            <option value="Rugs & mats & flooring">Rugs & mats & flooring</option>
-            <option value="Home decoration">Home decoration</option>
-            <option value="Lightning">Lightning</option>
+            <option value="Sofas & armchairs" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Sofas & armchairs') ? 'selected' : ''; ?>>Sofas & armchairs</option>
+            <option value="Tables & chairs" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Tables & chairs') ? 'selected' : ''; ?>>Tables & chairs</option>
+            <option value="Storage & organisation" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Storage & organisation') ? 'selected' : ''; ?>>Storage & organisation</option>
+            <option value="Office furniture" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Office furniture') ? 'selected' : ''; ?>>Office furniture</option>
+            <option value="Beds & mattresses" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Beds & mattresses') ? 'selected' : ''; ?>>Beds & mattresses</option>
+            <option value="Textiles" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Textiles') ? 'selected' : ''; ?>>Textiles</option>
+            <option value="Rugs & mats & flooring" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Rugs & mats & flooring') ? 'selected' : ''; ?>>Rugs & mats & flooring</option>
+            <option value="Home decoration" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Home decoration') ? 'selected' : ''; ?>>Home decoration</option>
+            <option value="Lightning" <?php echo (isset($form_data['category']) && $form_data['category'] == 'Lightning') ? 'selected' : ''; ?>>Lightning</option>
         </select><br><br>
 
         <label for="image_url">Image URL:</label><br>
@@ -249,42 +331,27 @@ $conn->close();
         <div id="drop_zone">Drag and drop images here</div>
         <div id="imagePreview"></div><br><br>
 
+        <label for="video_url">Product Video:</label><br>
+        <input type="file" id="video_url" name="video_url" accept="video/*"><br><br>
+
         <label for="status">Status:</label><br>
         <select id="status" name="status">
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="discontinued">Discontinued</option>
+            <option value="active" <?php echo (isset($form_data['status']) && $form_data['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+            <option value="inactive" <?php echo (isset($form_data['status']) && $form_data['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+            <option value="discontinued" <?php echo (isset($form_data['status']) && $form_data['status'] == 'discontinued') ? 'selected' : ''; ?>>Discontinued</option>
         </select><br><br>
 
         <label for="discount">Discount(%):</label><br>
-        <input type="number" step="0.01" id="discount" name="discount"><br><br>
+        <input type="number" step="0.01" id="discount" name="discount" value="<?php echo isset($form_data['discount']) ? htmlspecialchars($form_data['discount']) : '0'; ?>"><br><br>
 
         <label for="discounted_price">Discounted Price:</label><br>
         <input type="text" id="discounted_price" name="discounted_price" readonly><br><br>
 
-        <!-- <label for="weight">Weight:</label><br>
-        <input type="number" step="0.01" id="weight" name="weight"><br><br>
-
-        <label for="length">Length:</label><br>
-        <input type="number" step="0.01" id="length" name="length"><br><br>
-
-        <label for="width">Width:</label><br>
-        <input type="number" step="0.01" id="width" name="width"><br><br>
-
-        <label for="height">Height:</label><br>
-        <input type="number" step="0.01" id="height" name="height"><br><br> -->
-
         <label for="brand">Brand:</label><br>
-        <input type="text" id="brand" name="brand"><br><br>
+        <input type="text" id="brand" name="brand" value="<?php echo isset($form_data['brand']) ? htmlspecialchars($form_data['brand']) : ''; ?>"><br><br>
 
         <label for="color">Color:</label><br>
-        <input type="text" id="color" name="color"><br><br>
-
-        <label for="rating">Rating:</label><br>
-        <input type="number" step="0.01" id="rating" name="rating"><br><br>
-
-        <label for="reviews_count">Reviews Count:</label><br>
-        <input type="number" id="reviews_count" name="reviews_count"><br><br>
+        <input type="text" id="color" name="color" value="<?php echo isset($form_data['color']) ? htmlspecialchars($form_data['color']) : ''; ?>"><br><br>
 
         <input type="submit" value="Add Product">
     </form>

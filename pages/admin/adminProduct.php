@@ -177,13 +177,10 @@ $products = $pager->result;
                 <th>Stock</th>
                 <th>Category</th>
                 <th>Images</th>
+                <th>Video</th> <!-- New column for video -->
                 <th>Status</th>
                 <th>Discount (%)</th>
                 <th>Discounted Price</th>
-                <!-- <th>Weight</th>
-                <th>Length</th>
-                <th>Width</th>
-                <th>Height</th> -->
                 <th>Brand</th>
                 <th>Color</th>
                 <th>Rating</th>
@@ -213,6 +210,16 @@ $products = $pager->result;
                             }
                             ?>
                         </td>
+                        <td>
+                            <?php if (!empty($product['video_url'])): ?>
+                                <video controls style="max-width: 150px; max-height: 150x;">
+                                    <source src="/<?php echo htmlspecialchars($product['video_url']); ?>" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            <?php else: ?>
+                                No video available
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo htmlspecialchars($product['status']); ?></td>
                         <td><?php echo $product['discount']; ?></td>
                         <td><?php echo $product['discounted_price']; ?></td>
@@ -229,7 +236,7 @@ $products = $pager->result;
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
-                <tr><td colspan="21">No products found</td></tr>
+                <tr><td colspan="18">No products found</td></tr>
             <?php endif; ?>
         </tbody>
     </table>
