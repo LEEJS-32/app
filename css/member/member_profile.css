@@ -1,0 +1,184 @@
+.profile-wrapper {
+    display: flex;
+    gap: 30px;
+    width: 98%;
+    margin: 15px 0 25px 0;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.avatar-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-container {
+    position: relative;
+    width: 130px;
+    height: 130px;
+}
+
+.profile-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #d3d3d3;
+    border: 3px solid #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-guideline {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 20px 0;
+}
+
+.general-infos {
+    font-size: 18px;
+}
+
+.upload-title {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+
+.options {
+    display: none;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.options.show {
+    display: flex;
+}
+
+.general-infos {
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+
+.info-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #fff;
+    max-width: 100%;
+    margin-bottom: 30px;
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.info-header h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.edit-btn {
+    border: none;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 450;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 20px 40px; /* row gap, column gap */
+}
+
+.info-item label {
+    font-size: 16px;
+    font-weight: 450;
+    color: #999;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.info-item p {
+    font-size: 17px;
+    font-weight: 450;
+    font-weight: bold;
+    margin: 0;
+}
+
+.info-item input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: 450;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.confirm-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.info-item-gender label {
+    font-size: 18px;
+    color: #999;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.info-item-gender div {
+    display: flex;
+    gap: 20%;
+    padding: 5px 0;  
+}
+
+input[type="radio"] {
+    accent-color: black;
+}
+
+#editForm {
+    transition: all 0.3s ease;
+}
+

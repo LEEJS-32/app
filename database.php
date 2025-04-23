@@ -90,6 +90,14 @@ $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
 )";
 $conn->query($sql_create_products_table);
 
+// Create active_token table
+$sql_create_active_token_table = "CREATE TABLE IF NOT EXISTS active_token (
+    token_id VARCHAR(64) PRIMARY KEY, 
+    expire DATETIME NOT NULL, 
+    user_id INT NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+)";
+$conn->query($sql_create_active_token_table);
 
 // Remember to delete !!!!
 // Check if the products table exists
@@ -152,6 +160,20 @@ $sql_create_vouchers_table = "CREATE TABLE IF NOT EXISTS vouchers (
 )";
 $conn->query($sql_create_vouchers_table);
 
+
+// Create user address table
+$sql_create_address_table = "CREATE TABLE IF NOT EXISTS address (
+    address_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    address_line1 VARCHAR(255) NULL,
+    address_line2 VARCHAR(255),
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    postal_code VARCHAR(20) NOT NULL,
+    country VARCHAR(100) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+)";
+$conn->query($sql_create_address_table);
 
 // Create orders table
 $sql_create_orders_table = "CREATE TABLE IF NOT EXISTS orders (

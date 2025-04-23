@@ -23,6 +23,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <title>Member Profile</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="../../css/member/member_profile.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
 
@@ -46,6 +47,8 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
+            $email = $row['email'];
+            $name = $row['name'];
             
         // If avatar exists, update the image URL
             if (!empty($row["avatar"])) {
@@ -83,25 +86,45 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 
 
             <div class="profile-wrapper">
-            <div class="profile-container">
-                <img id="avatar" src="<?php echo htmlspecialchars($imageUrl); ?>" alt="Profile" class="profile-image" />
-                <video id="video" autoplay class="profile-image" style="display: none;"></video>
-                <button class="upload-btn" id="toggleOptions">+</button>
+    <div class="avatar-section">
+        <div class="avatar-container">
+            <img id="avatar" src="<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
+            <video id="video" autoplay class="profile-avatar" style="display: none;"></video>
+            <button class="avatar-upload-btn" id="toggleOptions">+</button>
+        </div>
+    </div>
+    <div class="upload-guideline">
+    <?php echo ($row['name']) ?>
+        <div class="general-infos">
+            <div class="g-info">
+                <p>Role</p>
+                <p>Member</p>
             </div>
-
-            <div class="options" id="uploadOptions">
-                <button id="openCamera" type="button"><i class='bx bx-camera' ></i></button>
-                <button onclick="document.getElementById('fileInput').click()" type="button"><i class='bx bxs-folder-plus'></i></button>
-                <input type="file" id="fileInput" style="display: none;" onchange="document.getElementById('uploadForm').submit();">
+            <div class="g-info">
+                <p>Email Address</p>
+                <p><?php echo ($row['email']) ?></p>
             </div>
+            <div class="g-info">
+                <p>Reward Pts.</p>
+                <p><?php echo ($row['reward_pt']) ?></p>
             </div>
+        </div>
 
-            <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+        <div class="options" id="uploadOptions">
+            <button id="openCamera" type="button"><i class='bx bx-camera'></i></button>
+            <button onclick="document.getElementById('fileInput').click()" type="button"><i class='bx bxs-folder-plus'></i></button>
+            <input type="file" id="fileInput" style="display: none;" onchange="document.getElementById('uploadForm').submit();">
+        </div>
+    </div>
+    <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
 
-            <form id="uploadForm" action="../../backend/upload_photo.php" method="POST">
-            <input type="hidden" name="image" id="imageData">
-            <button type="submit" id="upload" style="display: none;">Upload</button>
-            </form>
+<form id="uploadForm" action="../../backend/upload_photo.php" method="POST">
+<input type="hidden" name="image" id="imageData">
+<button type="submit" id="upload" style="display: none;">Upload</button>
+</form>
+</div>
+
+
 
             <!-- Edit Profile -->
 <?php 
@@ -122,26 +145,87 @@ if ($row = $result->fetch_assoc()) {
 }
 
 ?> 
-    <h1>Personal Information</h1>
-    <form method="post" id="#editForm" action="../../backend/extra_info_process.php">
-    <label for="gender">Gender:</label>
-                <?php html_radios('gender', $_genders, true, 'disabled')?>
-                <br>
-                <label for="phonenum">Phone Number:</label>
-                <input type="tel" id="phonenum" name="phonenum" value="<?php echo encode($GLOBALS['phonenum']); ?>" disabled>
-                <br><br>
-                <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" value="<?php echo encode($GLOBALS['dob']); ?>" disabled>
-                <br><br>
-                <label for="occupation">Occupation:</label>
-                <?php html_text('occupation', 'disabled')?>
-                <br><br>
-                <button type="button" id="edit-btn" onclick="enableForm()">Edit</button>
-                <button type="submit" id="confirm-btn" style="display: none;">Confirm</button>
+    <div class="info-card">
+    <div class="info-header">
+        <h3>Personal Info</h3>
+        <button type="button" class="edit-btn" id="toggleEdit">✎ Edit</button>
+
+    </div>
+
+    <div id="readonly-view">
+    <div class="info-grid">
+        <div class="info-item">
+            <label>Full Name</label>
+            <p><?= htmlspecialchars($name) ?></p>
+        </div>
+        <div class="info-item">
+            <label>Email</label>
+            <p><?php echo ($email) ?></p>
+        </div>
+        <div class="info-item">
+            <label>Phone</label>
+            <p><?= htmlspecialchars($GLOBALS['phonenum']) ?></p>
+        </div>
+        <div class="info-item">
+            <label>Gender</label>
+            <p><?= htmlspecialchars($GLOBALS['gender']) ?></p>
+        </div>
+        <div class="info-item">
+            <label>Date of Birth</label>
+            <p><?= htmlspecialchars($GLOBALS['dob']) ?></p>
+        </div>
+        <div class="info-item">
+            <label>Occupation</label>
+            <p><?= htmlspecialchars($GLOBALS['occupation']) ?></p>
+        </div>
+    </div>
+    </div>
+
+    <!-- Hidden editable form -->
+    <form method="post" id="editForm" action="../../backend/extra_info_process.php" style="display:none;">
+        <div class="info-grid">
+            <div class="info-item">
+                <label for="name">Name</label>
+                <?php html_text('name'); ?>
+            </div>
+            <div class="info-item">
+                <label for="email">Email</label>
+                <?php html_text('email'); ?>
+            </div>
+            <div class="info-item">
+                <label for="phonenum">Phone Number</label>
+                <input type="tel" id="phonenum" name="phonenum" value="<?= htmlspecialchars($GLOBALS['phonenum']) ?>">
+            </div>
+            <div class="info-item">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" value="<?= htmlspecialchars($GLOBALS['dob']) ?>">
+            </div>
+            <div class="info-item">
+                <label for="occupation">Occupation</label>
+                <input type="text" id="occupation" name="occupation" value="<?= htmlspecialchars($GLOBALS['occupation']) ?>">
+            </div>
+            <div class="info-item-gender">
+                <label for="gender">Gender</label>
+                <div>
+                <div>
+                <input type="radio" id="gender" name="gender" value="male" <?= $GLOBALS['gender'] == 'male' ? 'checked' : '' ?>> Male
+                </div>
+                <div>
+                <input type="radio" id="gender" name="gender" value="female" <?= $GLOBALS['gender'] == 'female' ? 'checked' : '' ?>> Female
+                </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="confirm-btn">Save</button>
     </form>
+</div>
+
         </div>  
     </div>
 
+    <!-- adding  -->
+     
+    
 
     <script>
         const toggleBtn = document.getElementById('toggleOptions');
@@ -181,17 +265,26 @@ if ($row = $result->fetch_assoc()) {
         });
     </script>
 
-    <script>
-        function enableForm() {
-    // Enable all input fields
-    document.querySelectorAll("form input, form select").forEach(input => {
-        input.removeAttribute("disabled");
-    });
+<script>
+document.getElementById("toggleEdit").addEventListener("click", function () {
+    const form = document.getElementById("editForm");
+    const readonly = document.getElementById("readonly-view");
 
-    // Hide "Edit" button and show "Confirm" button
-    document.getElementById("edit-btn").style.display = "none";
-    document.getElementById("confirm-btn").style.display = "inline-block";
+    const isVisible = form.style.display === "block";
+
+    if (isVisible) {
+        form.style.display = "none";
+        readonly.style.display = "block";
+        this.innerHTML = "✎ Edit";
+    } else {
+        form.style.display = "block";
+        readonly.style.display = "none";
+        this.innerHTML = "✖ Cancel";
     }
+});
+</script>
+
+
     </script>
 
     <!-- Load reCAPTCHA script -->
