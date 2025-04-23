@@ -49,6 +49,66 @@ $role = $user['role'];
                 $imageUrl = $row["avatar"];
             }
         }
+
+        // Total active products
+        $result_products = $conn->query("SELECT COUNT(*) AS total_products FROM products WHERE status = 'active'");
+        $total_products = $result_products->fetch_assoc()['total_products'];
+
+        // Total members
+        $result_members = $conn->query("SELECT COUNT(*) AS total_members FROM users WHERE role = 'member'");
+        $total_members = $result_members->fetch_assoc()['total_members'];
+
+        // Total revenue from all completed orders
+        $result_revenue = $conn->query("SELECT SUM(total_price) AS total_revenue FROM orders WHERE status IN ('shipped', 'delivered')");
+        $total_revenue = $result_revenue->fetch_assoc()['total_revenue'] ?? 0;
+
+        // Current month (YYYY-MM)
+        $currentMonth = date('Y-m');
+        $lastMonth = date('Y-m', strtotime('-1 month'));
+
+        // Total products sold this month
+        $res = $conn->query("
+            SELECT SUM(oi.quantity) AS total_sold
+            FROM orders o
+            JOIN order_items oi ON o.order_id = oi.order_id
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
+        ");
+        $total_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
+
+        // Total products sold last month
+        $res = $conn->query("
+            SELECT SUM(oi.quantity) AS total_sold
+            FROM orders o
+            JOIN order_items oi ON o.order_id = oi.order_id
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
+        ");
+        $last_month_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
+
+        // Revenue this month
+        $res = $conn->query("
+            SELECT SUM(o.total_price) AS total_revenue
+            FROM orders o
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth' AND o.status IN ('shipped', 'delivered')
+        ");
+        $revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
+
+        // Revenue last month
+        $res = $conn->query("
+            SELECT SUM(o.total_price) AS total_revenue
+            FROM orders o
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth' AND o.status IN ('shipped', 'delivered')
+        ");
+        $last_revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
+
+        // Percentage change helpers
+        function percentChange($current, $previous) {
+            if ($previous == 0) return $current > 0 ? 100 : 0;
+            return round((($current - $previous) / $previous) * 100, 1);
+        }
+
+        $sold_change = percentChange($total_sold, $last_month_sold);
+        $revenue_change = percentChange($revenue, $last_revenue);
+
     ?>
     <div class="container">
         <div class="left">
@@ -76,19 +136,19 @@ $role = $user['role'];
                 <div class="category">
                     <ul>
                         <li>Selling Products</li>
-                        <li>3,000</li>
+                        <li><?= $total_products ?></li>
                     </ul>
                 </div>
                 <div class="category">
                     <ul>
                         <li>Members</li>
-                        <li>2,000</li>
+                        <li><?= $total_members ?></li>
                     </ul>
                 </div>
                 <div class="category">
                     <ul>
                         <li>Total Revenue</li>
-                        <li>RM 100,000</li>
+                        <li>RM <?= number_format($total_revenue, 2) ?></li>
                     </ul>
                 </div>
             </div>
@@ -99,16 +159,17 @@ $role = $user['role'];
                         <h2>Financial Income</h2>
                     </div>
                     <div class="section2">
-                    <h3>Total Products Sold</h3>
-                    <h1>227</h1>
-                    <p>Increased 10% from last month</p>
+                        <h3>Total Products Sold</h3>
+                        <h1><?= $total_sold ?></h1>
+                        <p><?= ($sold_change >= 0 ? "Increased" : "Decreased") ?> <?= abs($sold_change) ?>% from last month</p>
                     </div>
                     <div class="section3">
-                    <h3>Total Revenue</h3>
-                    <h1>RM 35,300</h1>
-                    <p>Increased 15% from last month</p>
+                        <h3>Total Revenue</h3>
+                        <h1>RM <?= number_format($revenue, 2) ?></h1>
+                        <p><?= ($revenue_change >= 0 ? "Increased" : "Decreased") ?> <?= abs($revenue_change) ?>% from last month</p>
                     </div>
                 </div>
+
                 <div class="chart">
                     <canvas id="myChart"></canvas> <!-- Canvas to render the line chart -->
                 </div>
@@ -116,60 +177,73 @@ $role = $user['role'];
         </div>
     </div>
 
+    <?php
+    // Members registered by month (last 6 months)
+$members_per_month = [];
+$sales_per_month = [];
+
+for ($i = 5; $i >= 0; $i--) {
+    $month = date('Y-m', strtotime("-$i months"));
+    
+    // Members count
+    $res = $conn->query("SELECT COUNT(*) AS count FROM users WHERE DATE_FORMAT(created_at, '%Y-%m') = '$month'");
+    $members_per_month[] = (int)$res->fetch_assoc()['count'];
+
+    // Products sold
+    $res = $conn->query("
+        SELECT SUM(order_items.quantity) AS sold 
+        FROM orders 
+        JOIN order_items ON orders.order_id = order_items.order_id 
+        WHERE DATE_FORMAT(orders.order_date, '%Y-%m') = '$month'
+    ");
+    $sales_per_month[] = (int)($res->fetch_assoc()['sold'] ?? 0);
+}
+
+$month_labels = [];
+for ($i = 5; $i >= 0; $i--) {
+    $month_labels[] = date('M', strtotime("-$i months"));
+}
+?>
+
     <script>
-        // Generate last 6 months dynamically
-        function getLastSixMonths() {
-            let months = [];
-            let currentMonth = new Date();
-            for (let i = 0; i < 6; i++) {
-                months.unshift(currentMonth.toLocaleString('default', { month: 'short' }));
-                currentMonth.setMonth(currentMonth.getMonth() - 1); // Move to previous month
-            }
-            return months;
-        }
+    const months = <?= json_encode($month_labels) ?>;
+    const membersData = <?= json_encode($members_per_month) ?>;
+    const productsData = <?= json_encode($sales_per_month) ?>;
 
-        var months = getLastSixMonths(); // Get the last 6 months    
-
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'line', // Line chart type
-            data: {
-                labels: months, // X-axis labels (months)
-                datasets: [{
-                    label: 'Members Registered', // First line label
-                    data: [50, 100, 150, 200, 250, 300], // Example data for members registered
-                    borderColor: 'red', // Line color for members registered
-                    backgroundColor: 'red',
-                    fill: false, // Fill the area under the line
-                    tension: 0.1, // Curve the line slightly
-                    borderWidth: 2 // Line width
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Members Registered',
+                    data: membersData,
+                    borderColor: 'red',
+                    fill: false,
+                    tension: 0.1,
+                    borderWidth: 2
                 },
                 {
-                    label: 'Products Sold', // Second line label
-                    data: [30, 80, 120, 170, 220, 280], // Example data for products sold
-                    borderColor: 'blue', // Line color for products sold
-                    backgroundColor: 'blue',
-                    fill: false, // Fill the area under the line
-                    tension: 0.1, // Curve the line slightly
-                    borderWidth: 2 // Line width
-                }]
-            },
-            options: {
-                responsive: true, // Make the chart responsive
-                scales: {
-                    y: {
-                        beginAtZero: true // Start Y-axis at 0
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                    }
+                    label: 'Products Sold',
+                    data: productsData,
+                    borderColor: 'blue',
+                    fill: false,
+                    tension: 0.1,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>
 
 
     </main>

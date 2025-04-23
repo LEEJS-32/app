@@ -32,7 +32,7 @@ if ($row = $result->fetch_assoc()) {
         $stmt->execute();
 
         echo "Account activated successfully! Redirecting...";
-        header("refresh:3;url=../pages/extra_info.php");
+        redirect("../pages/member/activated.php");
         exit();
     }
 } else {
