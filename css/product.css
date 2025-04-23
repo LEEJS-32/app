@@ -74,25 +74,32 @@ a:hover {
 
 /* Product Container */
 .product-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+    display: grid; /* Use grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Add space between cards */
     padding: 20px;
+    justify-content: center; /* Center the grid items */
 }
 
+/* Product Link */
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block; /* Ensure the link only covers the card */
+}
+
+/* Product Card */
 .product-card {
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: calc(100% / 4 - 30px); /* Flexible width for 4 cards per row */
-    max-width: 300px;
     padding: 15px;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Hover effect for product card */
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -106,15 +113,6 @@ a:hover {
     object-fit: cover;
     border-radius: 4px;
     margin-bottom: 10px;
-}
-
-/* Style for product images */
-.product-image {
-    max-width: 150px; /* Set the maximum width */
-    max-height: 150px; /* Set the maximum height */
-    object-fit: cover; /* Ensure the image fits within the dimensions without distortion */
-    margin: 10px auto; /* Center the image and add spacing */
-    display: block; /* Ensure the image is treated as a block element */
 }
 
 /* Product Details */
@@ -241,14 +239,6 @@ a:hover {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
-}
-
-/* Product Container */
-.product-container {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
 }
 
 /* Filters */

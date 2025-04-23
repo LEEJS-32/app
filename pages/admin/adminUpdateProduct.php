@@ -1,31 +1,26 @@
 <?php
-// filepath: c:\Users\shenl\app\pages\admin\adminUpdateProduct.php
+// filepath: c:\Users\shenl\OneDrive\Documents\app1\app\pages\admin\adminUpdateProduct.php
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 include '../../_header.php';
 ob_start();
 
 // Initialize product array to prevent undefined variable warnings
-if (!isset($product)) {
-    $product = [
-        'product_id' => '',
-        'name' => '',
-        'description' => '',
-        'price' => '',
-        'stock' => '',
-        'category' => '',
-        'status' => '',
-        'discount' => '',
-        // 'weight' => '',
-        // 'length' => '',
-        // 'width' => '',
-        // 'height' => '',
-        'brand' => '',
-        'color' => '',
-        'rating' => '',
-        'reviews_count' => '',
-        'image_url' => '[]'
-    ];
-}
+$product = [
+    'product_id' => '',
+    'name' => '',
+    'description' => '',
+    'price' => '',
+    'stock' => '',
+    'category_id' => '',
+    'status' => '',
+    'discount' => '',
+    'brand' => '',
+    'color' => '',
+    'rating' => '',
+    'reviews_count' => '',
+    'image_url' => '[]',
+    'video_url' => ''
+];
 
 $servername = "localhost";
 $username = "root";
@@ -37,6 +32,12 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch categories for the dropdown
+$categories_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+if (!$categories_result) {
+    die("Error fetching categories: " . $conn->error);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['product_id'])) {
@@ -55,13 +56,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     $description = $_POST['description'] ?? '';
     $price = (float)$_POST['price'] ?? 0.0;
     $stock = (int)$_POST['stock'] ?? 0;
-    $category = $_POST['category'] ?? '';
+    $category_id = (int)$_POST['category'] ?? 0;
     $status = $_POST['status'] ?? '';
     $discount = (float)$_POST['discount'] ?? 0.0;
-    // $weight = (float)$_POST['weight'] ?? 0.0;
-    // $length = (float)$_POST['length'] ?? 0.0;
-    // $width = (float)$_POST['width'] ?? 0.0;
-    // $height = (float)$_POST['height'] ?? 0.0;
     $brand = $_POST['brand'] ?? '';
     $color = $_POST['color'] ?? '';
     $rating = (float)$_POST['rating'] ?? 0.0;
@@ -79,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     $existing_images = isset($_POST['existing_images']) ? json_decode($_POST['existing_images'], true) : [];
     $image_urls = $existing_images; // Start with existing images
 
-    // Process new uploads
+    // Process new image uploads
     if (!empty($_FILES['image_url']['name'][0])) {
         foreach ($_FILES['image_url']['name'] as $key => $name) {
             if ($_FILES['image_url']['error'][$key] == 0) {
@@ -95,49 +92,93 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
         }
     }
 
-    echo "<pre>";
-    print_r($_FILES);
-    echo "</pre>";
-    // Convert to JSON with duplicate removal
+    // Handle video upload
+    if (isset($_FILES['video_url']) && $_FILES['video_url']['error'] == 0) {
+        $videoFileName = $_FILES['video_url']['name'];
+        $videoTmpName = $_FILES['video_url']['tmp_name'];
+        $videoFileExtension = pathinfo($videoFileName, PATHINFO_EXTENSION);
+
+        $allowedVideoTypes = ['mp4', 'avi', 'mov', 'wmv'];
+        if (!in_array(strtolower($videoFileExtension), $allowedVideoTypes)) {
+            echo "Invalid video format. Allowed formats: mp4, avi, mov, wmv.<br>";
+        } else {
+            $uniqueVideoName = uniqid('video_', true) . '.' . $videoFileExtension;
+            $target_video_file = __DIR__ . "/../../videos/" . $uniqueVideoName;
+
+            // Unlink the old video if it exists
+            if (!empty($product['video_url']) && file_exists(__DIR__ . "/../../" . $product['video_url'])) {
+                unlink(__DIR__ . "/../../" . $product['video_url']);
+            }
+
+            if (move_uploaded_file($videoTmpName, $target_video_file)) {
+                $video_url = "videos/" . $uniqueVideoName; // Store relative path
+            } else {
+                echo "Error uploading the video file.<br>";
+            }
+        }
+    } else {
+        // Preserve the existing video URL if no new video is uploaded
+        $video_url = isset($_POST['existing_video_url']) ? $_POST['existing_video_url'] : '';
+    }
+
+    // Convert images to JSON
     $image_urls_json = json_encode(array_values(array_unique($image_urls)), JSON_UNESCAPED_SLASHES);
 
     // Update database
-    $sql = "UPDATE products SET
-                name = '" . $product_name . "',
-                description = '" . $description . "',
-                price = " . $price . ",
-                stock = " . $stock . ",
-                category = '" . $category . "',
-                status = '" . $status . "',
-                discount = " . $discount . ",
-                brand = '" . $brand . "',
-                color = '" . $color . "',
-                rating = " . $rating . ",
-                reviews_count = " . $reviews_count . ",
-                image_url = '" . $image_urls_json . "',
-                updated_at = NOW()
-            WHERE product_id = " . $product_id;
+    $stmt = $conn->prepare("
+        UPDATE products SET
+            name = ?, description = ?, price = ?, stock = ?, category_id = ?, status = ?, discount = ?, 
+            discounted_price = ?, brand = ?, color = ?, rating = ?, reviews_count = ?, image_url = ?, 
+            video_url = ?, updated_at = NOW()
+        WHERE product_id = ?
+    ");
+    $stmt->bind_param(
+        "ssdiisddssiissi",
+        $product_name,
+        $description,
+        $price,
+        $stock,
+        $category_id,
+        $status,
+        $discount,
+        $discounted_price,
+        $brand,
+        $color,
+        $rating,
+        $reviews_count,
+        $image_urls_json,
+        $video_url,
+        $product_id
+    );
 
-    if ($conn->query($sql) === TRUE) {
-        echo "Product updated successfully";
-        header("Location: adminProduct.php"); // Redirect
+    if ($stmt->execute()) {
+        temp('info', 'Product updated successfully!');
+        echo json_encode([
+            'success' => true,
+            'redirect' => 'adminProduct.php',
+            'message' => temp('info') // Include the flash message in the response
+        ]);
         exit;
     } else {
-        echo "Error updating product: " . $conn->error;
+        echo json_encode([
+            'success' => false,
+            'error' => $stmt->error
+        ]);
+        exit;
     }
+    $stmt->close();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Product</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../../css/adminUpdateProduct.css">
-    <style>
+<style>
         #drop_zone {
             border: 2px dashed #ccc;
             border-radius: 10px;
@@ -179,40 +220,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
         }
     </style>
 </head>
-
 <body>
     <h1>Update Product</h1>
 
     <form id="updateProductForm" action="adminUpdateProduct.php?product_id=<?php echo $product['product_id']; ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['product_id']); ?>">
+        <input type="hidden" id="existing_video_url" name="existing_video_url" value="<?php echo htmlspecialchars($product['video_url']); ?>">
 
         <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>"
-            required><br><br>
+        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br><br>
 
         <label for="description">Description:</label><br>
-        <textarea id="description" name="description"
-            required><?php echo htmlspecialchars($product['description']); ?></textarea><br><br>
+        <textarea id="description" name="description" required><?php echo htmlspecialchars($product['description']); ?></textarea><br><br>
 
         <label for="price">Price:</label><br>
-        <input type="number" step="0.01" id="price" name="price"
-            value="<?php echo htmlspecialchars($product['price']); ?>" required><br><br>
+        <input type="number" step="0.01" id="price" name="price" value="<?php echo htmlspecialchars($product['price']); ?>" required><br><br>
 
         <label for="stock">Stock:</label><br>
-        <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product['stock']); ?>"
-            required><br><br>
+        <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product['stock']); ?>" required><br><br>
 
         <label for="category">Category:</label><br>
         <select id="category" name="category" required>
-            <option value="Sofas & armchairs" <?php echo $product['category'] == 'Sofas & armchairs' ? 'selected' : ''; ?>>Sofas & armchairs</option>
-            <option value="Tables & chairs" <?php echo $product['category'] == 'Tables & chairs' ? 'selected' : ''; ?>>Tables & chairs</option>
-            <option value="Storage & organisation" <?php echo $product['category'] == 'Storage & organisation' ? 'selected' : ''; ?>>Storage & organisation</option>
-            <option value="Office furniture" <?php echo $product['category'] == 'Office furniture' ? 'selected' : ''; ?>>Office furniture</option>
-            <option value="Beds & mattresses" <?php echo $product['category'] == 'Beds & mattresses' ? 'selected' : ''; ?>>Beds & mattresses</option>
-            <option value="Textiles" <?php echo $product['category'] == 'Textiles' ? 'selected' : ''; ?>>Textiles</option>
-            <option value="Rugs & mats & flooring" <?php echo $product['category'] == 'Rugs & mats & flooring' ? 'selected' : ''; ?>>Rugs & mats & flooring</option>
-            <option value="Home decoration" <?php echo $product['category'] == 'Home decoration' ? 'selected' : ''; ?>>Home decoration</option>
-            <option value="Lightning" <?php echo $product['category'] == 'Lightning' ? 'selected' : ''; ?>>Lightning</option>
+            <option value="">Select a Category</option>
+            <?php
+            if ($categories_result->num_rows > 0) {
+                while ($row = $categories_result->fetch_assoc()) {
+                    $selected = ($product['category_id'] == $row['id']) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['name']) . "</option>";
+                }
+            } else {
+                echo "<option value=''>No categories available</option>";
+            }
+            ?>
         </select><br><br>
 
         <label for="image_url">Images:</label><br>
@@ -223,17 +262,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
             $existing_images = json_decode($product['image_url'], true);
             if (!empty($existing_images)) {
                 foreach ($existing_images as $image) {
-                    $image_path = trim($image); // Remove surrounding quotes and brackets
-                    echo "Current image value: " . htmlspecialchars($image) . "<br>";
                     echo "<div class='image-preview'>";
-                    // Use a root-relative path
-                    echo "<img src='/" . htmlspecialchars($image_path) . "' alt='Product Image'>";
-                    echo "<span class='remove-image' data-src='" . htmlspecialchars($image_path) . "'>×</span>";
+                    echo "<img src='/" . htmlspecialchars($image) . "' alt='Product Image'>";
+                    echo "<span class='remove-image' data-src='" . htmlspecialchars($image) . "'>×</span>";
                     echo "</div>";
                 }
             }
             ?>
-        </div>
+        </div><br><br>
+
+        <label for="video_url">Product Video:</label><br>
+        <input type="file" id="video_url" name="video_url" accept="video/*"><br><br>
+        <?php if (!empty($product['video_url'])): ?>
+            <video controls style="max-width: 300px;">
+                <source src="/<?php echo htmlspecialchars($product['video_url']); ?>" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <p>Current Video: <?php echo htmlspecialchars($product['video_url']); ?></p>
+        <?php endif; ?>
 
         <label for="status">Status:</label><br>
         <select id="status" name="status" required>
@@ -243,8 +289,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
         </select><br><br>
 
         <label for="discount">Discount (%):</label><br>
-        <input type="number" step="0.01" id="discount" name="discount"
-            value="<?php echo htmlspecialchars($product['discount']); ?>"><br><br>
+        <input type="number" step="0.01" id="discount" name="discount" value="<?php echo htmlspecialchars($product['discount']); ?>"><br><br>
 
         <label for="brand">Brand:</label><br>
         <input type="text" id="brand" name="brand" value="<?php echo htmlspecialchars($product['brand']); ?>"><br><br>
@@ -253,12 +298,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
         <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($product['color']); ?>"><br><br>
 
         <label for="rating">Rating:</label><br>
-        <input type="number" step="0.01" id="rating" name="rating"
-            value="<?php echo htmlspecialchars($product['rating']); ?>"><br><br>
+        <input type="number" step="0.01" id="rating" name="rating" value="<?php echo htmlspecialchars($product['rating']); ?>"><br><br>
 
         <label for="reviews_count">Reviews Count:</label><br>
-        <input type="number" id="reviews_count" name="reviews_count"
-            value="<?php echo htmlspecialchars($product['reviews_count']); ?>"><br><br>
+        <input type="number" id="reviews_count" name="reviews_count" value="<?php echo htmlspecialchars($product['reviews_count']); ?>"><br><br>
 
         <input type="submit" value="Update Product">
     </form>
@@ -372,16 +415,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        console.log('Success:', response);
-                        location.reload();
+                        const jsonResponse = JSON.parse(response);
+                        if (jsonResponse.success) {
+                            alert(jsonResponse.message);
+                            window.location.href ("adminProduct.php");
+                        } else {
+                            alert('Error: ' + jsonResponse.error);
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.error('Error:', error);
+                        alert('An error occurred while updating the product.');
                     }
                 });
             });
         });
     </script>
 </body>
-
 </html>

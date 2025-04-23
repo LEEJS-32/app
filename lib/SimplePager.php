@@ -18,6 +18,10 @@ class SimplePager {
         // Set item count
         $count_query = preg_replace('/SELECT.+FROM/i', 'SELECT COUNT(*) FROM', $query, 1);
         $stmt = $conn->prepare($count_query);
+        if (!$stmt) {
+            die("Error preparing count query: " . $conn->error);
+        }
+
         if (!empty($params)) {
             $types = str_repeat('s', count($params)); // Generate type string
             $stmt->bind_param($types, ...$params);
@@ -35,14 +39,22 @@ class SimplePager {
 
         // Set result
         $stmt = $conn->prepare($query . " LIMIT ?, ?");
+        if (!$stmt) {
+            die("Error preparing result query: " . $conn->error);
+        }
+
         if (!empty($params)) {
             $types = str_repeat('s', count($params)) . 'ii'; // Add 'ii' for offset and limit
             $stmt->bind_param($types, ...array_merge($params, [$offset, $this->limit]));
         } else {
             $stmt->bind_param('ii', $offset, $this->limit);
         }
+
         $stmt->execute();
         $result = $stmt->get_result();
+        if (!$result) {
+            die("Error executing result query: " . $stmt->error);
+        }
         $this->result = $result->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
