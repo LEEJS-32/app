@@ -125,7 +125,6 @@ $total_cart_price = 0;
                             $image_urls = json_decode($row['image_url']);
                             $image_url = $image_urls[0]; 
                             echo "<td>" . htmlspecialchars($row['name']) . "<br><img src='/" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($row['name']) . "'></td>";
-
                         ?>
                         <td>RM <?= number_format($price, 2) ?></td>
                         <form method="POST" action="view_cart.php">
