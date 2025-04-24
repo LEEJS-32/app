@@ -126,7 +126,7 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
     <?php } ?>
 
     <div class="header">
-        <h2>Product List</h2>
+        <h2>Product Lists</h2>
         <p><strong>User ID:</strong> <?php echo htmlspecialchars($user_id); ?></p>
         <p><strong>User Name:</strong> <?php echo htmlspecialchars($user_name); ?></p>
     </div>

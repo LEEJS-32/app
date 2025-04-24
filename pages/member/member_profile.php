@@ -75,7 +75,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
                 <li><a href="member_address.php"><i class='bx bx-home-alt-2' ></i>My Address</a></li>
                 <li><a href="view_cart.php"><i class='bx bx-shopping-bag' ></i>Shopping Cart</a></li>
                 <li><a href="#"><i class='bx bx-heart' ></i>Wishlist</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>My Orders</a></li>
+                <li><a href="order_history.php"><i class='bx bx-food-menu'></i>My Orders</a></li>
             </ul>
         </div>
 
@@ -86,7 +86,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 
 
             <div class="profile-wrapper">
-    <div class="avatar-section">
+        <div class="avatar-section">
         <div class="avatar-container">
             <img id="avatar" src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
             <video id="video" autoplay class="profile-avatar" style="display: none;"></video>
