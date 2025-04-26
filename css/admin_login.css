@@ -63,12 +63,23 @@ label {
     background-color: white;
 }
 
+.input {
+    margin-bottom: 5px; /* Reduce the bottom margin */
+}
+
+.input span {
+    display: block;
+    margin-top: 2px; /* Add small margin between input and error message */
+    font-size: 14px;
+    margin-bottom: 15px; /* Add margin below error message */
+}
+
 input {
     background-color: white;
 }
 
 input[type=text]{
-    margin:10px 0 30px 0;
+    margin:10px 0 5px 0; /* Reduce bottom margin */
     width: 96.5%;
     font-size: 16px;
     padding: 13px 0 13px 10px;
@@ -78,7 +89,7 @@ input[type=text]{
 }
 
 input[type=password]{
-    margin:10px 0 20px 0;
+    margin:10px 0 5px 0; /* Reduce bottom margin */
     width: 96.5%;
     font-size: 16px;
     padding: 13px 0 13px 10px;

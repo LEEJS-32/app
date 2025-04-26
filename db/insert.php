@@ -2,7 +2,7 @@
 include 'db_connect.php'; // Include the database connection file
 
 $name = "wwww";
-$email = "wwww@wwww";
+$email = "wwww@wwww.com";
 $pwd = "Ww12@1212";
 $hash_pwd = sha1($pwd);
 $role = "admin";
@@ -18,7 +18,7 @@ if ($conn->query($sql_insert_admin) === TRUE) {
 }
 
 $name = "qqqq";
-$email = "qqqq@qqqq";
+$email = "qqqq@qqqq.com";
 $pwd = "Qq12@1212";
 $hash_pwd = sha1($pwd);
 $role = "member";
