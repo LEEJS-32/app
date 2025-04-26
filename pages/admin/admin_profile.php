@@ -152,10 +152,10 @@ $role = $user->role;
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
-                    <h3><?php echo ($name); ?></h3>
-                    <p><?php echo ($role); ?></p>
+                    <h3><?php echo htmlspecialchars($name); ?></h3>
+                    <p><?php echo htmlspecialchars($role); ?></p>
                 </div>
             </div>
 
@@ -163,7 +163,10 @@ $role = $user->role;
                 <li><a href="admin_profile.php" class="active"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
                 <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <hr>
+                <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
+                <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>
             </ul>
         </div>
 
@@ -210,7 +213,7 @@ $role = $user->role;
                 </div>
 
                 <div class="chart">
-                    <canvas id="myChart"></canvas> <!-- Canvas to render the line chart -->
+                    <canvas id="myChart"></canvas>
                 </div>
             </div>
         </div>
@@ -284,7 +287,6 @@ for ($i = 5; $i >= 0; $i--) {
         }
     });
 </script>
-
 
     </main>
     <footer>
