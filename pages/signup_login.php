@@ -91,7 +91,7 @@ unset($_SESSION['form_data'], $_SESSION['errors']); // Clear after getting
                             <input type="password" id="signup_password" name="password">
                             <span id="signup_pwd_error" style="color:red;"><?php echo $errors['password'] ?? ''; ?></span>
                         </div>
-            
+                        
                         <button type="submit">Submit</button>
                     </form>
                     <p>Already have an account? <a href="javascript:void(0)" onclick="toggleForm()">Member Log In</a></p>

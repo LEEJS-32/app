@@ -1,13 +1,11 @@
 <?php
-include '../db/db_connect.php';
-include '../_base.php';
+require_once '../_base.php';
 
 auth_user();
 auth();
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-
+$user_id = $user->user_id;
 
 if (isset($_POST['image'])) {
     $imageData = post('image');
@@ -20,22 +18,27 @@ if (isset($_POST['image'])) {
     $filePath = "../img/avatar/" . uniqid() . ".png";
     $fileName = "../" . $filePath;
 
-    // Save file
-    file_put_contents($filePath, $imageData);
+    try {
+        // Save file
+        file_put_contents($filePath, $imageData);
 
-    // Save to database
-    $stmt = $conn->prepare("UPDATE users SET avatar = ? WHERE user_id = ?");
-    $stmt->bind_param("si", $fileName, $user_id);
+        // Save to database
+        $stm = $_db->prepare("UPDATE users SET avatar = :avatar WHERE user_id = :user_id");
+        $stm->execute([
+            ':avatar' => $fileName,
+            ':user_id' => $user_id
+        ]);
 
-    if ($stmt->execute()) {
+        // Update session
+        $_SESSION['user']->avatar = $fileName;
+
         // Redirect after successful upload
         echo "OK";
-    } else {
+    } catch (PDOException $e) {
+        error_log("Upload photo error: " . $e->getMessage());
         echo "Error saving image to database.";
     }
 } else {
     echo "No image received.";
 }
-
-$conn->close();
 ?>

@@ -1,5 +1,5 @@
 <?php
-require '../../database.php';
+include_once '../../_base.php';
 
 // Enable error reporting
 ini_set('display_errors', 1);
@@ -33,103 +33,126 @@ if (!$ref_no || !$bill_code || !$order_id || !$amount || !$transaction_time) {
     die(json_encode(["error" => "Missing required payment details"]));
 }
 
-// Retrieve `user_id` from the `orders` table
-$stmt = $conn->prepare("SELECT user_id FROM orders WHERE order_id = ?");
-$stmt->bind_param("s", $order_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-
-if (!$user) {
-    file_put_contents($logFile, "Error: Order ID not found in orders table\n", FILE_APPEND);
-    http_response_code(400);
-    die(json_encode(["error" => "Invalid order ID"]));
-}
-
-$user_id = $user['user_id']; // Now we have `user_id`
-
-// Determine payment status
-$payment_status = match ($status) {
-    "1" => "Completed",
-    "2" => "Pending",
-    default => "Failed"
-};
-
-// Start transaction
-$conn->begin_transaction();
-
 try {
+    // Retrieve `user_id` from the `orders` table
+    $stm = $_db->prepare("SELECT user_id FROM orders WHERE order_id = :order_id");
+    $stm->execute([':order_id' => $order_id]);
+    $user = $stm->fetch(PDO::FETCH_OBJ);
+
+    if (!$user) {
+        file_put_contents($logFile, "Error: Order ID not found in orders table\n", FILE_APPEND);
+        http_response_code(400);
+        die(json_encode(["error" => "Invalid order ID"]));
+    }
+
+    $user_id = $user->user_id; // Now we have `user_id`
+
+    // Determine payment status
+    $payment_status = match ($status) {
+        "1" => "Completed",
+        "2" => "Pending",
+        default => "Failed"
+    };
+
+    // Start transaction
+    $_db->beginTransaction();
+
     // Check if a payment record already exists for this order
-    $stmt = $conn->prepare("SELECT payment_id FROM payments WHERE order_id = ? AND bill_code = ?");
-    $stmt->bind_param("ss", $order_id, $bill_code);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $existing_payment = $result->fetch_assoc();
+    $stm = $_db->prepare("SELECT payment_id FROM payments WHERE order_id = :order_id AND bill_code = :bill_code");
+    $stm->execute([
+        ':order_id' => $order_id,
+        ':bill_code' => $bill_code
+    ]);
+    $existing_payment = $stm->fetch(PDO::FETCH_OBJ);
 
     if ($existing_payment) {
         // Update existing payment record
-        $stmt = $conn->prepare("
+        $stm = $_db->prepare("
             UPDATE payments 
-            SET transaction_id = ?, payment_status = ?, amount = ?, transaction_date = ?
-            WHERE order_id = ? AND bill_code = ?
+            SET transaction_id = :ref_no, payment_status = :payment_status, 
+                amount = :amount, transaction_date = :transaction_time
+            WHERE order_id = :order_id AND bill_code = :bill_code
         ");
-        $stmt->bind_param("ssdsss", $ref_no, $payment_status, $amount, $transaction_time, $order_id, $bill_code);
-        $stmt->execute();
+        $stm->execute([
+            ':ref_no' => $ref_no,
+            ':payment_status' => $payment_status,
+            ':amount' => $amount,
+            ':transaction_time' => $transaction_time,
+            ':order_id' => $order_id,
+            ':bill_code' => $bill_code
+        ]);
         
         file_put_contents($logFile, "✅ Updated existing payment record: Order ID $order_id, Status: $payment_status\n", FILE_APPEND);
     } else {
         // Insert new payment record
-        $stmt = $conn->prepare("
+        $stm = $_db->prepare("
             INSERT INTO payments (user_id, order_id, bill_code, transaction_id, payment_status, amount, transaction_date, payment_method) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (:user_id, :order_id, :bill_code, :ref_no, :payment_status, :amount, :transaction_time, :payment_method)
         ");
-        $stmt->bind_param("issssds", $user_id, $order_id, $bill_code, $ref_no, $payment_status, $amount, $transaction_time, $payment_method);
-        $stmt->execute();
+        $stm->execute([
+            ':user_id' => $user_id,
+            ':order_id' => $order_id,
+            ':bill_code' => $bill_code,
+            ':ref_no' => $ref_no,
+            ':payment_status' => $payment_status,
+            ':amount' => $amount,
+            ':transaction_time' => $transaction_time,
+            ':payment_method' => $payment_method
+        ]);
         
         file_put_contents($logFile, "✅ Inserted new payment record: Order ID $order_id, Status: $payment_status\n", FILE_APPEND);
     }
 
     // Update order status
-    $order_status = ($payment_status === "Completed") ? 'processing' : 'pending';
-    $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE order_id = ?");
-    $stmt->bind_param("ss", $order_status, $order_id);
-    $stmt->execute();
+    $order_status = ($payment_status === "Completed") ? 'processing' : 'cancelled';
+    $stm = $_db->prepare("UPDATE orders SET status = :status WHERE order_id = :order_id");
+    $stm->execute([
+        ':status' => $order_status,
+        ':order_id' => $order_id
+    ]);
 
-    if ($stmt->affected_rows > 0) {
+    if ($stm->rowCount() > 0) {
         file_put_contents($logFile, "✅ Order status updated: Order ID $order_id, Status: $order_status\n", FILE_APPEND);
     } else {
         file_put_contents($logFile, "⚠️ No changes made to order status for Order ID: $order_id\n", FILE_APPEND);
     }
 
     // **Reduce stock for each product in the order**
-    $stmt = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
-    $stmt->bind_param("s", $order_id);
-    $stmt->execute();
-    $order_items = $stmt->get_result();
+    if ($order_status !== 'cancelled') {
+        $stm = $_db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = :order_id");
+        $stm->execute([':order_id' => $order_id]);
+        $order_items = $stm->fetchAll(PDO::FETCH_OBJ);
 
-    while ($item = $order_items->fetch_assoc()) {
-        $product_id = $item['product_id'];
-        $quantity = $item['quantity'];
+        foreach ($order_items as $item) {
+            $product_id = $item->product_id;
+            $quantity = $item->quantity;
 
-        // Reduce the quantity in the products table
-        $stmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE product_id = ?");
-        $stmt->bind_param("ii", $quantity, $product_id);
-        $stmt->execute();
+            // Reduce the quantity in the products table
+            $stm = $_db->prepare("UPDATE products SET stock = stock - :quantity WHERE product_id = :product_id");
+            $stm->execute([
+                ':quantity' => $quantity,
+                ':product_id' => $product_id
+            ]);
 
-        // Log stock reduction
-        file_put_contents($logFile, "✅ Reduced stock for Product ID $product_id, Quantity: $quantity\n", FILE_APPEND);
+            // Log stock reduction
+            file_put_contents($logFile, "✅ Reduced stock for Product ID $product_id, Quantity: $quantity\n", FILE_APPEND);
+        }
+    } else {
+        file_put_contents($logFile, "⚠️ Stock reduction skipped as order status is 'cancelled' for Order ID: $order_id\n", FILE_APPEND);
     }
 
     // Commit transaction
-    $conn->commit();
+    $_db->commit();
 
     // Respond with success
     http_response_code(200);
     echo json_encode(["status" => "success"]);
 
-} catch (Exception $e) {
+} catch (PDOException $e) {
     // Rollback transaction on error
-    $conn->rollback();
+    if ($_db->inTransaction()) {
+        $_db->rollBack();
+    }
     file_put_contents($logFile, "❌ Database error: " . $e->getMessage() . "\n", FILE_APPEND);
     http_response_code(500);
     die(json_encode(["error" => "Database error"]));
