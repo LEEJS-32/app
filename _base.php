@@ -92,6 +92,12 @@ function html_pwd($key, $attr = '') {
     echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
 }
 
+// Generate <input type='password'>
+function html_password($key, $attr = '') {
+    $value = encode($GLOBALS[$key] ?? '');
+    echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
+}
+
 // Generate <input type='radio'> list
 function html_radios($key, $items, $br = false, $disabled = '') {
     $value = encode($GLOBALS[$key] ?? '');

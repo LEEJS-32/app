@@ -18,6 +18,7 @@ if (isset($_COOKIE["remember_me"])) {
 }
 
 // Redirect to login page
-redirect("../pages/admin/admin_login.php");
+temp('info', 'Log out successfully!');
+redirect("../pages/signup_login.php");
 ?>
 

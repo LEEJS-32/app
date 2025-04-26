@@ -28,8 +28,8 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <script defer src="../../js/webcam.js"></script>
 
 </head>
-
 <body>
+    <div id="info"><?= temp('info')?></div>
     <header>
         <?php 
             include __DIR__ . '/../../_header.php'; 
@@ -60,7 +60,6 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             die("Error: " . $e->getMessage());
         }
     ?>
-    
     <div class="container">
         <div class="left">
             <div class="profile">

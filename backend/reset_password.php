@@ -21,13 +21,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $confirm_password = $_POST['confirm-password'];
     $recaptcha_response = $_POST['g-recaptcha-response'];
 
+    if (empty($recaptcha_response)) {
+        temp('info', 'Please complete the CAPTCHA verification.');
+        redirect("../pages/member/reset_password.php");
+        exit;
+    }
+
     // Validate reCAPTCHA
     $verify_url = "https://www.google.com/recaptcha/api/siteverify?secret=$recaptcha_secret&response=$recaptcha_response";
     $response = file_get_contents($verify_url);
     $response_data = json_decode($response);
 
     if (!$response_data->success) {
-        $_SESSION['error'] = "CAPTCHA verification failed. Please try again.";
+        temp('info', 'CAPTCHA verification failed. Please try again.');
         redirect("../pages/member/reset_password.php");
         exit;
     }
@@ -67,10 +73,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ':user_id' => $user_id
         ]);
 
-        $_SESSION['success'] = "Password reset successful!";
+        temp('info', 'Password updated successfully!');
         redirect("../pages/member/reset_password.php");
+        exit();
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Error updating password.";
+        temp('info', 'Error updating password');
         redirect("../pages/member/reset_password.php");
     }
 }

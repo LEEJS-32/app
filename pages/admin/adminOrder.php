@@ -38,6 +38,7 @@ try {
     <link rel="stylesheet" href="../../css/adminOrder.css">
 </head>
 <body>
+<div id="info"><?= temp('info') ?></div>
 <header>
     <?php include '../../_header.php'; ?>
 </header>

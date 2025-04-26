@@ -42,14 +42,20 @@ try {
     echo "Data submitted successfully!";
 
     if (($_user) && ($_user->role == "member")) {
+        temp('info', 'Profile updated successfully.');
         redirect("../pages/member/member_profile.php");
+        exit();
     }
     else if (($_user) && ($_user->role == "admin")) {
         if ((!$new_user) && ($_user) && ($_user->role == "member")) {
+            temp('info', 'Profile updated successfully.');
             redirect("../pages/member/member_profile.php");
+            exit();
         }
         else if ((!$new_user) && ($_user) && ($_user->role == "admin")) {
+            temp('info', 'Profile updated successfully.');
             redirect("../pages/member/admin_profile.php");
+            exit();
         }
         else if ($new_user){
             redirect("../pages/signup_login.php"); // Redirect to a success page

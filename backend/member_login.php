@@ -96,6 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
                 // Redirect to member profile
+                temp('info', 'Log in successfully!');
                 redirect("../pages/member/member_profile.php");
             } else {
                 // Check if email exists

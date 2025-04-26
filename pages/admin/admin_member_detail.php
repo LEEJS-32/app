@@ -32,6 +32,7 @@ try {
 </head>
 
 <body>
+<div id="info"><?= temp('info') ?></div>
     <header>
         <?php include __DIR__ . '/../../_header.php'; ?>
     </header>

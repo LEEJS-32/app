@@ -89,10 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ";
 
             if ($m->send()) {
-                $_SESSION['success'] = "Registration successful! Please check your email to activate your account.";
+                temp('info', 'Registration successful! Please check your email to activate your account.');
                 redirect("../pages/signup_login.php");
             } else {
-                $errors['general'] = "Failed to send activation email. Please try again.";
+                temp('info', 'Failed to send activation email. Please try again.');
+                redirect("../pages/signup_login.php");
             }
         } catch (PDOException $e) {
             $errors['general'] = "Registration failed. Please try again.";

@@ -52,5 +52,6 @@ if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === 0) 
     $_SESSION['upload_error'] = "No file uploaded.";
 }
 
+temp('info', 'Photo uploaded successfully.');
 header("Location: ../pages/member/member_profile.php");
 exit();

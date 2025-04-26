@@ -34,6 +34,8 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     </style>
 </head>
 
+<div id="info"><?= temp('info')?></div>
+
 <body>
     <header>
         <?php 
@@ -45,15 +47,20 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <?php
         try {
             // Fetch avatar from database
-            $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+            $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
             $stm->execute([':user_id' => $user_id]);
             $row = $stm->fetch(PDO::FETCH_OBJ);
             
             $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
             
-            // If avatar exists, update the image URL
-            if ($row && !empty($row->avatar)) {
-                $imageUrl = $row->avatar;
+            if ($row) {
+                $email = $row->email;
+                $name = $row->name;
+                
+                // If avatar exists, update the image URL
+                if (!empty($row->avatar)) {
+                    $imageUrl = $row->avatar;
+                }
             }
         } catch (PDOException $e) {
             // Log error and continue with default avatar
@@ -64,7 +71,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
                     <h3><?php echo htmlspecialchars($name); ?></h3>
                     <p><?php echo htmlspecialchars($role); ?></p>
@@ -86,34 +93,16 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
         <div class="right">
             <h1>Password Reset</h1>
 
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="error-message" style="color: red; margin-bottom: 15px;">
-                    <?php 
-                        echo htmlspecialchars($_SESSION['error']); 
-                        unset($_SESSION['error']);
-                    ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="success-message" style="color: green; margin-bottom: 15px;">
-                    <?php 
-                        echo htmlspecialchars($_SESSION['success']); 
-                        unset($_SESSION['success']);
-                    ?>
-                </div>
-            <?php endif; ?>
-
             <!-- Reset password -->
             <form method="post" action="../../backend/reset_password.php" onsubmit="return validateResetPassword()">
                 <label for="old-password">Old Password</label>
-                <br><?php html_text('old-password'); ?><br>
+                <br><?php html_password('old-password'); ?><br>
                 <span id="old_pwd_error" style="color:red;"></span><br>
                 <label for="new-password">New Password</label>
-                <br><?php html_text('new-password'); ?><br>
+                <br><?php html_password('new-password'); ?><br>
                 <span id="new_pwd_error" style="color:red;"></span><br>
                 <label for="confirm-password">Confirm New Password</label>
-                <br><?php html_text('confirm-password'); ?><br>
+                <br><?php html_password('confirm-password'); ?><br>
                 <span id="confirm_pwd_error" style="color:red;"></span><br>
                 <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
                 <br><br>

@@ -30,6 +30,8 @@ if (!isset($_SESSION['user']) && isset($_COOKIE['remember_me'])) {
 // If still no session, redirect to login
 if (!isset($_SESSION['user'])) {
     echo "not authorized";
+    temp('info', 'Login required!');
+
     exit();
 }
 ?>

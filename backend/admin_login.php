@@ -50,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             // Redirect to admin profile
+            temp('info', 'Log in successfully.');
             redirect("../pages/admin/admin_profile.php");
         } else {
             // Invalid credentials
@@ -57,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             redirect("../pages/admin/admin_login.php");
         }
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Login failed. Please try again.";
+        temp('info', 'Login failed. Please try again.');
         redirect("../pages/admin/admin_login.php");
     }
 }

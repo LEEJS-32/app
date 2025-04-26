@@ -34,6 +34,9 @@ if (isset($_POST['image'])) {
 
         // Redirect after successful upload
         echo "OK";
+        temp('info', 'Photo uploaded successfully.');
+        header("Location: ../pages/member/member_profile.php");
+        exit();
     } catch (PDOException $e) {
         error_log("Upload photo error: " . $e->getMessage());
         echo "Error saving image to database.";

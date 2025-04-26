@@ -33,6 +33,7 @@ unset($_SESSION['form_data'], $_SESSION['errors']); // Clear after getting
 </head>
 
 <body>
+<div id="info"><?= temp('info') ?></div>
     <main>
         <div class="login">
             <div class="left">

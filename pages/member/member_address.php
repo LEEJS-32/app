@@ -29,6 +29,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 </head>
 
 <body>
+<div id="info"><?= temp('info') ?></div>
     <header>
         <?php 
             include __DIR__ . '/../../_header.php'; 
@@ -39,15 +40,20 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <?php
         try {
             // Fetch avatar from database
-            $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+            $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
             $stm->execute([':user_id' => $user_id]);
             $row = $stm->fetch(PDO::FETCH_OBJ);
             
             $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
             
-            // If avatar exists, update the image URL
-            if ($row && !empty($row->avatar)) {
-                $imageUrl = $row->avatar;
+            if ($row) {
+                $email = $row->email;
+                $name = $row->name;
+                
+                // If avatar exists, update the image URL
+                if (!empty($row->avatar)) {
+                    $imageUrl = $row->avatar;
+                }
             }
         } catch (PDOException $e) {
             error_log("Error fetching avatar: " . $e->getMessage());
@@ -57,7 +63,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
                     <h3><?php echo htmlspecialchars($name); ?></h3>
                     <p><?php echo htmlspecialchars($role); ?></p>
@@ -98,7 +104,7 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
             <?php endif; ?>
 
             <!-- Address -->
-            <form method="post" action="../backend/extra_info_process.php">
+            <form method="post" action="../../backend/extra_info_process.php">
                 <label for="address-line1">Address Line 1</label>
                 <br><input type="text" id="address-line1" name="address-line1" required>
                 <br><br>

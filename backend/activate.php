@@ -34,9 +34,10 @@ try {
             exit();
         }
     } else {
-        echo "Invalid token!";
+        temp('info', 'Invalid / Expired activation token.');
+
     }
 } catch (PDOException $e) {
-    echo "Error activating account. Please try again.";
+    temp('info', 'Activation failed. Please try again.');
 }
 ?>
