@@ -18,24 +18,12 @@ if (isset($_SESSION['form_data'])) {
 auth_user();
 auth('admin');
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
-include '../../_header.php';
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 // Fetch categories
-$categories_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
-if (!$categories_result) {
-    die("Error fetching categories: " . $conn->error);
+try {
+    $categories_stmt = $_db->query("SELECT id, name FROM categories ORDER BY name ASC");
+    $categories = $categories_stmt->fetchAll();
+} catch (PDOException $e) {
+    die("Error fetching categories: " . $e->getMessage());
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -50,19 +38,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $color = $_POST['color'];
 
     // Validate category
-    if ($category <= 0) {
-        $_err['category'] = "Invalid category selected.";
-    } else {
-        // Check if the category exists in the database
-        $stmt = $conn->prepare("SELECT id FROM categories WHERE id = ?");
-        $stmt->bind_param("i", $category);
-        $stmt->execute();
-        $stmt->store_result();
+    $category_exists = false;
+    try {
+        $category_stmt = $_db->prepare("SELECT id FROM categories WHERE id = ?");
+        $category_stmt->execute([$category]);
+        $category_exists = $category_stmt->fetch();
+    } catch (PDOException $e) {
+        die("Error validating category: " . $e->getMessage());
+    }
 
-        if ($stmt->num_rows === 0) {
-            $_err['category'] = "Selected category does not exist.";
-        }
-        $stmt->close();
+    if (!$category_exists) {
+        $_err['category'] = "Selected category does not exist.";
     }
 
     // Calculate discounted price
@@ -136,43 +122,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $image_urls_json = json_encode($image_urls);
 
-    // Prepare and bind
-    $stmt = $conn->prepare("
-        INSERT INTO products 
-        (name, description, price, stock, category_id, image_url, video_url, status, discount, discounted_price, brand, color, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-    ");
-    if (!$stmt) {
-        die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
-    }
-    $stmt->bind_param(
-        "ssdissssddss", 
-        $name, 
-        $description, 
-        $price, 
-        $stock, 
-        $category, 
-        $image_urls_json, 
-        $video_url, 
-        $status, 
-        $discount, 
-        $discounted_price, 
-        $brand, 
-        $color
-    );
+    // Insert product into the database
+    try {
+        $stm = $_db->prepare("
+            INSERT INTO products 
+            (name, description, price, stock, category_id, image_url, video_url, status, discount, discounted_price, brand, color, created_at, updated_at) 
+            VALUES (:name, :description, :price, :stock, :category_id, :image_url, :video_url, :status, :discount, :discounted_price, :brand, :color, NOW(), NOW())
+        ");
 
-    if ($stmt->execute()) {
+        $stm->execute([
+            ':name' => $name,
+            ':description' => $description,
+            ':price' => $price,
+            ':stock' => $stock,
+            ':category_id' => $category,
+            ':image_url' => $image_urls_json,
+            ':video_url' => $video_url,
+            ':status' => $status,
+            ':discount' => $discount,
+            ':discounted_price' => $discounted_price,
+            ':brand' => $brand,
+            ':color' => $color,
+        ]);
+
         $_SESSION['success_message'] = "Product added successfully!";
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
-    } else {
-        die("Error executing query: " . $stmt->error);
+    } catch (PDOException $e) {
+        die("Error inserting product: " . $e->getMessage());
     }
-
-    $stmt->close();
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -346,10 +325,10 @@ $conn->close();
         <select id="category" name="category" required>
             <option value="">Select a Category</option>
             <?php
-            if ($categories_result->num_rows > 0) {
-                while ($row = $categories_result->fetch_assoc()) {
-                    $selected = (isset($form_data['category']) && $form_data['category'] == $row['id']) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['name']) . "</option>";
+            if (!empty($categories)) {
+                foreach ($categories as $row) {
+                    $selected = (isset($form_data['category']) && $form_data['category'] == $row->id) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($row->id) . "' $selected>" . htmlspecialchars($row->name) . "</option>";
                 }
             } else {
                 echo "<option value=''>No categories available</option>";
