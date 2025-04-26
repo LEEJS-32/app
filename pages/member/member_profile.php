@@ -193,23 +193,27 @@ if ($row = $result->fetch_assoc()) {
     </div>
 
     <!-- Hidden editable form -->
-    <form method="post" id="editForm" action="../../backend/extra_info_process.php" style="display:none;">
+    <form method="post" id="editForm" action="../../backend/extra_info_process.php" style="display:none;" onsubmit="return validateMemberProfile()">
         <div class="info-grid">
             <div class="info-item">
                 <label for="name">Name</label>
                 <?php html_text('name'); ?>
+                <span id="name_error" style="color:red;"></span>
             </div>
             <div class="info-item">
                 <label for="email">Email</label>
                 <?php html_text('email'); ?>
+                <span id="email_error" style="color:red;"></span>
             </div>
             <div class="info-item">
-                <label for="phonenum">Phone Number</label>
-                <input type="tel" id="phonenum" name="phonenum" value="<?= htmlspecialchars($GLOBALS['phonenum']) ?>">
+                <label for="phonenum">Phone</label>
+                <?php html_text('phonenum'); ?>
+                <span id="phone_error" style="color:red;"></span>
             </div>
             <div class="info-item">
                 <label for="dob">Date of Birth</label>
                 <input type="date" id="dob" name="dob" value="<?= htmlspecialchars($GLOBALS['dob']) ?>">
+                <span id="dob_error" style="color:red;"></span>
             </div>
             <div class="info-item">
                 <label for="occupation">Occupation</label>
@@ -346,5 +350,72 @@ document.getElementById("toggleEdit").addEventListener("click", function () {
             include __DIR__ . '/../../_footer.php';
         ?>
     </footer>
+
+    <script>
+        function validateMemberProfile() {
+            let name = document.getElementById('name').value;
+            let email = document.getElementById('email').value;
+            let phone = document.getElementById('phonenum').value;
+            let dob = document.getElementById('dob').value;
+            let nameError = document.getElementById('name_error');
+            let emailError = document.getElementById('email_error');
+            let phoneError = document.getElementById('phone_error');
+            let dobError = document.getElementById('dob_error');
+            let isValid = true;
+
+            // Reset error messages
+            nameError.textContent = '';
+            emailError.textContent = '';
+            phoneError.textContent = '';
+            dobError.textContent = '';
+
+            // Name validation
+            if (name.trim() === '') {
+                nameError.textContent = 'Name is required';
+                isValid = false;
+            } else if (name.length < 2) {
+                nameError.textContent = 'Name must be at least 2 characters long';
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+                nameError.textContent = 'Name can only contain letters and spaces';
+                isValid = false;
+            }
+
+            // Email validation
+            if (email.trim() === '') {
+                emailError.textContent = 'Email is required';
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                emailError.textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+
+            // Phone validation
+            if (phone.trim() === '') {
+                phoneError.textContent = 'Phone number is required';
+                isValid = false;
+            } else if (!/^\d{10,11}$/.test(phone)) {
+                phoneError.textContent = 'Phone number must be 10 or 11 digits';
+                isValid = false;
+            }
+
+            // Date of Birth validation
+            if (dob.trim() === '') {
+                dobError.textContent = 'Date of birth is required';
+                isValid = false;
+            } else {
+                const today = new Date();
+                const selectedDate = new Date(dob);
+                today.setHours(0, 0, 0, 0); // Reset time part to compare only dates
+                
+                if (selectedDate >= today) {
+                    dobError.textContent = 'Date of birth cannot be today or in the future';
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+    </script>
 </body>
     

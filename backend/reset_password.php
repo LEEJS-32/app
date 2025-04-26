@@ -27,15 +27,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $response_data = json_decode($response);
 
     if (!$response_data->success) {
-        die("CAPTCHA verification failed. Please try again.");
+        $_SESSION['error'] = "CAPTCHA verification failed. Please try again.";
+        redirect("../pages/member/reset_password.php");
+        exit;
     }
 
     if (empty($old_password) || empty($new_password) || empty($confirm_password)) {
-        die("All fields are required.");
+        $_SESSION['error'] = "All fields are required.";
+        redirect("../pages/member/reset_password.php");
+        exit;
     }
 
     if ($new_password !== $confirm_password) {
-        die("New passwords do not match.");
+        $_SESSION['error'] = "New passwords do not match.";
+        redirect("../pages/member/reset_password.php");
+        exit;
     }
 
     // Fetch stored SHA-1 hashed password from database
@@ -48,7 +54,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Verify old password
     if (sha1($old_password) !== $stored_hash) {
-        die("Old password is incorrect.");
+        $_SESSION['error'] = "Old password is incorrect.";
+        redirect("../pages/member/reset_password.php");
+        exit;
     }
 
     // Hash the new password securely (bcrypt)
@@ -59,9 +67,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_stmt->bind_param("si", $new_hashed_password, $user_id);
     
     if ($update_stmt->execute()) {
-        echo "Password reset successful!";
+        $_SESSION['success'] = "Password reset successful!";
+        redirect("../pages/member/reset_password.php");
     } else {
-        echo "Error updating password.";
+        $_SESSION['error'] = "Error updating password.";
+        redirect("../pages/member/reset_password.php");
     }
 
     $update_stmt->close();

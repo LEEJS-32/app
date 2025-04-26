@@ -69,7 +69,7 @@ include_once '../../_base.php';
         <br>
         <p id="countdown-text">Redirecting in <span id="countdown">10</span> seconds...</p>
 
-        <button onclick="redirectNow()" style="padding: 8px 16px; font-size: 16px;">Login Page</button>
+        <button onclick="redirectNow()" style="padding: 8px 16px; font-size: 16px;">Get Started!</button>
 
         <script>
             let seconds = 10;
@@ -86,7 +86,7 @@ include_once '../../_base.php';
             }, 1000);
 
             function redirectNow() {
-                window.location.href = "../signup_login.php"; 
+                window.location.href = "../extra_info.php"; 
             }
         </script>
     </div>
