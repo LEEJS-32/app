@@ -1,8 +1,11 @@
 <?php
 require_once '../_base.php';
 
-// Remove session
-session_destroy();
+
+// Clear session data but keep session alive for temp message
+session_unset();
+
+
 
 // Remove token from database if "Remember Me" was used
 if (isset($_COOKIE["remember_me"])) {
@@ -17,8 +20,8 @@ if (isset($_COOKIE["remember_me"])) {
     }
 }
 
-// Redirect to login page
-temp('info', 'Log out successfully!');
-redirect("../pages/signup_login.php");
-?>
 
+redirect("../pages/signup_login.php");
+
+
+?>

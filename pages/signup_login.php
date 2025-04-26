@@ -3,7 +3,7 @@ require_once '../_base.php';
 require_once '../db/db_connect.php';
 
 // Check if user is already logged in
-if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'member') {
+if (isset($_SESSION['user']) && $_SESSION['user']->role === 'member') {
     redirect('member/member_profile.php');
 }
 
@@ -33,7 +33,7 @@ unset($_SESSION['form_data'], $_SESSION['errors']); // Clear after getting
 </head>
 
 <body>
-<div id="info"><?= temp('info') ?></div>
+<div id="info"><?= temp('info')?></div>
     <main>
         <div class="login">
             <div class="left">

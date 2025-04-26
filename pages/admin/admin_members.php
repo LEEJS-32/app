@@ -54,11 +54,35 @@ try {
         <?php include __DIR__ . '/../../_header.php'; ?>
     </header>
 
+    <?php
+        try {
+            // Fetch avatar from database
+            $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
+            $row = $stm->fetch(PDO::FETCH_OBJ);
+            
+            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+            
+            if ($row) {
+                $email = $row->email;
+                $name = $row->name;
+                
+                // If avatar exists, update the image URL
+                if (!empty($row->avatar)) {
+                    $imageUrl = $row->avatar;
+                }
+            }
+        } catch (PDOException $e) {
+            // Log error and continue with default avatar
+            error_log("Error fetching avatar: " . $e->getMessage());
+        }
+    ?>
+
     <main>
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+            <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
                     <h3><?= $name ?></h3>
                     <p><?= $role ?></p>
@@ -66,10 +90,13 @@ try {
             </div>
 
             <ul class="nav">
-                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
-                <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account'></i>Members</a></li>
+                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
+                <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <hr>
+                <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
+                <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>
             </ul>
         </div>
 

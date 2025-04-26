@@ -1,0 +1,154 @@
+/* Address Management Styles */
+.info-card {
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #fff;
+    max-width: 100%;
+    margin-top: 15px;
+    margin-bottom: 30px;
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.info-header h3 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.edit-btn {
+    border: none;
+    background: #f0f0f0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 450;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Readonly View Styles */
+#readonly-view .info-item {
+    margin-bottom: 20px;
+}
+
+#readonly-view label {
+    font-size: 16px;
+    font-weight: 450;
+    color: #999;
+    display: block;
+    margin-bottom: 3px;
+}
+
+#readonly-view p {
+    font-size: 17px;
+    font-weight: bold;
+    margin: 0;
+    padding: 8px 0;
+}
+
+/* Edit Form Styles */
+#editForm .info-item {
+    margin-bottom: 20px;
+}
+
+#editForm label {
+    font-size: 16px;
+    font-weight: 450;
+    color: #999;
+    display: block;
+    margin-bottom: 3px;
+}
+
+#editForm input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 450;
+    transition: border-color 0.3s;
+}
+
+#editForm input:focus {
+    border-color: #666;
+    outline: none;
+}
+
+#editForm input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+#editForm input::-webkit-outer-spin-button,
+#editForm input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.save-btn, .cancel-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 450;
+    transition: background-color 0.3s;
+}
+
+.save-btn {
+    background-color: #333;
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #444;
+}
+
+.cancel-btn {
+    background-color: #f0f0f0;
+    color: #666;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Error Messages */
+#editForm span[style*="color:red"] {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #ff4444;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .info-card {
+        padding: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .save-btn, .cancel-btn {
+        width: 100%;
+    }
+} 
