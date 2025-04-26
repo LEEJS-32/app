@@ -47,9 +47,9 @@
             <div class="nav-bar">
             <ul>
             <?php if (($_user) && ($_user['role'] == 'admin')): ?>
-                <li><a href="/pages/home.php">Home</a></li>
-                <li><a href="/pages/aboutus.php">About us</a></li>
+                <li><a href="/pages/admin/admin_members.php">Members</a></li>
                 <li><a href="/pages/admin/products.php">Products</a></li>
+                <li><a href="/pages/admin/adminOrder.php">Orders</a></li>
                 <li><a href="">Contact</a></li>
             <?php endif ?>
 
@@ -71,7 +71,10 @@
 
             <div class="other">
             <button class="search"><i class='bx bx-search'></i></button>
+            <?php if ((!$_user) || ($_user['role'] != 'admin')): ?>
             <a href="/pages/member/view_cart.php"><button class="cart"><i class='bx bx-shopping-bag'></i></button></a>
+            <?php endif ?>
+
             <button class="user" onclick="toggleDropdown()"><i class='bx bx-user' ></i></button>
             <ul class="profile-dropdown-list">
                 <?php if (($_user) && ($_user['role'] == 'member')): ?>
