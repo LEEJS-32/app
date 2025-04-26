@@ -72,11 +72,7 @@ $role = $user['role'];
             FROM orders o
             JOIN order_items oi ON o.order_id = oi.order_id
             WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
-            AND EXISTS (
-                SELECT 1 FROM payments p 
-                WHERE p.order_id = o.order_id 
-                AND p.payment_status = 'Completed'
-            )
+            AND o.status NOT IN ('pending', 'cancelled')
         ");
         $total_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
 
@@ -86,11 +82,7 @@ $role = $user['role'];
             FROM orders o
             JOIN order_items oi ON o.order_id = oi.order_id
             WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
-            AND EXISTS (
-                SELECT 1 FROM payments p 
-                WHERE p.order_id = o.order_id 
-                AND p.payment_status = 'Completed'
-            )
+            AND o.status NOT IN ('pending', 'cancelled')
         ");
         $last_month_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
 
@@ -209,6 +201,7 @@ for ($i = 5; $i >= 0; $i--) {
         FROM orders 
         JOIN order_items ON orders.order_id = order_items.order_id 
         WHERE DATE_FORMAT(orders.order_date, '%Y-%m') = '$month'
+        AND orders.status NOT IN ('pending', 'cancelled')
     ");
     $sales_per_month[] = (int)($res->fetch_assoc()['sold'] ?? 0);
 }

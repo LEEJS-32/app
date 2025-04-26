@@ -104,3 +104,24 @@ Array
 ✅ Updated existing payment record: Order ID ORD680c6e7654dbd, Status: Failed
 ⚠️ No changes made to order status for Order ID: ORD680c6e7654dbd
 ✅ Reduced stock for Product ID 2, Quantity: 1
+2025-04-26 08:01:38 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504262828684733
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 0vzhcgjl
+    [order_id] => ORD680c76ab5865f
+    [amount] => 1968.00
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504262828684733
+    [fpx_transaction_id] => 2504260142311173
+    [hash] => 085c557f0b67f9ddb529ba4a45b6ae9b
+    [transaction_time] => 2025-04-26 01:42:31
+)
+
+✅ Updated existing payment record: Order ID ORD680c76ab5865f, Status: Completed
+✅ Order status updated: Order ID ORD680c76ab5865f, Status: processing
+✅ Reduced stock for Product ID 2, Quantity: 2
