@@ -159,13 +159,16 @@ $column_check_query = "SHOW COLUMNS FROM products LIKE 'category_id'";
 $column_check_result = $conn->query($column_check_query);
 
 if ($column_check_result && $column_check_result->num_rows == 0) {
-    // Add category_id column and foreign key
-    $sql_update_products_table = "
-        ALTER TABLE products
+    // First drop the category column
+    $sql_drop_category = "ALTER TABLE products DROP COLUMN IF EXISTS category";
+    $conn->query($sql_drop_category);
+
+    // Then add category_id column and foreign key
+    $sql_add_category_id = "ALTER TABLE products 
         ADD COLUMN category_id INT,
-        ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
-    ";
-    if ($conn->query($sql_update_products_table) === TRUE) {
+        ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL";
+    
+    if ($conn->query($sql_add_category_id) === TRUE) {
         echo "Products table updated successfully.";
     } else {
         echo "Error updating products table: " . $conn->error;
