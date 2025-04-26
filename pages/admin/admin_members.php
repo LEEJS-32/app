@@ -9,9 +9,9 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
 // Database connection
 require '../../db/db_connect.php';
@@ -22,20 +22,22 @@ $where = [];
 $params = [];
 
 if ($search) {
-    $where[] = "(name LIKE ? OR email LIKE ? OR user_id LIKE ?)";
-    $params = array_fill(0, 3, "%$search%");
+    $where[] = "(name LIKE :search OR email LIKE :search OR user_id LIKE :search)";
+    $params[':search'] = "%$search%";
 }
 
 $sql = "SELECT user_id, name, email, role, status, avatar FROM users"; // Added photo field
 if ($where) {
     $sql .= " WHERE " . implode(' AND ', $where);
 }
-$stmt = $conn->prepare($sql);
-if ($params) {
-    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+
+try {
+    $stm = $_db->prepare($sql);
+    $stm->execute($params);
+    $result = $stm->fetchAll(PDO::FETCH_OBJ);
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
-$stmt->execute();
-$result = $stmt->get_result();
 // ----------------------------------------------------------------------------
 ?>
 <head>
@@ -95,16 +97,16 @@ $result = $stmt->get_result();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php foreach ($result as $row): ?>
                     <tr>
-                        <td><?= $row['user_id'] ?></td>
-                        <td><?= htmlspecialchars($row['name']) ?></td>
-                        <td><?= htmlspecialchars($row['email']) ?></td>
-                        <td><?= $row['role'] ?></td>
-                        <td><?= $row['status'] ?></td>
+                        <td><?= $row->user_id ?></td>
+                        <td><?= htmlspecialchars($row->name) ?></td>
+                        <td><?= htmlspecialchars($row->email) ?></td>
+                        <td><?= $row->role ?></td>
+                        <td><?= $row->status ?></td>
                         <td>
-                            <?php if (!empty($row['profile_photo'])): ?>
-                                <img src="../../uploads/profile_photos/<?= htmlspecialchars($row['profile_photo']) ?>" 
+                            <?php if (!empty($row->avatar)): ?>
+                                <img src="../../img/avatar/<?= htmlspecialchars($row->avatar) ?>" 
                                      class="thumbnail popup-thumb"
                                      alt="User Photo">
                             <?php else: ?>
@@ -112,10 +114,10 @@ $result = $stmt->get_result();
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="admin_member_detail.php?id=<?= $row['user_id'] ?>" class="btn-view">View Details</a>
+                            <a href="admin_member_detail.php?id=<?= $row->user_id ?>" class="btn-view">View Details</a>
                         </td>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>  

@@ -1,9 +1,5 @@
 <?php
-require_once __DIR__ . 'database.php';
-require_once __DIR__ . 'backend/admin/member.php';
-
-$pdo = $pdo;
-$member = new Member($pdo);
+require_once '../_base.php';
 
 $response = ['success' => false, 'message' => ''];
 
@@ -22,9 +18,12 @@ try {
     }
 
     // Check if username/email exists
-    $stmt = $pdo->prepare("SELECT id FROM members WHERE username = ? OR email = ?");
-    $stmt->execute([$username, $email]);
-    if ($stmt->fetch()) {
+    $stm = $_db->prepare("SELECT id FROM members WHERE username = :username OR email = :email");
+    $stm->execute([
+        ':username' => $username,
+        ':email' => $email
+    ]);
+    if ($stm->fetch(PDO::FETCH_OBJ)) {
         throw new Exception('Username or email already exists');
     }
 
@@ -44,7 +43,15 @@ try {
     }
 
     // Create member
-    $memberId = $member->create($username, $email, $password, $photo);
+    $stm = $_db->prepare("INSERT INTO members (username, email, password_hash, profile_photo) 
+                         VALUES (:username, :email, :password_hash, :photo)");
+    $stm->execute([
+        ':username' => $username,
+        ':email' => $email,
+        ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
+        ':photo' => $photo
+    ]);
+    $memberId = $_db->lastInsertId();
     
     $response['success'] = true;
     $response['message'] = 'Registration successful!';

@@ -7,12 +7,18 @@ $password = $_POST['password'] ?? '';
 $hash_password = sha1($password);
 
 if ($email) {
-    $stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
-    $stmt->bind_param("ss", $hash_password, $email);
-    $stmt->execute();
+    try {
+        $stm = $_db->prepare("UPDATE users SET password = :password WHERE email = :email");
+        $stm->execute([
+            ':password' => $hash_password,
+            ':email' => $email
+        ]);
 
-    unset($_SESSION['reset_email']);
-    echo "Password reset successful. <a href='../pages/signup_login.php'>Login</a>";
+        unset($_SESSION['reset_email']);
+        echo "Password reset successful. <a href='../pages/signup_login.php'>Login</a>";
+    } catch (PDOException $e) {
+        echo "Error resetting password. Please try again.";
+    }
 } else {
     echo "Session expired.";
 }

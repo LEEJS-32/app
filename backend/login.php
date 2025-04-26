@@ -7,64 +7,81 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = sha1($_POST["password"]);
     $remember = isset($_POST["remember"]); // Check if "Remember Me" is ticked
 
-    // Check user credentials and activation status
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ? AND is_active = 1");
-    $stmt->bind_param("ss", $email, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    try {
+        // Check user credentials and activation status
+        $stm = $_db->prepare("SELECT * FROM users WHERE email = :email AND password = :password AND is_active = 1");
+        $stm->execute([
+            ':email' => $email,
+            ':password' => $password
+        ]);
+        $user = $stm->fetch();
 
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $_SESSION["user"] = $user; // Store in session
-        $user_id = $user["user_id"];
+        if ($user) {
+            $_SESSION["user"] = $user; // Store in session
+            $user_id = $user->user_id;
 
-        // Merge guest cart into user's cart
-        if (isset($_SESSION["cart"]) && !empty($_SESSION["cart"])) {
-            foreach ($_SESSION["cart"] as $product_id => $guest_quantity) {
-                // Check if the product already exists in the user's cart
-                $stmt = $conn->prepare("SELECT quantity FROM shopping_cart WHERE user_id = ? AND product_id = ?");
-                $stmt->bind_param("ii", $user_id, $product_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
+            // Merge guest cart into user's cart
+            if (isset($_SESSION["cart"]) && !empty($_SESSION["cart"])) {
+                foreach ($_SESSION["cart"] as $product_id => $guest_quantity) {
+                    // Check if the product already exists in the user's cart
+                    $stm = $_db->prepare("SELECT quantity FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id");
+                    $stm->execute([
+                        ':user_id' => $user_id,
+                        ':product_id' => $product_id
+                    ]);
+                    $result = $stm->fetch();
 
-                if ($result->num_rows > 0) {
-                    // Product exists in cart, update quantity
-                    $row = $result->fetch_assoc();
-                    $new_quantity = $row['quantity'] + $guest_quantity;
-                    $stmt = $conn->prepare("UPDATE shopping_cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
-                    $stmt->bind_param("iii", $new_quantity, $user_id, $product_id);
-                } else {
-                    // Product not in cart, insert new row
-                    $stmt = $conn->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-                    $stmt->bind_param("iii", $user_id, $product_id, $guest_quantity);
+                    if ($result) {
+                        // Product exists in cart, update quantity
+                        $new_quantity = $result->quantity + $guest_quantity;
+                        $stm = $_db->prepare("UPDATE shopping_cart SET quantity = :quantity WHERE user_id = :user_id AND product_id = :product_id");
+                        $stm->execute([
+                            ':quantity' => $new_quantity,
+                            ':user_id' => $user_id,
+                            ':product_id' => $product_id
+                        ]);
+                    } else {
+                        // Product not in cart, insert new row
+                        $stm = $_db->prepare("INSERT INTO shopping_cart (user_id, product_id, quantity) VALUES (:user_id, :product_id, :quantity)");
+                        $stm->execute([
+                            ':user_id' => $user_id,
+                            ':product_id' => $product_id,
+                            ':quantity' => $guest_quantity
+                        ]);
+                    }
                 }
-                $stmt->execute();
+
+                // Clear guest session cart after merging
+                unset($_SESSION["cart"]);
             }
 
-            // Clear guest session cart after merging
-            unset($_SESSION["cart"]);
+            if ($remember) {
+                // Generate a secure token
+                $token = bin2hex(random_bytes(32));
+                $expiry = date("Y-m-d H:i:s", strtotime("+7 days")); // Valid for 7 days
+
+                // Store token in database
+                $stm = $_db->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (:user_id, :token, :expire)");
+                $stm->execute([
+                    ':user_id' => $user_id,
+                    ':token' => $token,
+                    ':expire' => $expiry
+                ]);
+
+                // Store token in cookie
+                setcookie("remember_me", $token, time() + (86400 * 7), "/", "", false, true);
+            }
+
+            // Redirect based on role
+            $redirect_url = ($user->role == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
+            redirect($redirect_url);
+        } else {
+            $_SESSION["error"] = "Invalid email, password, or account not activated.";
+            echo "Invalid email, password, or account not activated.";
         }
-
-        if ($remember) {
-            // Generate a secure token
-            $token = bin2hex(random_bytes(32));
-            $expiry = date("Y-m-d H:i:s", strtotime("+7 days")); // Valid for 7 days
-
-            // Store token in database
-            $stmt = $conn->prepare("INSERT INTO token (user_id, token_id, expire) VALUES (?, ?, ?)");
-            $stmt->bind_param("iss", $user_id, $token, $expiry);
-            $stmt->execute();
-
-            // Store token in cookie
-            setcookie("remember_me", $token, time() + (86400 * 7), "/", "", false, true);
-        }
-
-        // Redirect based on role
-        $redirect_url = ($user['role'] == "admin") ? "../pages/admin/admin_profile.php" : "../pages/member/member_profile.php";
-        redirect($redirect_url);
-    } else {
-        $_SESSION["error"] = "Invalid email, password, or account not activated.";
-        echo "Invalid email, password, or account not activated.";
+    } catch (PDOException $e) {
+        $_SESSION["error"] = "Login failed. Please try again.";
+        echo "Login failed. Please try again.";
     }
 }
 ?>

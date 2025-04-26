@@ -1,5 +1,5 @@
 <?php
-
+include_once 'config/database.php';
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // Is GET request?
@@ -172,7 +172,7 @@ function auth(...$roles) {
            // print_r($roles); // Display required roles
            // echo "<br>";
 
-            if (in_array($_user['role'], $roles)) {
+            if (in_array($_user->role, $roles)) {
                 // echo "✅ User role matches. Access granted.<br>";
                 return; // ✅ Allow access
             } else {

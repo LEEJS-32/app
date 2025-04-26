@@ -1,5 +1,5 @@
 <?php
-require '../../db/db_connect.php';
+include_once '../../_base.php';
 include '../../_header.php';
 
 // Get the product_id from the query parameter
@@ -9,20 +9,24 @@ if ($product_id <= 0) {
     die("Invalid product ID.");
 }
 
-// Fetch product details
-$stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
-$stmt->bind_param("i", $product_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$product = $result->fetch_assoc();
+try {
+    // Fetch product details
+    $stm = $_db->prepare("SELECT * FROM products WHERE product_id = :product_id");
+    $stm->execute([':product_id' => $product_id]);
+    $product = $stm->fetch(PDO::FETCH_OBJ);
 
-if (!$product) {
-    die("Product not found.");
+    if (!$product) {
+        die("Product not found.");
+    }
+
+    // Decode images and video
+    $image_urls = json_decode($product->image_url, true);
+    $video_url = $product->video_url;
+
+} catch (PDOException $e) {
+    error_log("Error fetching product details: " . $e->getMessage());
+    die("Error loading product details. Please try again later.");
 }
-
-// Decode images and video
-$image_urls = json_decode($product['image_url'], true);
-$video_url = $product['video_url'];
 ?>
 
 <!DOCTYPE html>
@@ -30,12 +34,12 @@ $video_url = $product['video_url'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
-    <link rel="stylesheet" href="../../css/product_details.css"> <!-- Add your CSS file -->
+    <title><?php echo htmlspecialchars($product->name); ?> - Product Details</title>
+    <link rel="stylesheet" href="../../css/product_details.css">
 </head>
 <body>
     <div class="product-details-container">
-        <h1><?php echo htmlspecialchars($product['name']); ?></h1>
+        <h1><?php echo htmlspecialchars($product->name); ?></h1>
 
         <!-- Product Images -->
         <div class="product-images">
@@ -62,19 +66,19 @@ $video_url = $product['video_url'];
 
         <!-- Product Details -->
         <div class="product-info">
-            <p><strong>Price:</strong> $<?php echo number_format($product['price'], 2); ?></p>
-            <p><strong>Brand:</strong> <?php echo htmlspecialchars($product['brand']); ?></p>
-            <p><strong>Color:</strong> <?php echo htmlspecialchars($product['color']); ?></p>
-            <p><strong>Description:</strong> <?php echo htmlspecialchars($product['description']); ?></p>
-            <p><strong>Stock:</strong> <?php echo intval($product['stock']); ?></p>
+            <p><strong>Price:</strong> RM <?php echo number_format($product->price, 2); ?></p>
+            <p><strong>Brand:</strong> <?php echo htmlspecialchars($product->brand); ?></p>
+            <p><strong>Color:</strong> <?php echo htmlspecialchars($product->color); ?></p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($product->description); ?></p>
+            <p><strong>Stock:</strong> <?php echo intval($product->stock); ?></p>
         </div>
 
         <!-- Add to Cart -->
         <form action="add_to_cart.php" method="POST" class="add-to-cart-form">
-            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['product_id']); ?>">
-            <?php if ($product['stock'] > 0) { ?>
+            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product->product_id); ?>">
+            <?php if ($product->stock > 0) { ?>
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?php echo intval($product['stock']); ?>">
+                <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?php echo intval($product->stock); ?>">
                 <button type="submit" class="add-to-cart-btn">Add to Cart</button>
             <?php } else { ?>
                 <button type="button" class="out-of-stock-btn" disabled>Out of Stock</button>
@@ -83,8 +87,3 @@ $video_url = $product['video_url'];
     </div>
 </body>
 </html>
-
-<?php
-$stmt->close();
-$conn->close();
-?>

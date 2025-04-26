@@ -12,9 +12,9 @@ $new_user = false;
 $_SESSION["new_user"] = $new_user;
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 $_genders = ['male' => 'Male', 'female' => 'Female'];
 // ----------------------------------------------------------------------------
 ?>
@@ -43,32 +43,31 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
 
     <main>
     <?php
-        require '../../db/db_connect.php';
-
-        // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
-        $result = $conn->query($sql);
-        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-        
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
+        try {
+            // Fetch avatar from database
+            $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
+            $row = $stm->fetch(PDO::FETCH_OBJ);
             
-        // If avatar exists, update the image URL
-            if (!empty($row["avatar"])) {
-                $imageUrl = $row["avatar"];
+            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+            
+            // If avatar exists, update the image URL
+            if ($row && !empty($row->avatar)) {
+                $imageUrl = $row->avatar;
             }
+        } catch (PDOException $e) {
+            // Log error and continue with default avatar
+            error_log("Error fetching avatar: " . $e->getMessage());
         }
     ?>
-    
-
     
     <div class="container">
         <div class="left">
             <div class="profile">
                 <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
                 <div class="profile-text">
-                    <h3><?php echo ($name); ?></h3>
-                    <p><?php echo ($role); ?></p>
+                    <h3><?php echo htmlspecialchars($name); ?></h3>
+                    <p><?php echo htmlspecialchars($role); ?></p>
                 </div>
             </div>
 
@@ -120,8 +119,6 @@ $_genders = ['male' => 'Male', 'female' => 'Female'];
                 <br><br>
                 <button type="submit" id="confirm-btn">Confirm</button>
             </form>
-
-            
         </div>  
     </div>
 

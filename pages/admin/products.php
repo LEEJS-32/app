@@ -9,10 +9,24 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
+try {
+    // Fetch avatar from database
+    $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+    $stm->execute([':user_id' => $user_id]);
+    $row = $stm->fetch(PDO::FETCH_OBJ);
+    
+    $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+    
+    if ($row && !empty($row->avatar)) {
+        $imageUrl = $row->avatar;
+    }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
 // ----------------------------------------------------------------------------
 ?>
 </script>
@@ -33,30 +47,13 @@ $role = $user['role'];
     </header>
 
     <main>
-    <?php
-        require '../../db/db_connect.php';
-    
-        // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
-        $result = $conn->query($sql);
-        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-        
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            
-        // If avatar exists, update the image URL
-            if (!empty($row["avatar"])) {
-                $imageUrl = $row["avatar"];
-            }
-        }
-    ?>
     <div class="container">
         <div class="left">
             <div class="profile">
                 <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
                 <div class="profile-text">
-                    <h3><?php echo ($name); ?></h3>
-                    <p><?php echo ($role); ?></p>
+                    <h3><?php echo htmlspecialchars($name); ?></h3>
+                    <p><?php echo htmlspecialchars($role); ?></p>
                 </div>
             </div>
 
@@ -72,7 +69,6 @@ $role = $user['role'];
 
         <div class="right">
             <h1>Product Management</h1>
-
 
             <a href="adminCreateProduct.php">Create Product</a>
             <a href="adminProduct.php">Show Product</a>

@@ -25,12 +25,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $errors['email'] = 'Please enter a valid email address';
     } else {
         // Check if email already exists
-        $stmt = $conn->prepare("SELECT email FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $errors['email'] = 'Email already exists';
+        try {
+            $stm = $_db->prepare("SELECT email FROM users WHERE email = :email");
+            $stm->execute([':email' => $email]);
+            if ($stm->fetch()) {
+                $errors['email'] = 'Email already exists';
+            }
+        } catch (PDOException $e) {
+            $errors['general'] = "Database error occurred. Please try again.";
         }
     }
 
@@ -44,25 +46,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (empty($errors)) {
-        // Hash the password
-        $hash_password = sha1($password);
-        $avatar = "../../img/avatar/avatar.jpg";
-        $activation_token = bin2hex(random_bytes(32)); // Generate unique activation token
-        $role = 'member';
+        try {
+            // Hash the password
+            $hash_password = sha1($password);
+            $avatar = "../../img/avatar/avatar.jpg";
+            $activation_token = bin2hex(random_bytes(32)); // Generate unique activation token
+            $role = 'member';
 
-        // Insert user into database
-        $stmt = $conn->prepare("INSERT INTO users (name, email, password, avatar, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $name, $email, $hash_password, $avatar, $role);
+            // Insert user into database
+            $stm = $_db->prepare("INSERT INTO users (name, email, password, avatar, role, is_active) VALUES (:name, :email, :password, :avatar, :role, :is_active)");
+            $stm->execute([
+                ':name' => $name,
+                ':email' => $email,
+                ':password' => $hash_password,
+                ':avatar' => $avatar,
+                ':role' => $role, 
+                ':is_active' => 0
+            ]);
 
-        if ($stmt->execute()) {
-            $user_id = $stmt->insert_id;
+            $user_id = $_db->lastInsertId();
 
             // Generate Activation Token
             $expiry_time = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-            $stmt = $conn->prepare("INSERT INTO active_token (token_id, user_id, expire) VALUES (?, ?, ?)");
-            $stmt->bind_param("sis", $activation_token, $user_id, $expiry_time);
-            $stmt->execute();
+            $stm = $_db->prepare("INSERT INTO active_token (token_id, user_id, expire) VALUES (:token, :user_id, :expire)");
+            $stm->execute([
+                ':token' => $activation_token,
+                ':user_id' => $user_id,
+                ':expire' => $expiry_time
+            ]);
 
             // Send activation email
             $url = base("backend/activate.php?token=$activation_token");
@@ -82,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             } else {
                 $errors['general'] = "Failed to send activation email. Please try again.";
             }
-        } else {
+        } catch (PDOException $e) {
             $errors['general'] = "Registration failed. Please try again.";
         }
     }
