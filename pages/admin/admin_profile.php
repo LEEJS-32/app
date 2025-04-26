@@ -59,7 +59,7 @@ $role = $user['role'];
         $total_members = $result_members->fetch_assoc()['total_members'];
 
         // Total revenue from all completed orders
-        $result_revenue = $conn->query("SELECT SUM(total_price) AS total_revenue FROM orders WHERE status IN ('shipped', 'delivered')");
+        $result_revenue = $conn->query("SELECT SUM(amount) AS total_revenue FROM payments WHERE payment_status IN ('Completed')");
         $total_revenue = $result_revenue->fetch_assoc()['total_revenue'] ?? 0;
 
         // Current month (YYYY-MM)
@@ -72,6 +72,11 @@ $role = $user['role'];
             FROM orders o
             JOIN order_items oi ON o.order_id = oi.order_id
             WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
+            AND EXISTS (
+                SELECT 1 FROM payments p 
+                WHERE p.order_id = o.order_id 
+                AND p.payment_status = 'Completed'
+            )
         ");
         $total_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
 
@@ -81,22 +86,31 @@ $role = $user['role'];
             FROM orders o
             JOIN order_items oi ON o.order_id = oi.order_id
             WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
+            AND EXISTS (
+                SELECT 1 FROM payments p 
+                WHERE p.order_id = o.order_id 
+                AND p.payment_status = 'Completed'
+            )
         ");
         $last_month_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
 
         // Revenue this month
         $res = $conn->query("
-            SELECT SUM(o.total_price) AS total_revenue
-            FROM orders o
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth' AND o.status IN ('shipped', 'delivered')
+            SELECT SUM(amount) AS total_revenue
+            FROM payments p
+            JOIN orders o ON p.order_id = o.order_id
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
+            AND p.payment_status = 'Completed'
         ");
         $revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
 
         // Revenue last month
         $res = $conn->query("
-            SELECT SUM(o.total_price) AS total_revenue
-            FROM orders o
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth' AND o.status IN ('shipped', 'delivered')
+            SELECT SUM(amount) AS total_revenue
+            FROM payments p
+            JOIN orders o ON p.order_id = o.order_id
+            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
+            AND p.payment_status = 'Completed'
         ");
         $last_revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
 

@@ -15,6 +15,6 @@ auth_user();
 <h1>Use sample.php as reference code!!!!!!!!!!!!!!</h1>
 
 <?php 
-require 'database.php';
+require 'config/database.php';
 include 'db/insert.php';
  ?>

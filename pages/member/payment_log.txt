@@ -394,3 +394,32 @@ Voucher code received:
 Total amount before discount: 13782.60
 Total amount after discount: 13782.6
 2025-04-24 09:01:10 - API Response: 						[{"BillCode":"hr3qn6cm"}]
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 1393.5
+Total amount before discount: 2787.00
+Total amount after discount: 1393.5
+2025-04-26 12:58:50 - API Response: 						{"status":"error","msg":"billPhone parameter is empty"}
+Error: Unable to create payment.
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 1393.5
+Total amount before discount: 2787.00
+Total amount after discount: 1393.5
+2025-04-26 13:01:29 - API Response: 						[{"BillCode":"l1d9vzcf"}]
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 2377.5
+Total amount before discount: 4755.00
+Total amount after discount: 2377.5
+2025-04-26 13:19:48 - API Response: 						[{"BillCode":"zorahecw"}]
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 2377.5
+Total amount before discount: 4755.00
+Total amount after discount: 2377.5
+2025-04-26 13:24:55 - API Response: 						[{"BillCode":"ozr3rt4w"}]
+Voucher code received: 
+Total amount before discount: 1968.00
+Total amount after discount: 1968
+2025-04-26 13:26:14 - API Response: 						[{"BillCode":"ot97zgnv"}]
