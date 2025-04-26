@@ -1,6 +1,4 @@
 <?php
-// filepath: c:\Users\shenl\OneDrive\Documents\app1\app\pages\admin\adminUpdateProduct.php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 include '../../_header.php';
 ob_start();
 
