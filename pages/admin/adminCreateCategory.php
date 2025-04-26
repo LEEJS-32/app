@@ -1,21 +1,14 @@
 <?php
 ob_start(); // Start output buffering
 include '../../_header.php'; 
+require_once '../../_base.php';
 
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Initialize variables
 $category_name = "";
 $error_message = "";
 $success_message = "";
+
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -25,31 +18,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($category_name)) {
         $error_message = "Category name is required.";
     } else {
-        // Check if the category already exists
-        $stmt = $conn->prepare("SELECT id FROM categories WHERE name = ?");
-        $stmt->bind_param("s", $category_name);
-        $stmt->execute();
-        $stmt->store_result();
+        try {
+            // Check if the category already exists
+            $stmt = $_db->prepare("SELECT id FROM categories WHERE name = :name");
+            $stmt->execute([':name' => $category_name]);
 
-        if ($stmt->num_rows > 0) {
-            $error_message = "Category already exists.";
-        } else {
-            // Insert the new category
-            $stmt = $conn->prepare("INSERT INTO categories (name) VALUES (?)");
-            $stmt->bind_param("s", $category_name);
+            if ($stmt->fetch()) {
+                $error_message = "Category already exists.";
+            } else {
+                // Insert the new category
+                $stmt = $_db->prepare("INSERT INTO categories (name) VALUES (:name)");
+                $stmt->execute([':name' => $category_name]);
 
-            if ($stmt->execute()) {
                 $success_message = "Category created successfully.";
                 $category_name = ""; // Clear the input field
-            } else {
-                $error_message = "Error creating category: " . $stmt->error;
             }
+        } catch (PDOException $e) {
+            $error_message = "Error creating category: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
