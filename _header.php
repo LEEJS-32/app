@@ -50,14 +50,14 @@
                 <li><a href="/pages/admin/admin_members.php">Members</a></li>
                 <li><a href="/pages/admin/adminProduct.php">Products</a></li>
                 <li><a href="/pages/admin/adminOrder.php">Orders</a></li>
-                <li><a href="/pages/admin/adminVoucher.php">Contact</a></li>
+                <li><a href="/pages/admin/adminVoucher.php">Vouchers</a></li>
             <?php endif ?>
 
             <?php if (($_user) && ($_user->role == 'member')): ?>
                 <li><a href="/pages/home.php">Home</a></li>
                 <li><a href="/pages/aboutus.php">About us</a></li>
                 <li><a href="/pages/member/product_list.php">Products</a></li>
-                <li><a href="">Contact</a></li>
+                <li><a href="/pages/member/memberVoucher.php">Vouchers</a></li>
             <?php endif ?>
             <?php if (!$_user): ?>
                 <li><a href="/pages/home.php">Home</a></li>

@@ -463,3 +463,15 @@ Voucher code received:
 Total amount before discount: 950.40
 Total amount after discount: 950.4
 2025-04-27 21:37:19 - API Response: 						[{"BillCode":"unh8prb8"}]
+Voucher code received: try
+Voucher type: rm
+Voucher discount applied: 50.00
+Total amount before discount: 117.60
+Total amount after discount: 67.6
+2025-04-28 01:28:07 - API Response: 						[{"BillCode":"4vs5iaav"}]
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 58.8
+Total amount before discount: 117.60
+Total amount after discount: 58.8
+2025-04-28 02:37:18 - API Response: 						[{"BillCode":"zq8mr8ue"}]
