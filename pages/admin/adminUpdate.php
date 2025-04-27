@@ -278,7 +278,7 @@ if (!headers_sent()) {
             max-height: 100px;
         }
 
-        .remove-image {
+        .remove-image, .remove-new-image { /* Apply style to both classes */
             position: absolute;
             top: -10px;
             right: -10px;
@@ -288,6 +288,11 @@ if (!headers_sent()) {
             border-radius: 50%;
             padding: 5px;
             font-size: 12px;
+            line-height: 1; /* Ensure 'x' fits well */
+            display: inline-block; /* Ensure it takes space */
+            width: 16px; /* Adjust size as needed */
+            height: 16px; /* Adjust size as needed */
+            text-align: center; /* Center the 'x' */
         }
     </style>
 </head>
@@ -408,64 +413,83 @@ if (!headers_sent()) {
                 existingImages = [];
             }
 
-            let uploadedFiles = new Set();
+            const fileInput = $('#image_url')[0];
+            const previewContainer = $('#imagePreview');
+            const dropZone = $('#drop_zone');
 
-            function handleFiles(files) {
-                const fileInput = $('#image_url')[0];
-                const currentDt = new DataTransfer();
+            // Use a Map to keep track of new files and their data URLs for preview
+            let newFilesMap = new Map();
 
-                if (fileInput.files) {
-                    Array.from(fileInput.files).forEach(file => {
-                        if (!uploadedFiles.has(file.name)) {
-                            currentDt.items.add(file);
-                            uploadedFiles.add(file.name);
-                        }
-                    });
-                }
-
-                Array.from(files).forEach(file => {
-                    if (!uploadedFiles.has(file.name)) {
-                        currentDt.items.add(file);
-                        uploadedFiles.add(file.name);
-                    }
+            function updateFileInput() {
+                const dt = new DataTransfer();
+                newFilesMap.forEach(fileData => {
+                    dt.items.add(fileData.file);
                 });
-
-                fileInput.files = currentDt.files;
-                updateImagePreviews();
+                fileInput.files = dt.files;
             }
 
-            function updateImagePreviews() {
-                const previewContainer = $('#imagePreview');
-                previewContainer.empty();
+            function renderPreviews() {
+                previewContainer.empty(); // Clear previous previews
 
+                // 1. Render Existing Images
                 existingImages.forEach(imagePath => {
                     const preview = $('<div>').addClass('image-preview');
                     const imgSrc = (imagePath.startsWith('/') ? '' : '/') + imagePath;
                     const img = $('<img>').attr('src', imgSrc).attr('alt', 'Existing Image');
-                    const removeBtn = $('<span>').addClass('remove-image').text('×').data('src', imagePath);
+                    const removeBtn = $('<span>')
+                        .addClass('remove-image')
+                        .text('×')
+                        .data('src', imagePath);
                     preview.append(img).append(removeBtn);
                     previewContainer.append(preview);
                 });
 
-                const fileInput = $('#image_url')[0];
-                if (fileInput.files) {
-                    Array.from(fileInput.files).forEach(file => {
-                        if (!existingImages.includes("img/" + file.name)) {
-                            const reader = new FileReader();
-                            reader.onload = function (e) {
-                                const preview = $('<div>').addClass('image-preview');
-                                const img = $('<img>').attr('src', e.target.result).attr('alt', 'New Image');
-                                const removeBtn = $('<span>').addClass('remove-new-image').text('×').data('filename', file.name);
-                                preview.append(img).append(removeBtn);
-                                previewContainer.append(preview);
-                            };
-                            reader.readAsDataURL(file);
-                        }
-                    });
+                // 2. Render New Images from the Map
+                newFilesMap.forEach((fileData, fileName) => {
+                    if (fileData.dataUrl) { // Only render if dataUrl is ready
+                        const preview = $('<div>').addClass('image-preview');
+                        const img = $('<img>').attr('src', fileData.dataUrl).attr('alt', 'New Image');
+                        const removeBtn = $('<span>')
+                            .addClass('remove-new-image')
+                            .text('×')
+                            .attr('data-filename', fileName); // Use filename as key
+                        preview.append(img).append(removeBtn);
+                        previewContainer.append(preview);
+                    }
+                });
+            }
+
+            function handleFiles(files) {
+                let filesAdded = false;
+                Array.from(files).forEach(file => {
+                    // Only add if it's not already tracked
+                    if (!newFilesMap.has(file.name) && !existingImages.some(existing => existing.endsWith('/' + file.name))) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            // Store file and its data URL in the map
+                            newFilesMap.set(file.name, { file: file, dataUrl: e.target.result });
+                            renderPreviews(); // Re-render after this file is loaded
+                            updateFileInput(); // Update the actual file input
+                        };
+                        reader.onerror = function(e) {
+                            console.error("FileReader error for file:", file.name, e);
+                            // Optionally remove from map if loading failed
+                            newFilesMap.delete(file.name);
+                        };
+                        // Add to map immediately (without dataUrl yet) to track it
+                        newFilesMap.set(file.name, { file: file, dataUrl: null });
+                        reader.readAsDataURL(file);
+                        filesAdded = true;
+                    }
+                });
+
+                if (filesAdded) {
+                     // Initial render might show placeholders or nothing until onload fires
+                     // renderPreviews(); // Optional: render immediately without waiting for onload
                 }
             }
 
-            const dropZone = $('#drop_zone');
+            // --- Event Listeners ---
 
             dropZone.on('dragover', function (e) {
                 e.preventDefault();
@@ -487,44 +511,45 @@ if (!headers_sent()) {
             });
 
             dropZone.click(function () {
-                $('#image_url').click();
+                fileInput.click();
             });
 
-            $('#image_url').change(function () {
-                handleFiles(this.files);
+            $('#image_url').change(function (e) {
+                handleFiles(e.target.files);
             });
 
+            // Remove Existing Image
             $(document).on('click', '.remove-image', function () {
                 const removedSrc = $(this).data('src');
                 existingImages = existingImages.filter(src => src !== removedSrc);
-                $(this).parent('.image-preview').remove();
-                updateImagePreviews();
+                renderPreviews(); // Re-render the previews
             });
 
+            // Remove New Image
             $(document).on('click', '.remove-new-image', function () {
-                const filenameToRemove = $(this).data('filename');
-                const fileInput = $('#image_url')[0];
-                const dt = new DataTransfer();
-
-                Array.from(fileInput.files).forEach(file => {
-                    if (file.name !== filenameToRemove) {
-                        dt.items.add(file);
-                    }
-                });
-
-                fileInput.files = dt.files;
-                uploadedFiles.delete(filenameToRemove);
-                $(this).parent('.image-preview').remove();
-                updateImagePreviews();
+                const filenameToRemove = $(this).attr('data-filename');
+                newFilesMap.delete(filenameToRemove); // Remove from our tracking map
+                updateFileInput(); // Update the actual file input
+                renderPreviews(); // Re-render the previews
             });
 
-            updateImagePreviews();
+            // Initial render on page load
+            renderPreviews();
 
+            // --- Form Submission ---
             $('#updateProductForm').submit(function (e) {
-                e.preventDefault();
+                e.preventDefault(); // Prevent default synchronous submission
+
+                // Ensure file input is up-to-date before creating FormData
+                updateFileInput();
+
                 const formData = new FormData(this);
 
+                // Append remaining existing images
                 formData.append('existing_images', JSON.stringify(existingImages));
+
+                // Remove the file input data if you handle uploads separately or rely on the map
+                // formData.delete('image_url[]'); // Optional: if PHP uses the map data instead
 
                 $.ajax({
                     url: $(this).attr('action'),
@@ -534,21 +559,18 @@ if (!headers_sent()) {
                     contentType: false,
                     success: function (response) {
                         console.log('Raw server response:', response);
-                        console.log('Type of response:', typeof response);
-
                         try {
                             const jsonResponse = (typeof response === 'string') ? JSON.parse(response) : response;
-
-                            console.log('Server response:', jsonResponse);
+                            console.log('Parsed server response:', jsonResponse);
                             if (jsonResponse.success) {
-                                alert(jsonResponse.message);
-                                window.location.href = jsonResponse.redirect;
+                                alert(jsonResponse.message || "Product updated successfully!");
+                                window.location.href = jsonResponse.redirect || 'adminProduct.php';
                             } else {
                                 alert('Error: ' + (jsonResponse.error || 'Unknown error occurred.'));
                             }
-                        } catch (e) {
-                            alert('Invalid server response format.');
-                            console.error('Error processing response:', e, 'Raw response was:', response);
+                        } catch (err) {
+                            alert('Invalid server response format. Check console.');
+                            console.error('Error processing response:', err, 'Raw response was:', response);
                         }
                     },
                     error: function (xhr, status, error) {
@@ -557,7 +579,19 @@ if (!headers_sent()) {
                     }
                 });
             });
+
+            $('#stock').on('input', function () {
+                const stockVal = parseInt($(this).val(), 10);
+                if (stockVal === 0) {
+                    $('#status').val('inactive');
+                }
+            });
         });
     </script>
 </body>
+<footer>
+        <?php
+            include __DIR__ . '/../../_footer.php';
+        ?>
+    </footer>
 </html>
