@@ -1,20 +1,17 @@
 <?php
-
-include ('../../_base.php');
-
-// ----------------------------------------------------------------------------
-
-// Verify admin privileges
+require '../../_base.php';
 auth_user();
 auth('admin');
+
+// Generate CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 $user = $_SESSION['user'];
 $user_id = $user->user_id;
 $name = $user->name;
 $role = $user->role;
-
-// Database connection
-require '../../db/db_connect.php';
 
 // Search functionality
 $search = isset($_GET['search']) ? $_GET['search'] : '';
@@ -22,70 +19,49 @@ $where = [];
 $params = [];
 
 if ($search) {
-    $where[] = "(name LIKE :search OR email LIKE :search OR user_id LIKE :search)";
-    $params[':search'] = "%$search%";
-}
-
-$sql = "SELECT user_id, name, email, role, status, avatar FROM users"; // Added photo field
-if ($where) {
-    $sql .= " WHERE " . implode(' AND ', $where);
+    $where[] = "(name LIKE ? OR email LIKE ? OR user_id LIKE ?)";
+    $params = array_fill(0, 3, "%$search%");
 }
 
 try {
+    $sql = "SELECT user_id, name, email, role, status, avatar FROM users";
+    if ($where) {
+        $sql .= " WHERE " . implode(' AND ', $where);
+    }
     $stm = $_db->prepare($sql);
-    $stm->execute($params);
-    $result = $stm->fetchAll(PDO::FETCH_OBJ);
+    if ($params) {
+        $stm->execute($params);
+    } else {
+        $stm->execute();
+    }
+    $users = $stm->fetchAll(PDO::FETCH_OBJ);
 } catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
+    error_log("Error fetching users: " . $e->getMessage());
+    $users = [];
 }
-// ----------------------------------------------------------------------------
 ?>
+
 <head>
     <title>Member Maintenance</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
-    <link rel="stylesheet" href="../../css/admin_member.css">
+    <link rel="stylesheet" href="../../css/style2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
 </head>
 
 <body>
-    <div id="info"><?= temp('info') ?></div>
     <header>
         <?php include __DIR__ . '/../../_header.php'; ?>
     </header>
-
-    <?php
-        try {
-            // Fetch avatar from database
-            $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
-            $stm->execute([':user_id' => $user_id]);
-            $row = $stm->fetch(PDO::FETCH_OBJ);
-            
-            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-            
-            if ($row) {
-                $email = $row->email;
-                $name = $row->name;
-                
-                // If avatar exists, update the image URL
-                if (!empty($row->avatar)) {
-                    $imageUrl = $row->avatar;
-                }
-            }
-        } catch (PDOException $e) {
-            // Log error and continue with default avatar
-            error_log("Error fetching avatar: " . $e->getMessage());
-        }
-    ?>
 
     <main>
     <div class="container">
         <div class="left">
             <div class="profile">
-            <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
+            <img src="../../img/avatar/<?= htmlspecialchars($avatar) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
-                    <h3><?= $name ?></h3>
-                    <p><?= $role ?></p>
+                    <h3><?= htmlspecialchars($name) ?></h3>
+                    <p><?= htmlspecialchars($role) ?></p>
                 </div>
             </div>
 
@@ -125,16 +101,16 @@ try {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($result as $row): ?>
+                <?php foreach ($users as $user): ?>
                     <tr>
-                        <td><?= $row->user_id ?></td>
-                        <td><?= htmlspecialchars($row->name) ?></td>
-                        <td><?= htmlspecialchars($row->email) ?></td>
-                        <td><?= $row->role ?></td>
-                        <td><?= $row->status ?></td>
+                        <td><?= htmlspecialchars($user->user_id) ?></td>
+                        <td><?= htmlspecialchars($user->name) ?></td>
+                        <td><?= htmlspecialchars($user->email) ?></td>
+                        <td><?= htmlspecialchars($user->role) ?></td>
+                        <td><?= ucfirst($user->status) ?></td>
                         <td>
-                            <?php if (!empty($row->avatar)): ?>
-                                <img src="../../img/avatar/<?= htmlspecialchars($row->avatar) ?>" 
+                            <?php if (!empty($user->profile_photo)): ?>
+                                <img src="../../img/avatar/<?= htmlspecialchars($user->avatar) ?>" 
                                      class="thumbnail popup-thumb"
                                      alt="User Photo">
                             <?php else: ?>
@@ -142,10 +118,29 @@ try {
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="admin_member_detail.php?id=<?= $row->user_id ?>" class="btn-view">View Details</a>
+                            <a href="admin_member_detail.php?id=<?= $user->user_id ?>" class="btn-view">View Details</a>
+                            
+                            <!-- Block/Unblock User Form -->
+                            <form method="post" action="block_unblock_user.php" class="inline-form">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                <input type="hidden" name="user_id" value="<?= $user->user_id ?>">
+                                
+                                <?php if ($user->status === 'active'): ?>
+                                    <button type="submit" name="action" value="block" class="btn-block">Block</button>
+                                <?php else: ?>
+                                    <button type="submit" name="action" value="unblock" class="btn-unblock">Unblock</button>
+                                <?php endif; ?>
+                            </form>
+
+                            <!-- Delete User Form -->
+                            <form method="post" action="delete_user.php" class="inline-form">
+                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                <input type="hidden" name="user_id" value="<?= $user->user_id ?>">
+                                <button type="submit" name="action" value="delete" class="btn delete">Delete</button>
+                            </form>
                         </td>
                     </tr>
-                    <?php endforeach; ?>
+                <?php endforeach; ?>
                 </tbody>
             </table>
         </div>  

@@ -1,6 +1,7 @@
 <?php
 // ob_start(); // Start output buffering
-include '../../_base.php';
+require '../../_base.php';
+auth_user();
 include '../../_header.php';
 
 
