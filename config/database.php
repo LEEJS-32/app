@@ -174,7 +174,7 @@ try {
         order_id VARCHAR(50) NOT NULL,
         user_id INT NOT NULL,
         amount DECIMAL(10,2) NOT NULL,
-        payment_method ENUM('Credit Card', 'PayPal', 'Bank Transfer', 'ToyyibPay') NOT NULL,
+        payment_method ENUM('ToyyibPay') NOT NULL,
         payment_status ENUM('Pending', 'Completed', 'Failed','Refunded') DEFAULT 'Pending',
         transaction_id VARCHAR(100) NOT NULL UNIQUE,
         bill_code VARCHAR(100) NOT NULL,
