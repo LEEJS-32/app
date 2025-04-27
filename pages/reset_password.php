@@ -1,5 +1,8 @@
 <?php
-include_once '../_base.php';
+
+require '../_base.php';
+auth_user();
+
 if (!isset($_SESSION['otp_email'])) {
     header("Location: forgot_password.php");
     exit();

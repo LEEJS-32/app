@@ -1,9 +1,9 @@
 <?php
-include ('../../_base.php');
+require '../../_base.php';
+auth_user();
 
 // ----------------------------------------------------------------------------
 // Member role
-auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];

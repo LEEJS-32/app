@@ -86,7 +86,7 @@ include_once '../../_base.php';
             }, 1000);
 
             function redirectNow() {
-                window.location.href = "../extra_info.php"; 
+                window.location.href = "../signup_login.php"; 
             }
         </script>
     </div>

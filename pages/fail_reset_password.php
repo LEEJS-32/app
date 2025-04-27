@@ -1,5 +1,6 @@
 <?php
-include_once '../_base.php';
+require '../_base.php';
+auth_user();
 
 // Get error message based on error parameter
 $error = $_GET['error'] ?? 'unknown';

@@ -1,5 +1,6 @@
 <?php
-include_once '../../_base.php';
+require '../../_base.php';
+auth_user();
 
 $user = $_SESSION['user'];
 $user_id = $user->user_id;

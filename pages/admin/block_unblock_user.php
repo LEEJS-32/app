@@ -1,50 +1,43 @@
 <?php
-include ('../../_base.php');
-
-// Verify admin privileges
+require '../../_base.php';
 auth_user();
 auth('admin');
 
-// CSRF protection
+// Verify CSRF token
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['error'] = 'Invalid CSRF token';
-    header('Location: admin_members.php');
-    exit;
+    die('Invalid CSRF token');
 }
 
-// Prevent self-blocking
-if ($_POST['user_id'] == $_SESSION['user']['user_id']) {
-    $_SESSION['error'] = 'You cannot block your own account';
-    header('Location: admin_members.php');
-    exit;
+$user_id = $_POST['user_id'] ?? 0;
+$action = $_POST['action'] ?? '';
+
+if (!$user_id || !in_array($action, ['block', 'unblock'])) {
+    die('Invalid request');
 }
 
-// Validate action
-$valid_actions = ['block', 'unblock'];
-if (!in_array($_POST['action'], $valid_actions)) {
-    $_SESSION['error'] = 'Invalid action';
-    header('Location: admin_members.php');
-    exit;
+try {
+    // Get current status
+    $stm = $_db->prepare("SELECT status FROM users WHERE user_id = :user_id");
+    $stm->execute([':user_id' => $user_id]);
+    $user = $stm->fetch(PDO::FETCH_OBJ);
+
+    if (!$user) {
+        die('User not found');
+    }
+
+    // Update status
+    $new_status = $action === 'block' ? 'blocked' : 'active';
+    $stm = $_db->prepare("UPDATE users SET status = :status WHERE user_id = :user_id");
+    $stm->execute([
+        ':status' => $new_status,
+        ':user_id' => $user_id
+    ]);
+
+    header("Location: admin_members.php");
+    exit();
+} catch (PDOException $e) {
+    error_log("Error in block/unblock user: " . $e->getMessage());
+    die('Error processing request');
 }
+?>
 
-// Update user status
-require '../../db/db_connect.php';
-
-$new_status = $_POST['action'] === 'block' ? 'blocked' : 'active';
-$user_id = $_POST['user_id'];
-
-$stmt = $conn->prepare("UPDATE users SET status = ? WHERE user_id = ?");
-$stmt->bind_param('ss', $new_status, $user_id);
-$stmt->execute();
-
-if ($stmt->affected_rows > 0) {
-    $_SESSION['success'] = "User account successfully " . ($new_status === 'blocked' ? 'blocked' : 'activated');
-} else {
-    $_SESSION['error'] = 'No changes made. User may not exist.';
-}
-
-$stmt->close();
-$conn->close();
-
-header('Location: admin_members.php');
-exit;

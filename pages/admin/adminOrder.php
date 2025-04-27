@@ -1,5 +1,6 @@
 <?php
-include_once '../../_base.php';
+require '../../_base.php';
+auth_user();
 
 // Check if user is authenticated
 auth_user(); // Assuming this function checks if the user is an admin

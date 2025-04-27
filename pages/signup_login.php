@@ -1,5 +1,6 @@
 <?php
-require_once '../_base.php';
+require '../_base.php';
+auth_user();
 require_once '../db/db_connect.php';
 
 // Check if user is already logged in

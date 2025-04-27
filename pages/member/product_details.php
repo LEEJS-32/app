@@ -1,6 +1,6 @@
 <?php
-
-include_once '../../_base.php';
+require '../../_base.php';
+auth_user();
 include '../../_header.php';
 
 // Get the product_id from the query parameter

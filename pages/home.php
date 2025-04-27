@@ -1,5 +1,5 @@
 <?php
-include_once('../_base.php');
+require '../_base.php';
 auth_user();
 ?>
 

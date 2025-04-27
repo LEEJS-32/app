@@ -1,5 +1,6 @@
 <?php
 require '../_base.php';
+auth_user();
 require '../database.php';
 
 $message = "";
