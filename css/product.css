@@ -47,7 +47,7 @@ a h3:hover {
 }
 
 .search-container input[type="text"] {
-    width: 300px;
+    width: 200px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -109,7 +109,7 @@ a h3:hover {
 }
 
 .filter-group input[type="range"] {
-    width: 100%;
+    width: 10%;
 }
 
 .filter-group select {
