@@ -213,7 +213,7 @@ function auth_user() {
         $stmt->execute([':token' => $token]); // Bind parameter using execute
 
         // Fetch the user
-        $user_data = $stmt->fetch(PDO::FETCH_ASSOC); // Use fetch with PDO::FETCH_ASSOC
+        $user_data = $stmt->fetch(PDO::FETCH_OBJ); // Use fetch with PDO::FETCH_OBJ
 
         if ($user_data) {
             $_user = $user_data;
