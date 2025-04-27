@@ -10,25 +10,21 @@ if ($product_id <= 0) {
     die("Invalid product ID.");
 }
 
-
 // Fetch product details
 try {
     $stm = $_db->prepare("SELECT * FROM products WHERE product_id = :product_id");
     $stm->execute([':product_id' => $product_id]);
     $product = $stm->fetch(PDO::FETCH_ASSOC);
 
-
     if (!$product) {
         die("Product not found.");
     }
-
 
     // Decode images and video
     $image_urls = json_decode($product['image_url'], true);
     $video_url = $product['video_url'];
 } catch (PDOException $e) {
     die("Error fetching product: " . $e->getMessage());
-
 }
 ?>
 
@@ -37,7 +33,6 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
     <link rel="stylesheet" href="../../css/product_details.css"> <!-- Add your CSS file -->
     <script>
@@ -61,7 +56,6 @@ try {
 </head>
 <body>
     <div class="product-details-container">
-      
         <div class="product-images">
             <!-- Big Display Area -->
             <div class="big-display" id="bigDisplay">
@@ -87,7 +81,6 @@ try {
    
 
         <div class="product-info">
-
             <h1><?php echo htmlspecialchars($product['name']); ?></h1>
             <div class="price-container">
                 <p class="original-price">RM<?php echo number_format($product['price'], 2); ?></p>
@@ -118,7 +111,6 @@ try {
 
             
         </div>
-
     </div>
 </body>
 </html>

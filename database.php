@@ -65,30 +65,38 @@ $sql_create_token_table = "CREATE TABLE IF NOT EXISTS token (
 )";
 $conn->query($sql_create_token_table);
 
-// Create products table
+// Create categories table (Create before products table)
+$sql_create_categories = "CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+)";
+$conn->query($sql_create_categories); 
+
+// Create products table (Updated structure)
 $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
-    category VARCHAR(50),
-    image_url VARCHAR(255),
+    -- category VARCHAR(50), -- Replaced by category_id
+    category_id INT NULL, -- Added category_id
+    image_url TEXT NULL, -- Changed to TEXT to allow JSON array
+    video_url VARCHAR(255) NULL, -- Added video_url
     status ENUM('active', 'inactive', 'discontinued') DEFAULT 'active',
     discount DECIMAL(5, 2) DEFAULT 0.00,
     discounted_price DECIMAL(10, 2) DEFAULT 0.00,
-    -- weight DECIMAL(10, 2),
-    -- length DECIMAL(10, 2),
-    -- width DECIMAL(10, 2),
-    -- height DECIMAL(10, 2),
     brand VARCHAR(50),
     color VARCHAR(50),
     rating DECIMAL(3, 2) DEFAULT 0.00,
     reviews_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL -- Added FK constraint
 )";
-$conn->query($sql_create_products_table);
+if (!$conn->query($sql_create_products_table)) {
+    echo "Error creating products table: " . $conn->error . "\n"; // Added error reporting
+}
 
 // Create active_token table
 $sql_create_active_token_table = "CREATE TABLE IF NOT EXISTS active_token (
@@ -108,26 +116,7 @@ $sql_create_verify_otp_table = "CREATE TABLE IF NOT EXISTS verify_otp (
 )";
 $conn->query($sql_create_verify_otp_table);
 
-// Remember to delete !!!!
-// Check if the products table exists
-$table_check_query = "SHOW TABLES LIKE 'products'";
-$table_check_result = $conn->query($table_check_query);
 
-if ($table_check_result && $table_check_result->num_rows > 0) {
-    // Drop columns if the table exists
-    $sql_drop_columns = "ALTER TABLE products 
-        DROP COLUMN IF EXISTS weight,
-        DROP COLUMN IF EXISTS length,
-        DROP COLUMN IF EXISTS width,
-        DROP COLUMN IF EXISTS height";
-
-    if ($conn->query($sql_drop_columns) === TRUE) {
-    } else {
-        echo "Error dropping columns: " . $conn->error;
-    }
-} else {
-    echo "Table 'products' does not exist.";
-}
 
 // Add 'video_url' column if it does not exist
 $column_check_query = "SHOW COLUMNS FROM products LIKE 'video_url'";
@@ -142,38 +131,6 @@ if ($column_check_result && $column_check_result->num_rows == 0) {
 } else {
 }
 
-$sql_create_categories = "CREATE TABLE IF NOT EXISTS categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
-)";
-$conn->query($sql_create_categories); 
-
-// $sql_drop_category ="ALTER TABLE products
-// DROP COLUMN category,
-// ADD COLUMN category_id INT,
-// ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL";
-// $conn->query($sql_drop_category);
-
-// Update products table to use category_id as a foreign key
-$column_check_query = "SHOW COLUMNS FROM products LIKE 'category_id'";
-$column_check_result = $conn->query($column_check_query);
-
-if ($column_check_result && $column_check_result->num_rows == 0) {
-    // First drop the category column
-    $sql_drop_category = "ALTER TABLE products DROP COLUMN IF EXISTS category";
-    $conn->query($sql_drop_category);
-
-    // Then add category_id column and foreign key
-    $sql_add_category_id = "ALTER TABLE products 
-        ADD COLUMN category_id INT,
-        ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL";
-    
-    if ($conn->query($sql_add_category_id) === TRUE) {
-        echo "Products table updated successfully.";
-    } else {
-        echo "Error updating products table: " . $conn->error;
-    }
-}
 
 
 // Create shopping_cart table

@@ -116,7 +116,7 @@ Custom CSS without frameworks
 }
 
 .nav a:hover {
-    background: #e0e0e0;
+    background: black;
 }
 
 .nav .active {

@@ -16,13 +16,14 @@ if (isset($_SESSION['form_data'])) {
     $form_data = [];
 }
 
+// Member role
 auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
 
 // Fetch categories

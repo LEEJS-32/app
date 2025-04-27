@@ -313,6 +313,18 @@ th, td {
     width: 60px;
 }
 
+/* --- Divider adjustment: ensure spacing between left, divider, and right --- */
+.divider {
+    width: 1px;
+    background-color: grey;
+    display: inline-block;
+    margin-left: 30px;
+    margin-right: 30px;
+    opacity: 0.3;
+    vertical-align: middle;
+    height: 90vh;
+}
+
 /* Content area on the right */
 .right {
     flex: 1; /* Take up remaining space */
