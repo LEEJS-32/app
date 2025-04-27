@@ -94,6 +94,7 @@ try {
                 <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="adminProduct.php"><i class='bx bx-chair'></i>Products</a></li>
                 <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminVoucher.php"><i class='bx bx-gift'></i>Vouchers</a></li>
                 <hr>
                 <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
                 <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>

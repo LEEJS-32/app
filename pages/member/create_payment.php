@@ -175,7 +175,7 @@ try {
             $category_code = "vsofdz4y"; // Replace with actual category code
 
             // Ensure callback URL is correct (HTTPS required for production)
-            $callback_url = "https://findarticles-attachment-gathered-participating.trycloudflare.com/pages/member/payment_callback.php"; 
+            $callback_url = "https://relations-reality-karaoke-experiment.trycloudflare.com/pages/member/payment_callback.php"; 
             $return_url = "http://localhost:8000/pages/member/order_history.php";
 
             // Payment details
@@ -233,6 +233,10 @@ try {
 
             // Commit transaction if everything is successful
             $_db->commit();
+
+            // Clear the shopping cart for the user
+            $stm = $_db->prepare("DELETE FROM shopping_cart WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
 
             // Redirect to payment page
             header("Location: " . $payment_url);

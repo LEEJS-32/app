@@ -281,3 +281,66 @@ Array
 ✅ Updated existing payment record: Order ID ORD680ca233656b6, Status: Completed
 ✅ Order status updated: Order ID ORD680ca233656b6, Status: processing
 ✅ Reduced stock for Product ID 2, Quantity: 1
+2025-04-28 01:28:26 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504280656348481
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 4vs5iaav
+    [order_id] => ORD680e69279fb0f
+    [amount] => 67.59
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504280656348481
+    [fpx_transaction_id] => 2504280109186455
+    [hash] => c02109ab19e0b3de4b335c9dd098e731
+    [transaction_time] => 2025-04-28 01:09:18
+)
+
+✅ Updated existing payment record: Order ID ORD680e69279fb0f, Status: Completed
+✅ Order status updated: Order ID ORD680e69279fb0f, Status: processing
+✅ Reduced stock for Product ID 25, Quantity: 1
+2025-04-28 04:07:51 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504282471843624
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 6ajnjib2
+    [order_id] => ORD680e8e3311b64
+    [amount] => 217.70
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504282471843624
+    [fpx_transaction_id] => 2504280348104357
+    [hash] => d538c57022851c3f8c69eafca3e50980
+    [transaction_time] => 2025-04-28 03:48:10
+)
+
+✅ Updated existing payment record: Order ID ORD680e8e3311b64, Status: Completed
+✅ Order status updated: Order ID ORD680e8e3311b64, Status: processing
+✅ Reduced stock for Product ID 22, Quantity: 1
+2025-04-28 04:21:03 - Callback received:
+POST data:
+Array
+(
+    [refno] => TP2504282383200432
+    [status] => 1
+    [reason] => Payment Approved
+    [billcode] => 9g0tpe1v
+    [order_id] => ORD680e919b36784
+    [amount] => 435.40
+    [status_id] => 1
+    [msg] => ok
+    [transaction_id] => TP2504282383200432
+    [fpx_transaction_id] => 2504280401546684
+    [hash] => 63f7419c86e15791785d72eaac2fc585
+    [transaction_time] => 2025-04-28 04:01:54
+)
+
+✅ Updated existing payment record: Order ID ORD680e919b36784, Status: Completed
+✅ Order status updated: Order ID ORD680e919b36784, Status: processing
+✅ Reduced stock for Product ID 22, Quantity: 1
