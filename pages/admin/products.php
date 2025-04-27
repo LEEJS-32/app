@@ -4,7 +4,7 @@ include ('../../_base.php');
 
 // ----------------------------------------------------------------------------
 
-//member role
+// Member role
 auth_user();
 auth('admin');
 
@@ -34,6 +34,7 @@ try {
     <title>Product</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
+    <link rel="stylesheet" href="../../css/nav.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
     <script defer src="../../js/webcam.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,8 +48,12 @@ try {
     </header>
 
     <main>
+
     <div class="container">
         <div class="left">
+            <button id="navToggle" class="nav-toggle">
+                <i class='bx bx-menu'></i>
+            </button>
             <div class="profile">
                 <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
                 <div class="profile-text">
@@ -59,7 +64,7 @@ try {
 
             <ul class="nav">
                 <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
-                <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
+                <li><a href="admin_members.php"><i class='bx bxs-user-account'></i>Members</a></li>
                 <li><a href="products.php" class="active"><i class='bx bx-chair'></i>Products</a></li>
                 <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
             </ul>
@@ -73,7 +78,7 @@ try {
             <a href="adminCreateProduct.php">Create Product</a>
             <a href="adminProduct.php">Show Product</a>
             <a href="adminUpdateProduct.php">Update Product</a>
-        </div>  
+        </div>
     </div>
 
     </main>
@@ -82,5 +87,14 @@ try {
             include __DIR__ . '/../../_footer.php';
         ?>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navToggle = document.getElementById('navToggle');
+            const leftContainer = document.querySelector('.left');
+
+            navToggle.addEventListener('click', function () {
+                leftContainer.classList.toggle('collapsed');
+            });
+        });
+    </script>
 </body>
-    

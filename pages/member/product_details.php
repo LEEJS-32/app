@@ -1,4 +1,5 @@
 <?php
+
 include_once '../../_base.php';
 include '../../_header.php';
 
@@ -9,23 +10,25 @@ if ($product_id <= 0) {
     die("Invalid product ID.");
 }
 
+
+// Fetch product details
 try {
-    // Fetch product details
     $stm = $_db->prepare("SELECT * FROM products WHERE product_id = :product_id");
     $stm->execute([':product_id' => $product_id]);
-    $product = $stm->fetch(PDO::FETCH_OBJ);
+    $product = $stm->fetch(PDO::FETCH_ASSOC);
+
 
     if (!$product) {
         die("Product not found.");
     }
 
-    // Decode images and video
-    $image_urls = json_decode($product->image_url, true);
-    $video_url = $product->video_url;
 
+    // Decode images and video
+    $image_urls = json_decode($product['image_url'], true);
+    $video_url = $product['video_url'];
 } catch (PDOException $e) {
-    error_log("Error fetching product details: " . $e->getMessage());
-    die("Error loading product details. Please try again later.");
+    die("Error fetching product: " . $e->getMessage());
+
 }
 ?>
 
@@ -34,56 +37,88 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($product->name); ?> - Product Details</title>
-    <link rel="stylesheet" href="../../css/product_details.css">
+
+    <title><?php echo htmlspecialchars($product['name']); ?> - Product Details</title>
+    <link rel="stylesheet" href="../../css/product_details.css"> <!-- Add your CSS file -->
+    <script>
+        function updateBigDisplay(type, src) {
+            const bigDisplay = document.getElementById('bigDisplay');
+
+            if (type === 'image') {
+                bigDisplay.innerHTML = `
+                    <img src="${src}" alt="Product Image" class="big-image">
+                `;
+            } else if (type === 'video') {
+                bigDisplay.innerHTML = `
+                    <video controls autoplay class="big-image">
+                        <source src="${src}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                `;
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="product-details-container">
-        <h1><?php echo htmlspecialchars($product->name); ?></h1>
-
-        <!-- Product Images -->
+      
         <div class="product-images">
-            <?php
-            if (is_array($image_urls) && !empty($image_urls)) {
-                foreach ($image_urls as $image) {
-                    echo "<img src='/" . htmlspecialchars($image) . "' alt='Product Image' class='product-image'>";
-                }
-            } else {
-                echo "<img src='/img/default-product.jpg' alt='Default Product Image' class='product-image'>";
-            }
-            ?>
-        </div>
-
-        <!-- Product Video -->
-        <?php if (!empty($video_url)) { ?>
-            <div class="product-video">
-                <video controls>
-                    <source src="/<?php echo htmlspecialchars($video_url); ?>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
+            <!-- Big Display Area -->
+            <div class="big-display" id="bigDisplay">
+                <?php if (!empty($image_urls[0])): ?>
+                    <img src="/<?php echo htmlspecialchars($image_urls[0]); ?>" alt="Product Image" class="big-image">
+                <?php endif; ?>
             </div>
-        <?php } ?>
 
-        <!-- Product Details -->
+            <!-- Small Images -->
+            <div class="small-images">
+                <?php foreach ($image_urls as $image): ?>
+                    <img src="/<?php echo htmlspecialchars($image); ?>" alt="Product Thumbnail" class="small-image" onclick="updateBigDisplay('image', this.src)">
+                <?php endforeach; ?>
+
+                <?php if (!empty($video_url)): ?>
+                    <video class="small-image" poster="../../img/video_thumbnail/thumbnail.png" onclick="updateBigDisplay('video', '/<?php echo htmlspecialchars($video_url); ?>')">
+                        <source src="/<?php echo htmlspecialchars($video_url); ?>" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                <?php endif; ?>
+            </div>
+        </div>
+   
+
         <div class="product-info">
-            <p><strong>Price:</strong> RM <?php echo number_format($product->price, 2); ?></p>
-            <p><strong>Brand:</strong> <?php echo htmlspecialchars($product->brand); ?></p>
-            <p><strong>Color:</strong> <?php echo htmlspecialchars($product->color); ?></p>
-            <p><strong>Description:</strong> <?php echo htmlspecialchars($product->description); ?></p>
-            <p><strong>Stock:</strong> <?php echo intval($product->stock); ?></p>
+
+            <h1><?php echo htmlspecialchars($product['name']); ?></h1>
+            <div class="price-container">
+                <p class="original-price">RM<?php echo number_format($product['price'], 2); ?></p>
+                <p class="discounted-price">RM<?php echo number_format($product['discounted_price'], 2); ?></p>
+                <p class="discount-percentage">
+                    <?php
+                    $discount = (($product['price'] - $product['discounted_price']) / $product['price']) * 100;
+                    echo round($discount, 2) . '% Off';
+                    ?>
+                </p>
+            </div>
+            <p><strong>Brand:</strong> <?php echo htmlspecialchars($product['brand']); ?></p>
+            <p><strong>Color:</strong> <?php echo htmlspecialchars($product['color']); ?></p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($product['description']); ?></p>
+            <p><strong>Stock:</strong> <?php echo intval($product['stock']); ?></p>
+
+            <!-- Add to Cart -->
+            <form action="add_to_cart.php" method="POST" class="add-to-cart-form">
+                <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['product_id']); ?>">
+                <?php if ($product['stock'] > 0): ?>
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?php echo intval($product['stock']); ?>">
+                    <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+                <?php else: ?>
+                    <button type="button" class="out-of-stock-btn" disabled>Out of Stock</button>
+                <?php endif; ?>
+            </form>
+
+            
         </div>
 
-        <!-- Add to Cart -->
-        <form action="add_to_cart.php" method="POST" class="add-to-cart-form">
-            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product->product_id); ?>">
-            <?php if ($product->stock > 0) { ?>
-                <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?php echo intval($product->stock); ?>">
-                <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-            <?php } else { ?>
-                <button type="button" class="out-of-stock-btn" disabled>Out of Stock</button>
-            <?php } ?>
-        </form>
     </div>
 </body>
 </html>

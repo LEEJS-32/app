@@ -9,7 +9,7 @@ class SimplePager {
     public $count;      // Item count on the current page
 
     public function __construct($query, $params, $limit, $page) {
-        global $conn; // Use the global database connection
+        global $_db; // Use the global PDO database connection
 
         // Set limit and page
         $this->limit = ctype_digit((string)$limit) ? max((int)$limit, 1) : 10;
@@ -17,19 +17,13 @@ class SimplePager {
 
         // Set item count
         $count_query = preg_replace('/SELECT.+FROM/i', 'SELECT COUNT(*) FROM', $query, 1);
-        $stmt = $conn->prepare($count_query);
-        if (!$stmt) {
-            die("Error preparing count query: " . $conn->error);
+        try {
+            $stm = $_db->prepare($count_query);
+            $stm->execute($params);
+            $this->item_count = $stm->fetchColumn();
+        } catch (PDOException $e) {
+            die("Error preparing count query: " . $e->getMessage());
         }
-
-        if (!empty($params)) {
-            $types = str_repeat('s', count($params)); // Generate type string
-            $stmt->bind_param($types, ...$params);
-        }
-        $stmt->execute();
-        $stmt->bind_result($this->item_count);
-        $stmt->fetch();
-        $stmt->close();
 
         // Set page count
         $this->page_count = ceil($this->item_count / $this->limit);
@@ -38,25 +32,18 @@ class SimplePager {
         $offset = ($this->page - 1) * $this->limit;
 
         // Set result
-        $stmt = $conn->prepare($query . " LIMIT ?, ?");
-        if (!$stmt) {
-            die("Error preparing result query: " . $conn->error);
+        try {
+            $stm = $_db->prepare($query . " LIMIT :offset, :limit");
+            foreach ($params as $key => $value) {
+                $stm->bindValue($key, $value);
+            }
+            $stm->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stm->bindValue(':limit', $this->limit, PDO::PARAM_INT);
+            $stm->execute();
+            $this->result = $stm->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die("Error preparing result query: " . $e->getMessage());
         }
-
-        if (!empty($params)) {
-            $types = str_repeat('s', count($params)) . 'ii'; // Add 'ii' for offset and limit
-            $stmt->bind_param($types, ...array_merge($params, [$offset, $this->limit]));
-        } else {
-            $stmt->bind_param('ii', $offset, $this->limit);
-        }
-
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if (!$result) {
-            die("Error executing result query: " . $stmt->error);
-        }
-        $this->result = $result->fetch_all(MYSQLI_ASSOC);
-        $stmt->close();
 
         // Set count
         $this->count = count($this->result);

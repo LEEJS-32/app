@@ -1,0 +1,75 @@
+/* Navigation container */
+.left {
+    width: 250px;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.left.collapsed {
+    width: 60px;
+}
+
+/* Toggle button */
+.nav-toggle {
+    background: none;
+    border: none;
+    color: inherit; /* Use the inherited color */
+    cursor: pointer;
+    font-size: 24px;
+    padding: 10px;
+    transition: color 0.3s ease; /* Optional: Smooth transition for color */
+}
+
+
+
+/* Prevent the icon inside the button from changing color */
+.nav-toggle i {
+    color: inherit;
+}
+
+.nav-toggle i:hover {
+    color: inherit; /* Prevent hover effect on the icon */
+}
+
+/* Profile section */
+.left .profile {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.left.collapsed .profile {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Navigation links */
+.left .nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    transition: opacity 0.3s ease;
+}
+
+.left .nav li {
+    padding: 10px;
+}
+
+.left .nav li a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.left .nav li a i {
+    margin-right: 10px;
+}
+
+.left.collapsed .nav {
+    opacity: 0;
+    pointer-events: none;
+}
+

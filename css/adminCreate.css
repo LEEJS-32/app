@@ -5,7 +5,26 @@ body {
     background-color: #f9f9f9;
     color: #333;
 }
+.container {
+    width: 80%;
+    margin-left: auto; /* Add this */
+    margin-right: auto; /* Add this */
+}
 
+
+
+.divider {
+    width: 1px; /* Make it reliably visible */
+    background-color: grey;
+    display: inline-block;
+    margin: 0 10px;
+    opacity: 0.3;
+    vertical-align: middle; /* Helps align with text if needed */
+}
+
+.right{
+    margin-bottom: 15%;
+}
 h1 {
     text-align: center;
     color: #444;
@@ -13,7 +32,7 @@ h1 {
 }
 
 button, input[type="submit"] {
-    background-color: #007bff;
+    background-color: black;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -24,11 +43,12 @@ button, input[type="submit"] {
 }
 
 button:hover, input[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: white;
+    color: black;
 }
 
 /* Form Styles */
-form {
+.form-container {
     max-width: 600px;
     margin: 0 auto;
     background: #fff;

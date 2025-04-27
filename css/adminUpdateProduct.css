@@ -102,3 +102,30 @@ input[type="submit"]:hover, button:hover {
 .remove-image:hover {
     background: darkred;
 }
+
+
+        /* Add some basic styling for drag-and-drop
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .drop-zone.dragover {
+            border-color: #000;
+            color: #000;
+        }
+        .preview-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .preview-images img {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        } */
