@@ -228,34 +228,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $("#price, #discount").on("input", calculateDiscountedPrice);
 
-            let uploadedFiles = new Set();
+            // Use a Map to track files by unique name
+            let filesMap = new Map();
 
-            function handleFiles(files) {
-                let uniqueFiles = Array.from(files).filter(file => {
-                    if (uploadedFiles.has(file.name)) {
-                        return false;
-                    }
-                    uploadedFiles.add(file.name);
-                    return true;
-                });
+            function updateFileInput() {
+                const dt = new DataTransfer();
+                filesMap.forEach(file => dt.items.add(file));
+                $('#image_url')[0].files = dt.files;
+            }
 
-                // Clear existing previews
+            function renderPreviews() {
                 $('#imagePreview').empty();
-
-                // Add new image previews
-                uniqueFiles.forEach(file => {
+                filesMap.forEach((file, key) => {
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         const preview = $('<div>').addClass('image-preview');
                         const img = $('<img>').attr('src', e.target.result);
-                        const removeBtn = $('<span>').addClass('remove-image').text('×');
+                        const removeBtn = $('<span>').addClass('remove-image').text('×').attr('data-key', key);
                         preview.append(img).append(removeBtn);
                         $('#imagePreview').append(preview);
                     };
                     reader.readAsDataURL(file);
                 });
+            }
 
-                return uniqueFiles;
+            function handleFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (!filesMap.has(file.name)) {
+                        filesMap.set(file.name, file);
+                    }
+                });
+                renderPreviews();
+                updateFileInput();
             }
 
             // Drag-and-drop functionality
@@ -277,15 +281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 e.preventDefault();
                 e.stopPropagation();
                 dropZone.removeClass('dragover');
-
-                const files = e.originalEvent.dataTransfer.files;
-                const uniqueFiles = handleFiles(files);
-
-                // Add files to the input element
-                const fileInput = $('#image_url')[0];
-                const dt = new DataTransfer();
-                uniqueFiles.forEach(file => dt.items.add(file));
-                fileInput.files = dt.files;
+                handleFiles(e.originalEvent.dataTransfer.files);
             });
 
             // Click to upload
@@ -295,17 +291,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // File input change
             $('#image_url').change(function () {
-                const uniqueFiles = handleFiles(this.files);
-                const dt = new DataTransfer();
-                uniqueFiles.forEach(file => dt.items.add(file));
-                this.files = dt.files;
+                handleFiles(this.files);
             });
 
             // Remove image
             $(document).on('click', '.remove-image', function () {
-                $(this).parent('.image-preview').remove();
-                const removedSrc = $(this).data('src');
-                uploadedFiles.delete(removedSrc);
+                const key = $(this).attr('data-key');
+                filesMap.delete(key);
+                renderPreviews();
+                updateFileInput();
             });
         });
     </script>
