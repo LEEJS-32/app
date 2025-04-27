@@ -48,7 +48,7 @@
             <ul>
             <?php if (($_user) && ($_user->role == 'admin')): ?>
                 <li><a href="/pages/admin/admin_members.php">Members</a></li>
-                <li><a href="/pages/admin/adminProduct.php">Products</a></li>
+                <li><a href="/pages/admin/adminProducts.php">Products</a></li>
                 <li><a href="/pages/admin/adminOrder.php">Orders</a></li>
                 <li><a href="/pages/admin/adminVoucher.php">Contact</a></li>
             <?php endif ?>

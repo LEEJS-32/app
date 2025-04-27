@@ -179,6 +179,7 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     <div class="filter-group">
                         <label for="minPrice">Price Range:</label>
                         <input type="number" id="minPrice" name="min_price" min="0" max="10000" step="1" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : 0; ?>" placeholder="Min Price">
+                        <span style="display:inline-block; width:20px; height:2px; background:#ccc; vertical-align:middle; margin:0 24px;"></span>
                         <input type="number" id="maxPrice" name="max_price" min="0" max="10000" step="1" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : 10000; ?>" placeholder="Max Price">
                     </div>
 

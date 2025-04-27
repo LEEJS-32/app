@@ -57,7 +57,7 @@ a h3:hover {
 
 .search-container button {
     padding: 10px 15px;
-    background-color: #3498db;
+    background-color: black;
     color: white;
     border: none;
     border-radius: 4px;
@@ -68,7 +68,8 @@ a h3:hover {
 }
 
 .search-container button:hover {
-    background-color: #2980b9;
+    background-color: white;
+    color: black; /* Change text color to black */
 }
 
 /* Content Container */
@@ -241,14 +242,15 @@ a h3:hover {
     padding: 20px; /* Add padding */
 }
 
-/* Filters */
-#search, #categoryFilter, #statusFilter {
-    margin: 10px;
-    padding: 8px;
-    font-size: 14px;
+
+#minPrice,#maxPrice {
+    padding: 7px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+
+
 
 #search {
     width: 300px;
@@ -311,26 +313,27 @@ button:hover {
 .pagination a, .pagination span {
     padding: 8px 12px;
     text-decoration: none;
-    color: #3498db;
+    color: white;
+    background-color: black;
     border: 1px solid #ddd;
     border-radius: 4px;
     transition: background-color 0.3s ease;
 }
 
 .pagination a.active {
-    background-color: #3498db;
+    background-color: black;
     color: white;
     pointer-events: none;
 }
 
 .pagination a:hover {
-    background-color: #2980b9;
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 .pagination span.disabled {
     color: #ccc;
-    border-color: #ccc;
+    border-color: black;
     pointer-events: none; /* Disable interaction */
 }
 
