@@ -1,7 +1,7 @@
 <?php
 require_once '../_base.php';
 auth_user();
-auth();
+
 
 $user = $_SESSION['user'];
 $name = $user['name'];

@@ -17,7 +17,9 @@ try {
         $_SESSION['reset_email'] = $email;
         redirect("../pages/reset_password.php");
     } else {
-        echo "Invalid or expired OTP";
+        temp('info', 'Invalid or expired OTP');
+        header('Location: ../pages/verify_otp.php'); // Redirect to another page
+        exit();
     }
 } catch (PDOException $e) {
     echo "Error verifying OTP. Please try again.";

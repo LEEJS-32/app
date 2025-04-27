@@ -83,24 +83,14 @@ try {
         <div class="product-info">
             <h1><?php echo htmlspecialchars($product['name']); ?></h1>
             <div class="price-container">
-                <?php if ($product['price'] != $product['discounted_price']) { ?>
-                    <p class="original-price" style="text-decoration: line-through;">
-                        RM<?php echo number_format($product['price'], 2); ?>
-                    </p>
-                    <p class="discounted-price">
-                        RM<?php echo number_format($product['discounted_price'], 2); ?>
-                    </p>
-                    <p class="discount-percentage">
-                        <?php
-                        $discount = (($product['price'] - $product['discounted_price']) / $product['price']) * 100;
-                        echo round($discount, 2) . '% Off';
-                        ?>
-                    </p>
-                <?php } else { ?>
-                    <p class="no-discount-price">
-                        RM<?php echo number_format($product['price'], 2); ?>
-                    </p>
-                <?php } ?>
+                <p class="original-price">RM<?php echo number_format($product['price'], 2); ?></p>
+                <p class="discounted-price">RM<?php echo number_format($product['discounted_price'], 2); ?></p>
+                <p class="discount-percentage">
+                    <?php
+                    $discount = (($product['price'] - $product['discounted_price']) / $product['price']) * 100;
+                    echo round($discount, 2) . '% Off';
+                    ?>
+                </p>
             </div>
             <p><strong>Brand:</strong> <?php echo htmlspecialchars($product['brand']); ?></p>
             <p><strong>Color:</strong> <?php echo htmlspecialchars($product['color']); ?></p>
@@ -123,9 +113,4 @@ try {
         </div>
     </div>
 </body>
-<footer>
-        <?php
-            include __DIR__ . '/../../_footer.php';
-        ?>
-    </footer>
 </html>
