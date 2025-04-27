@@ -12,15 +12,16 @@ $role = $user['role'];
 
 $user_id = req('id');
 
-// Use the mysqli connection ($conn) instead of PDO
-$stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
-$stmt->bind_param("s", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$member = $result->fetch_assoc();
+try {
+    $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
+    $stm->execute([':user_id' => $user_id]);
+    $member = $stm->fetch(PDO::FETCH_ASSOC);
 
-if (!$member) {
-    die("Member not found");
+    if (!$member) {
+        die("Member not found");
+    }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
 ?>
 <head>
@@ -31,6 +32,7 @@ if (!$member) {
 </head>
 
 <body>
+<div id="info"><?= temp('info') ?></div>
     <header>
         <?php include __DIR__ . '/../../_header.php'; ?>
     </header>

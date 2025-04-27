@@ -1,29 +1,28 @@
 <?php
 include_once '../../_base.php';
-require '../../database.php';
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$user_role = $user['role'];
-$user_name = htmlspecialchars($user['name']);
-$user_email = htmlspecialchars($user['email']);
+$user_id = $user->user_id;
+$user_role = $user->role;
+$user_name = htmlspecialchars($user->name);
+$user_email = htmlspecialchars($user->email);
 
-// Fetch orders and payment details
-$sql = "SELECT o.order_id, o.total_price, o.order_date, o.status, 
-               p.payment_status, p.payment_method, p.amount, p.transaction_date 
-        FROM orders o
-        LEFT JOIN payments p ON o.order_id = p.order_id
-        WHERE o.user_id = ?
-        ORDER BY o.order_date DESC";
+try {
+    // Fetch orders and payment details
+    $sql = "SELECT o.order_id, o.total_price, o.order_date, o.status, 
+                   p.payment_status, p.payment_method, p.amount, p.transaction_date 
+            FROM orders o
+            LEFT JOIN payments p ON o.order_id = p.order_id
+            WHERE o.user_id = :user_id
+            ORDER BY o.order_date DESC";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stm = $_db->prepare($sql);
+    $stm->execute([':user_id' => $user_id]);
+    $orders = $stm->fetchAll(PDO::FETCH_OBJ);
 
-$orders = [];
-while ($row = $result->fetch_assoc()) {
-    $orders[] = $row;
+} catch (PDOException $e) {
+    error_log("Error fetching orders: " . $e->getMessage());
+    $orders = [];
 }
 ?>
 
@@ -46,20 +45,20 @@ while ($row = $result->fetch_assoc()) {
 
     <main>
     <?php
-        require '../../db/db_connect.php';
-
-        // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
-        $result = $conn->query($sql);
-        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-        
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
+        try {
+            // Fetch avatar from database
+            $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
+            $row = $stm->fetch(PDO::FETCH_OBJ);
             
-        // If avatar exists, update the image URL
-            if (!empty($row["avatar"])) {
-                $imageUrl = $row["avatar"];
+            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+            
+            // If avatar exists, update the image URL
+            if ($row && !empty($row->avatar)) {
+                $imageUrl = $row->avatar;
             }
+        } catch (PDOException $e) {
+            error_log("Error fetching avatar: " . $e->getMessage());
         }
     ?>
 
@@ -68,8 +67,8 @@ while ($row = $result->fetch_assoc()) {
             <div class="profile">
                 <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
                 <div class="profile-text">
-                    <h3><?php echo ($user_name); ?></h3>
-                    <p><?php echo ($user_role); ?></p>
+                    <h3><?php echo htmlspecialchars($user_name); ?></h3>
+                    <p><?php echo htmlspecialchars($user_role); ?></p>
                 </div>
             </div>
 
@@ -89,9 +88,9 @@ while ($row = $result->fetch_assoc()) {
             <h1>Orders History</h1>
 
             <div class="user-info">
-                <p><strong >User ID:</strong> <?= $user_id; ?></p>
-                <p><strong>Name:</strong> <?= $user_name; ?></p>
-                <p><strong>Email:</strong> <?= $user_email; ?></p>
+                <p><strong>User ID:</strong> <?= htmlspecialchars($user_id); ?></p>
+                <p><strong>Name:</strong> <?= htmlspecialchars($user_name); ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($user_email); ?></p>
             </div>
 
             <table>
@@ -109,17 +108,17 @@ while ($row = $result->fetch_assoc()) {
                 </thead>
                 <tbody>
                     <?php foreach ($orders as $order) : ?>
-                        <tr class="order-row" data-order-id="<?= $order['order_id']; ?>">
-                            <td><?= htmlspecialchars($order['order_id']); ?> <span class="toggle-arrow">▼</span></td>
-                            <td><?= number_format($order['total_price'], 2); ?></td>
-                            <td><?= $order['order_date']; ?></td>
-                            <td><?= ucfirst($order['status']); ?></td>
-                            <td><?= ucfirst($order['payment_status'] ?? 'N/A'); ?></td>
-                            <td><?= ucfirst($order['payment_method'] ?? 'N/A'); ?></td>
-                            <td><?= number_format($order['amount'], 2); ?></td>
-                            <td><?= $order['transaction_date'] ?? 'N/A'; ?></td>
+                        <tr class="order-row" data-order-id="<?= htmlspecialchars($order->order_id); ?>">
+                            <td><?= htmlspecialchars($order->order_id); ?> <span class="toggle-arrow">▼</span></td>
+                            <td><?= number_format($order->total_price, 2); ?></td>
+                            <td><?= htmlspecialchars($order->order_date); ?></td>
+                            <td><?= ucfirst(htmlspecialchars($order->status)); ?></td>
+                            <td><?= ucfirst(htmlspecialchars($order->payment_status ?? 'N/A')); ?></td>
+                            <td><?= ucfirst(htmlspecialchars($order->payment_method ?? 'N/A')); ?></td>
+                            <td><?= number_format($order->amount, 2); ?></td>
+                            <td><?= htmlspecialchars($order->transaction_date ?? 'N/A'); ?></td>
                         </tr>
-                        <tr class="order-items" id="items-<?= $order['order_id']; ?>" style="display: none;">
+                        <tr class="order-items" id="items-<?= htmlspecialchars($order->order_id); ?>" style="display: none;">
                             <td colspan="8">
                                 <table>
                                     <thead>
@@ -129,7 +128,7 @@ while ($row = $result->fetch_assoc()) {
                                             <th>Subtotal (RM)</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="items-list-<?= $order['order_id']; ?>">
+                                    <tbody id="items-list-<?= htmlspecialchars($order->order_id); ?>">
                                         <!-- Order items will be loaded here -->
                                     </tbody>
                                 </table>

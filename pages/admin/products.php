@@ -9,10 +9,24 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
+try {
+    // Fetch avatar from database
+    $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+    $stm->execute([':user_id' => $user_id]);
+    $row = $stm->fetch(PDO::FETCH_OBJ);
+    
+    $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+    
+    if ($row && !empty($row->avatar)) {
+        $imageUrl = $row->avatar;
+    }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
 // ----------------------------------------------------------------------------
 ?>
 </script>
@@ -34,22 +48,7 @@ $role = $user['role'];
     </header>
 
     <main>
-    <?php
-        // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = :user_id";
-        $stmt = $_db->prepare($sql);
-        $stmt->execute(['user_id' => $user_id]);
-        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-        
-        if ($stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            // If avatar exists, update the image URL
-            if (!empty($row["avatar"])) {
-                $imageUrl = $row["avatar"];
-            }
-        }
-    ?>
+
     <div class="container">
         <div class="left">
             <button id="navToggle" class="nav-toggle">

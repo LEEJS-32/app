@@ -1,44 +1,34 @@
 <?php
 // filepath: c:\Users\shenl\app\pages\admin\adminUpdateOrder.php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+require_once '../../_base.php';
 include '../../_header.php';
 ob_start();
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 $order = null;
 
-if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['order_id'])) {
-    $order_id = $_GET['order_id'];
-    $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ?");
-    $stmt->bind_param("i", $order_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $order = $result->fetch_assoc();
-    $stmt->close();
-}
+try {
+    if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['order_id'])) {
+        $order_id = $_GET['order_id'];
+        $stm = $_db->prepare("SELECT * FROM orders WHERE order_id = :order_id");
+        $stm->execute([':order_id' => $order_id]);
+        $order = $stm->fetch(PDO::FETCH_ASSOC);
+    }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['order_id'])) {
-    $order_id = (int)$_POST['order_id'];
-    $status = $_POST['status'] ?? 'Pending';
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['order_id'])) {
+        $order_id = (int)$_POST['order_id'];
+        $status = $_POST['status'] ?? 'Pending';
 
-    $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE order_id = ?");
-    $stmt->bind_param("si", $status, $order_id);
-    $stmt->execute();
-    $stmt->close();
+        $stm = $_db->prepare("UPDATE orders SET status = :status WHERE order_id = :order_id");
+        $stm->execute([
+            ':status' => $status,
+            ':order_id' => $order_id
+        ]);
 
-    header("Location: adminOrder.php");
-    exit;
+        header("Location: adminOrder.php");
+        exit;
+    }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
 ?>
 

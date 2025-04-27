@@ -1,20 +1,28 @@
 <?php
-require_once __DIR__ . 'database.php';
-require_once __DIR__ . 'member.php';
+require_once '../_base.php';
+require_once '../db/db_connect.php';
 
-// Start session and check admin access
-session_start();
-if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
-    header('Location: /login.php');
-    exit;
-}
+// Check admin access
+auth_user();
+auth('admin');
 
-$member = new Member($pdo);
 $searchTerm = $_GET['search'] ?? '';
-$members = $searchTerm ? $member->search($searchTerm) : $member->getAll();
 
-include '_header.php';
+try {
+    if ($searchTerm) {
+        $stm = $_db->prepare("SELECT * FROM users WHERE role = 'member' AND (name LIKE :search OR email LIKE :search)");
+        $stm->execute([':search' => "%$searchTerm%"]);
+    } else {
+        $stm = $_db->prepare("SELECT * FROM users WHERE role = 'member'");
+        $stm->execute();
+    }
+    $members = $stm->fetchAll(PDO::FETCH_OBJ);
+} catch (PDOException $e) {
+    $_SESSION['error'] = "Error fetching members.";
+    $members = [];
+}
 ?>
+<?php include_once '../pages/admin/admin_header.php'; ?>
 
 <div class="container">
     <h2>Member Management</h2>
@@ -22,7 +30,7 @@ include '_header.php';
     <form method="get" class="mb-4">
         <div class="input-group">
             <input type="text" name="search" class="form-control" 
-                   placeholder="Search by username or email" value="<?= htmlspecialchars($searchTerm) ?>">
+                   placeholder="Search by name or email" value="<?= htmlspecialchars($searchTerm) ?>">
             <button type="submit" class="btn btn-primary">Search</button>
         </div>
     </form>
@@ -31,7 +39,7 @@ include '_header.php';
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Username</th>
+                <th>Name</th>
                 <th>Email</th>
                 <th>Joined</th>
                 <th>Actions</th>
@@ -40,23 +48,22 @@ include '_header.php';
         <tbody>
             <?php foreach ($members as $member): ?>
             <tr>
-                <td><?= $member['id'] ?></td>
+                <td><?= $member->user_id ?></td>
                 <td>
-                    <?php if ($member['profile_photo']): ?>
-                    <img src="/assets/uploads/<?= htmlspecialchars($member['profile_photo']) ?>" 
+                    <?php if ($member->avatar): ?>
+                    <img src="../img/avatar/<?= htmlspecialchars($member->avatar) ?>" 
                          alt="Profile Photo" width="50" class="rounded-circle">
                     <?php endif; ?>
-                    <?= htmlspecialchars($member['username']) ?>
+                    <?= htmlspecialchars($member->name) ?>
                 </td>
-                <td><?= htmlspecialchars($member['email']) ?></td>
-                <td><?= date('M j, Y', strtotime($member['created_at'])) ?></td>
+                <td><?= htmlspecialchars($member->email) ?></td>
+                <td><?= date('M j, Y', strtotime($member->created_at)) ?></td>
                 <td>
-                    <a href="view-member.php?id=<?= $member['id'] ?>" class="btn btn-info btn-sm">View</a>
+                    <a href="view-member.php?id=<?= $member->user_id ?>" class="btn btn-info btn-sm">View</a>
                 </td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+    <?php include_once '../pages/admin/admin_footer.php'; ?>
 </div>
-
-<?php include '_footer.php'; ?>

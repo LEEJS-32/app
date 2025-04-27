@@ -1,5 +1,5 @@
 <?php
-
+include_once 'config/database.php';
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // Is GET request?
@@ -90,6 +90,12 @@ function html_pwd($key, $attr = '') {
     echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
 }
 
+// Generate <input type='password'>
+function html_password($key, $attr = '') {
+    $value = encode($GLOBALS[$key] ?? '');
+    echo "<input type='password' id='$key' name='$key' value='$value' $attr>";
+}
+
 // Generate <input type='radio'> list
 function html_radios($key, $items, $br = false, $disabled = '') {
     $value = encode($GLOBALS[$key] ?? '');
@@ -170,7 +176,7 @@ function auth(...$roles) {
            // print_r($roles); // Display required roles
            // echo "<br>";
 
-            if (in_array($_user['role'], $roles)) {
+            if (in_array($_user->role, $roles)) {
                 // echo "✅ User role matches. Access granted.<br>";
                 return; // ✅ Allow access
             } else {

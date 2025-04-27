@@ -1,49 +1,48 @@
 <?php 
 include_once '../../_base.php';
-require '../../db/db_connect.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
-$user_id = $user ? $user['user_id'] : 0;
+$user_id = $user ? $user->user_id : 0;
 
 $cart_items = isset($_SESSION['cart_items']) ? $_SESSION['cart_items'] : [];
 $total_price = 0;
 foreach ($cart_items as $item) {
-    $total_price += $item['discounted_price'] * $item['quantity'];
+    $total_price += $item->discounted_price * $item->quantity;
 }
 
-if ($user_id > 0) {
-    $sql_user = "SELECT name, phonenum, email FROM users WHERE user_id = ?";
-    $stmt_user = $conn->prepare($sql_user);
-    $stmt_user->bind_param("i", $user_id);
-    $stmt_user->execute();
-    $user_info = $stmt_user->get_result()->fetch_assoc();
+try {
+    if ($user_id > 0) {
+        // Fetch user info
+        $stm = $_db->prepare("SELECT name, phonenum, email FROM users WHERE user_id = :user_id");
+        $stm->execute([':user_id' => $user_id]);
+        $user_info = $stm->fetch(PDO::FETCH_OBJ);
 
-    $sql_address = "SELECT address_line1, address_line2, city, state, postal_code, country
-                    FROM address WHERE user_id = ?";
-    $stmt_address = $conn->prepare($sql_address);
-    $stmt_address->bind_param("i", $user_id);
-    $stmt_address->execute();
-    $address_info = $stmt_address->get_result()->fetch_assoc();
+        // Fetch address info
+        $stm = $_db->prepare("SELECT address_line1, address_line2, city, state, postal_code, country
+                             FROM address WHERE user_id = :user_id");
+        $stm->execute([':user_id' => $user_id]);
+        $address_info = $stm->fetch(PDO::FETCH_OBJ);
 
-    $vouchers = [];
-    $sql_vouchers = "SELECT * FROM vouchers 
-                     WHERE user_id = ? 
-                     AND quantity > 0 
-                     AND start_date <= CURDATE() 
-                     AND end_date >= CURDATE()";
-    $stmt_voucher = $conn->prepare($sql_vouchers);
-    $stmt_voucher->bind_param("i", $user_id);
-    $stmt_voucher->execute();
-    $result_vouchers = $stmt_voucher->get_result();
-    $vouchers = $result_vouchers->fetch_all(MYSQLI_ASSOC);
-} else {
-    $user_info = null;
-    $address_info = null;
-    $vouchers = [];
+        // Fetch available vouchers
+        $stm = $_db->prepare("SELECT * FROM vouchers 
+                             WHERE user_id = :user_id 
+                             AND quantity > 0 
+                             AND start_date <= CURDATE() 
+                             AND end_date >= CURDATE()");
+        $stm->execute([':user_id' => $user_id]);
+        $vouchers = $stm->fetchAll(PDO::FETCH_OBJ);
+    } else {
+        $user_info = null;
+        $address_info = null;
+        $vouchers = [];
+    }
+} catch (PDOException $e) {
+    error_log("Error in checkout: " . $e->getMessage());
+    die("Error loading checkout information. Please try again later.");
 }
 ?>
 
@@ -62,9 +61,9 @@ if ($user_id > 0) {
 
         <div class="user-info card">
             <?php if ($user_id > 0 && $user_info): ?>
-                <p><strong>Name:</strong> <?= htmlspecialchars($user_info['name']) ?></p>
-                <p><strong>Phone:</strong> <?= htmlspecialchars($user_info['phonenum']) ?></p>
-                <p><strong>Email:</strong> <?= htmlspecialchars($user_info['email']) ?></p>
+                <p><strong>Name:</strong> <?= htmlspecialchars($user_info->name) ?></p>
+                <p><strong>Phone:</strong> <?= htmlspecialchars($user_info->phonenum) ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($user_info->email) ?></p>
             <?php else: ?>
                 <p><strong>Guest Checkout</strong></p>
             <?php endif; ?>
@@ -84,14 +83,14 @@ if ($user_id > 0) {
                     </thead>
                     <tbody>
                         <?php foreach ($cart_items as $row):
-                                                        $image_urls = json_decode($row['image_url']);
-                                                        $image_url = $image_urls[0]; // Assuming you want the first image URL          
-                            ?>
+                            $image_urls = json_decode($row->image_url);
+                            $image_url = $image_urls[0] ?? ''; // Assuming you want the first image URL with fallback
+                        ?>
                             <tr>
-                            <?php echo "<td>". htmlspecialchars($row['name']) . "<br><img width='200px' height='200px' src='/" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($row['name']) . "'</td>"; ?>
-                            <td>RM <?= number_format($row['discounted_price'], 2) ?></td>
-                                <td><?= $row['quantity'] ?></td>
-                                <td>RM <?= number_format($row['discounted_price'] * $row['quantity'], 2) ?></td>
+                                <?php echo "<td>" . htmlspecialchars($row->name) . "<br><img width='200px' height='200px' src='/" . htmlspecialchars($image_url) . "' alt='" . htmlspecialchars($row->name) . "'</td>"; ?>
+                                <td>RM <?= number_format($row->discounted_price, 2) ?></td>
+                                <td><?= htmlspecialchars($row->quantity) ?></td>
+                                <td>RM <?= number_format($row->discounted_price * $row->quantity, 2) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -105,22 +104,22 @@ if ($user_id > 0) {
             <h3>Shipping Information</h3>
             <form action="create_payment.php" method="POST">
                 <label>Address Line 1:</label>
-                <input type="text" name="address_line1" value="<?= htmlspecialchars($address_info['address_line1'] ?? '') ?>" required>
+                <input type="text" name="address_line1" value="<?= htmlspecialchars($address_info->address_line1 ?? '') ?>" required>
 
                 <label>Address Line 2:</label>
-                <input type="text" name="address_line2" value="<?= htmlspecialchars($address_info['address_line2'] ?? '') ?>">
+                <input type="text" name="address_line2" value="<?= htmlspecialchars($address_info->address_line2 ?? '') ?>">
 
                 <label>City:</label>
-                <input type="text" name="city" value="<?= htmlspecialchars($address_info['city'] ?? '') ?>" required>
+                <input type="text" name="city" value="<?= htmlspecialchars($address_info->city ?? '') ?>" required>
 
                 <label>State:</label>
-                <input type="text" name="state" value="<?= htmlspecialchars($address_info['state'] ?? '') ?>" required>
+                <input type="text" name="state" value="<?= htmlspecialchars($address_info->state ?? '') ?>" required>
 
                 <label>Postal Code:</label>
-                <input type="text" name="postal_code" value="<?= htmlspecialchars($address_info['postal_code'] ?? '') ?>" required>
+                <input type="text" name="postal_code" value="<?= htmlspecialchars($address_info->postal_code ?? '') ?>" required>
 
                 <label>Country:</label>
-                <input type="text" name="country" value="<?= htmlspecialchars($address_info['country'] ?? '') ?>" required>
+                <input type="text" name="country" value="<?= htmlspecialchars($address_info->country ?? '') ?>" required>
 
                 <label>Comment to Seller:</label>
                 <textarea name="comment"><?= htmlspecialchars($_POST['comment'] ?? '') ?></textarea>
@@ -129,10 +128,11 @@ if ($user_id > 0) {
                 <select name="voucher_code" id="voucher_code" onchange="applyVoucher()">
                     <option value="" data-type="" data-value="0">-- No Voucher --</option>
                     <?php foreach ($vouchers as $voucher): ?>
-                        <option value="<?= $voucher['code'] ?>" 
-                                data-type="<?= $voucher['type'] ?>" 
-                                data-value="<?= $voucher['value'] ?>">
-                            <?= $voucher['description'] ?> (<?= $voucher['type'] === 'rm' ? 'RM' : '%' ?><?= $voucher['value'] ?>)
+                        <option value="<?= htmlspecialchars($voucher->code) ?>" 
+                                data-type="<?= htmlspecialchars($voucher->type) ?>" 
+                                data-value="<?= htmlspecialchars($voucher->value) ?>">
+                            <?= htmlspecialchars($voucher->description) ?> 
+                            (<?= $voucher->type === 'rm' ? 'RM' : '%' ?><?= htmlspecialchars($voucher->value) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>

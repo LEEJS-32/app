@@ -7,19 +7,11 @@ auth();
 var_dump($_SESSION['user']);
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
+$user_id = $user->user_id;
 
 echo ($user_id);
 
 $new_user = $_SESSION['new_user'];
-
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$database = "TESTING1";
-
-$conn = new mysqli($servername, $username, $password, $database);
 
 $name = post('name') ?? null;
 $email = post('email') ?? null;
@@ -34,35 +26,42 @@ $country = post('country') ?? null;
 $postcode = post('postcode') ?? null;
 $preference = post('preference') ?? null;
 
-$stmt = $conn->prepare("UPDATE users SET name=?, email=?, gender=?, phonenum=?, preference=?, dob=?, occupation=? WHERE user_id=?");
-$stmt->bind_param("sssssssi", $name, $email, $gender, $phonenum, $preference, $dob, $occupation, $user_id);
+try {
+    $stm = $_db->prepare("UPDATE users SET name=:name, email=:email, gender=:gender, phonenum=:phonenum, preference=:preference, dob=:dob, occupation=:occupation WHERE user_id=:user_id");
+    $stm->execute([
+        ':name' => $name,
+        ':email' => $email,
+        ':gender' => $gender,
+        ':phonenum' => $phonenum,
+        ':preference' => $preference,
+        ':dob' => $dob,
+        ':occupation' => $occupation,
+        ':user_id' => $user_id
+    ]);
 
-// Execute SQL query
-if ($stmt->execute()) {
     echo "Data submitted successfully!";
 
-    if (($_user) && ($_user['role'] == "member")) {
+    if (($_user) && ($_user->role == "member")) {
+        temp('info', 'Profile updated successfully.');
         redirect("../pages/member/member_profile.php");
+        exit();
     }
-    else if (($_user) && ($_user['role'] == "admin")) {
-
-    if ((!$new_user) && ($_user) && ($_user['role'] == "member")) {
-        redirect("../pages/member/member_profile.php");
+    else if (($_user) && ($_user->role == "admin")) {
+        if ((!$new_user) && ($_user) && ($_user->role == "member")) {
+            temp('info', 'Profile updated successfully.');
+            redirect("../pages/member/member_profile.php");
+            exit();
+        }
+        else if ((!$new_user) && ($_user) && ($_user->role == "admin")) {
+            temp('info', 'Profile updated successfully.');
+            redirect("../pages/member/admin_profile.php");
+            exit();
+        }
+        else if ($new_user){
+            redirect("../pages/signup_login.php"); // Redirect to a success page
+        }
     }
-    else if ((!$new_user) && ($_user) && ($_user['role'] == "admin")) {
-
-        redirect("../pages/member/admin_profile.php");
-    }
-    else if ($new_user){
-        redirect("../pages/signup_login.php"); // Redirect to a success page
-    }
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
 }
-else {
-    echo "Error: " . $stmt->error;
-}
-}
-
-// Close connection
-$stmt->close();
-$conn->close();
 ?>

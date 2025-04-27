@@ -4,25 +4,29 @@ include_once '../../_base.php';
 // Check if user is authenticated
 auth_user(); // Assuming this function checks if the user is an admin
 
-require '../../database.php';
+try {
+    // Fetch all orders
+    $sql = "SELECT o.order_id, o.status, o.total_price, o.order_date, u.name AS user_name
+            FROM orders o
+            JOIN users u ON o.user_id = u.user_id";
+    $stm = $_db->query($sql);
+    $orders = $stm->fetchAll(PDO::FETCH_OBJ);
 
-// Fetch all orders
-$sql = "SELECT o.order_id, o.status, o.total_price, o.order_date, u.name AS user_name
-        FROM orders o
-        JOIN users u ON o.user_id = u.user_id";
-$result = $conn->query($sql);
+    // If the form has been submitted to update order status
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset($_POST['status'])) {
+        // Update order status
+        $order_id = $_POST['order_id'];
+        $new_status = $_POST['status'];
 
-// If the form has been submitted to update order status
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset($_POST['status'])) {
-    // Update order status
-    $order_id = $_POST['order_id'];
-    $new_status = $_POST['status'];
-
-    $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE order_id = ?");
-    $stmt->bind_param("ss", $new_status, $order_id);
-    $stmt->execute();
+        $stm = $_db->prepare("UPDATE orders SET status = :status WHERE order_id = :order_id");
+        $stm->execute([
+            ':status' => $new_status,
+            ':order_id' => $order_id
+        ]);
+    }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -34,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset(
     <link rel="stylesheet" href="../../css/adminOrder.css">
 </head>
 <body>
+<div id="info"><?= temp('info') ?></div>
 <header>
     <?php include '../../_header.php'; ?>
 </header>
@@ -55,32 +60,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset(
                 </tr>
             </thead>
             <tbody>
-                <?php while ($order = $result->fetch_assoc()): ?>
+                <?php foreach ($orders as $order): ?>
                     <tr>
-                        <td><?= htmlspecialchars($order['order_id']) ?></td>
-                        <td><?= htmlspecialchars($order['user_name']) ?></td>
-                        <td>RM <?= number_format($order['total_price'], 2) ?></td>
-                        <td><?= htmlspecialchars($order['status']) ?></td>
-                        <td><?= htmlspecialchars($order['order_date']) ?></td>
+                        <td><?= htmlspecialchars($order->order_id) ?></td>
+                        <td><?= htmlspecialchars($order->user_name) ?></td>
+                        <td>RM <?= number_format($order->total_price, 2) ?></td>
+                        <td><?= htmlspecialchars($order->status) ?></td>
+                        <td><?= htmlspecialchars($order->order_date) ?></td>
                         <td>
                             <!-- Form to change order status -->
                             <form action="adminOrder.php" method="POST" style="display:inline;">
                                 <select name="status" class="status-dropdown">
-                                    <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                    <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : '' ?>>Processing</option>
-                                    <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : '' ?>>Shipped</option>
-                                    <option value="delivered" <?= $order['status'] == 'delivered' ? 'selected' : '' ?>>Delivered</option>
-                                    <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                    <option value="pending" <?= $order->status == 'pending' ? 'selected' : '' ?>>Pending</option>
+                                    <option value="processing" <?= $order->status == 'processing' ? 'selected' : '' ?>>Processing</option>
+                                    <option value="shipped" <?= $order->status == 'shipped' ? 'selected' : '' ?>>Shipped</option>
+                                    <option value="delivered" <?= $order->status == 'delivered' ? 'selected' : '' ?>>Delivered</option>
+                                    <option value="cancelled" <?= $order->status == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
                                 </select>
-                                <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
+                                <input type="hidden" name="order_id" value="<?= $order->order_id ?>">
                                 <button type="submit" class="btn update-btn">Update</button>
                             </form>
 
                             <!-- View Order Details Link -->
-                            <a href="adminOrder.php?view=<?= $order['order_id'] ?>" class="view-link">View</a>
+                            <a href="adminOrder.php?view=<?= $order->order_id ?>" class="view-link">View</a>
                         </td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
 
@@ -89,95 +94,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset(
         if (isset($_GET['view'])) {
             $order_id = $_GET['view'];
 
-            // Fetch order details
-            $stmt = $conn->prepare("SELECT * FROM orders WHERE order_id = ?");
-            $stmt->bind_param("s", $order_id);
-            $stmt->execute();
-            $order = $stmt->get_result()->fetch_assoc();
+            try {
+                // Fetch order details
+                $stm = $_db->prepare("SELECT * FROM orders WHERE order_id = :order_id");
+                $stm->execute([':order_id' => $order_id]);
+                $order = $stm->fetch(PDO::FETCH_OBJ);
 
-            // Check if order exists
-            if (!$order) {
-                echo "<p>Error: Order not found.</p>";
-                exit;
-            }
+                // Check if order exists
+                if (!$order) {
+                    echo "<p>Error: Order not found.</p>";
+                    exit;
+                }
 
-            // Fetch the items in the order
-            $stmt = $conn->prepare("SELECT oi.product_id, oi.quantity, oi.subtotal, p.name AS product_name
+                // Fetch the items in the order
+                $stm = $_db->prepare("SELECT oi.product_id, oi.quantity, oi.subtotal, p.name AS product_name
                                     FROM order_items oi
                                     JOIN products p ON oi.product_id = p.product_id
-                                    WHERE oi.order_id = ?");
-            $stmt->bind_param("s", $order_id);
-            $stmt->execute();
-            $order_items = $stmt->get_result();
+                                    WHERE oi.order_id = :order_id");
+                $stm->execute([':order_id' => $order_id]);
+                $order_items = $stm->fetchAll(PDO::FETCH_OBJ);
 
-            // Check if there are order items
-            if ($order_items->num_rows == 0) {
-                echo "<p>No items found for this order.</p>";
-                exit;
-            }
+                // Check if there are order items
+                if (empty($order_items)) {
+                    echo "<p>No items found for this order.</p>";
+                    exit;
+                }
 
-            // Fetch payment information
-            $stmt = $conn->prepare("SELECT * FROM payments WHERE order_id = ?");
-            $stmt->bind_param("s", $order_id);
-            $stmt->execute();
-            $payment = $stmt->get_result()->fetch_assoc();
+                // Fetch payment information
+                $stm = $_db->prepare("SELECT * FROM payments WHERE order_id = :order_id");
+                $stm->execute([':order_id' => $order_id]);
+                $payment = $stm->fetch(PDO::FETCH_OBJ);
 
-            // Check if payment information is found
-            if (!$payment) {
-                echo "<p>Payment information not found for this order.</p>";
-                exit;
-            }
-            ?>
+                // Check if payment information is found
+                if (!$payment) {
+                    echo "<p>Payment information not found for this order.</p>";
+                    exit;
+                }
+                ?>
 
-            <h2 class="details">Order Details - <?= htmlspecialchars($order['order_id']) ?></h2>
+                <h2 class="details">Order Details - <?= htmlspecialchars($order->order_id) ?></h2>
 
-            
+                <div class="order-details">
+                    <div class="order-summary">
+                        <h4>Order Summary</h4>
+                        <p><strong>Status:</strong> <?= htmlspecialchars($order->status) ?></p>
+                        <p><strong>Total Price:</strong> RM <?= number_format($order->total_price, 2) ?></p>
+                        <p><strong>Shipping Address:</strong></p>
+                        <p><?= htmlspecialchars($order->shipping_address_line1) ?><br>
+                           <?= htmlspecialchars($order->shipping_address_line2) ?><br>
+                           <?= htmlspecialchars($order->shipping_city) ?>, <?= htmlspecialchars($order->shipping_state) ?><br>
+                           <?= htmlspecialchars($order->shipping_postal_code) ?>, <?= htmlspecialchars($order->shipping_country) ?></p>
+                    </div>
 
-            <div class="order-details">
-                <div class="order-summary">
-                    <h4>Order Summary</h4>
-                    <p><strong>Status:</strong> <?= htmlspecialchars($order['status']) ?></p>
-                    <p><strong>Total Price:</strong> RM <?= number_format($order['total_price'], 2) ?></p>
-                    <p><strong>Shipping Address:</strong></p>
-                    <p><?= htmlspecialchars($order['shipping_address_line1']) ?><br>
-                       <?= htmlspecialchars($order['shipping_address_line2']) ?><br>
-                       <?= htmlspecialchars($order['shipping_city']) ?>, <?= htmlspecialchars($order['shipping_state']) ?><br>
-                       <?= htmlspecialchars($order['shipping_postal_code']) ?>, <?= htmlspecialchars($order['shipping_country']) ?></p>
-                </div>
-
-                <div class="order-items">
-                    <h4>Order Items</h4>
-                    <table class="order-items-table">
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Quantity</th>
-                                <th>Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($item = $order_items->fetch_assoc()): ?>
+                    <div class="order-items">
+                        <h4>Order Items</h4>
+                        <table class="order-items-table">
+                            <thead>
                                 <tr>
-                                    <td><?= htmlspecialchars($item['product_name']) ?></td>
-                                    <td><?= htmlspecialchars($item['quantity']) ?></td>
-                                    <td>RM <?= number_format($item['subtotal'], 2) ?></td>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
                                 </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($order_items as $item): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($item->product_name) ?></td>
+                                        <td><?= htmlspecialchars($item->quantity) ?></td>
+                                        <td>RM <?= number_format($item->subtotal, 2) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div class="payment-info">
-                    <h4>Payment Information</h4>
-                    <p><strong>Payment Method:</strong> <?= htmlspecialchars($payment['payment_method']) ?></p>
-                    <p><strong>Payment Status:</strong> <?= htmlspecialchars($payment['payment_status']) ?></p>
-                    <p><strong>Amount Paid:</strong> RM <?= number_format($payment['amount'], 2) ?></p>
+                    <div class="payment-info">
+                        <h4>Payment Information</h4>
+                        <p><strong>Payment Method:</strong> <?= htmlspecialchars($payment->payment_method) ?></p>
+                        <p><strong>Payment Status:</strong> <?= htmlspecialchars($payment->payment_status) ?></p>
+                        <p><strong>Amount Paid:</strong> RM <?= number_format($payment->amount, 2) ?></p>
+                    </div>
                 </div>
-            </div>
-            <!-- Close Order Details Button -->
-            <button class="close-btn" onclick="closeOrderDetails()">Close Details</button>
+                <!-- Close Order Details Button -->
+                <button class="close-btn" onclick="closeOrderDetails()">Close Details</button>
 
-        <?php } ?>
+            <?php } catch (PDOException $e) {
+                die("Error: " . $e->getMessage());
+            }
+        } ?>
 
     </div>
 </main>

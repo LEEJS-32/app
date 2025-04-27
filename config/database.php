@@ -47,6 +47,14 @@ try {
     )";
     $pdo->exec($sql_create_token_table);
 
+    
+    // Create categories table
+    $sql_create_categories = "CREATE TABLE IF NOT EXISTS categories (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(50) NOT NULL UNIQUE
+    )";
+    $pdo->exec($sql_create_categories);
+
     // Create products table
     $sql_create_products_table = "CREATE TABLE IF NOT EXISTS products (
         product_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -87,13 +95,6 @@ try {
         expire_at DATETIME NOT NULL
     )";
     $pdo->exec($sql_create_verify_otp_table);
-
-    // Create categories table
-    $sql_create_categories = "CREATE TABLE IF NOT EXISTS categories (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(50) NOT NULL UNIQUE
-    )";
-    $pdo->exec($sql_create_categories);
 
     // Create shopping_cart table
     $sql_create_cart_table = "CREATE TABLE IF NOT EXISTS shopping_cart (

@@ -9,9 +9,9 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
 // Database connection
 require '../../db/db_connect.php';
@@ -22,20 +22,22 @@ $where = [];
 $params = [];
 
 if ($search) {
-    $where[] = "(name LIKE ? OR email LIKE ? OR user_id LIKE ?)";
-    $params = array_fill(0, 3, "%$search%");
+    $where[] = "(name LIKE :search OR email LIKE :search OR user_id LIKE :search)";
+    $params[':search'] = "%$search%";
 }
 
 $sql = "SELECT user_id, name, email, role, status, avatar FROM users"; // Added photo field
 if ($where) {
     $sql .= " WHERE " . implode(' AND ', $where);
 }
-$stmt = $conn->prepare($sql);
-if ($params) {
-    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+
+try {
+    $stm = $_db->prepare($sql);
+    $stm->execute($params);
+    $result = $stm->fetchAll(PDO::FETCH_OBJ);
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
 }
-$stmt->execute();
-$result = $stmt->get_result();
 // ----------------------------------------------------------------------------
 ?>
 <head>
@@ -47,15 +49,40 @@ $result = $stmt->get_result();
 </head>
 
 <body>
+    <div id="info"><?= temp('info') ?></div>
     <header>
         <?php include __DIR__ . '/../../_header.php'; ?>
     </header>
+
+    <?php
+        try {
+            // Fetch avatar from database
+            $stm = $_db->prepare("SELECT * FROM users WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
+            $row = $stm->fetch(PDO::FETCH_OBJ);
+            
+            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
+            
+            if ($row) {
+                $email = $row->email;
+                $name = $row->name;
+                
+                // If avatar exists, update the image URL
+                if (!empty($row->avatar)) {
+                    $imageUrl = $row->avatar;
+                }
+            }
+        } catch (PDOException $e) {
+            // Log error and continue with default avatar
+            error_log("Error fetching avatar: " . $e->getMessage());
+        }
+    ?>
 
     <main>
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+            <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
                     <h3><?= $name ?></h3>
                     <p><?= $role ?></p>
@@ -63,10 +90,13 @@ $result = $stmt->get_result();
             </div>
 
             <ul class="nav">
-                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
-                <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account'></i>Members</a></li>
+                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
+                <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <hr>
+                <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
+                <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>
             </ul>
         </div>
 
@@ -95,16 +125,16 @@ $result = $stmt->get_result();
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php foreach ($result as $row): ?>
                     <tr>
-                        <td><?= $row['user_id'] ?></td>
-                        <td><?= htmlspecialchars($row['name']) ?></td>
-                        <td><?= htmlspecialchars($row['email']) ?></td>
-                        <td><?= $row['role'] ?></td>
-                        <td><?= $row['status'] ?></td>
+                        <td><?= $row->user_id ?></td>
+                        <td><?= htmlspecialchars($row->name) ?></td>
+                        <td><?= htmlspecialchars($row->email) ?></td>
+                        <td><?= $row->role ?></td>
+                        <td><?= $row->status ?></td>
                         <td>
-                            <?php if (!empty($row['profile_photo'])): ?>
-                                <img src="../../uploads/profile_photos/<?= htmlspecialchars($row['profile_photo']) ?>" 
+                            <?php if (!empty($row->avatar)): ?>
+                                <img src="../../img/avatar/<?= htmlspecialchars($row->avatar) ?>" 
                                      class="thumbnail popup-thumb"
                                      alt="User Photo">
                             <?php else: ?>
@@ -112,10 +142,10 @@ $result = $stmt->get_result();
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="admin_member_detail.php?id=<?= $row['user_id'] ?>" class="btn-view">View Details</a>
+                            <a href="admin_member_detail.php?id=<?= $row->user_id ?>" class="btn-view">View Details</a>
                         </td>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>  

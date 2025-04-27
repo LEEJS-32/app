@@ -9,9 +9,9 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
 // ----------------------------------------------------------------------------
 ?>
@@ -26,6 +26,7 @@ $role = $user['role'];
 </head>
 
 <body>
+    <div id="info"><?= temp('info') ?></div>
     <header>
         <?php 
             include __DIR__ . '/../../_header.php'; 
@@ -36,93 +37,125 @@ $role = $user['role'];
     <?php
         require '../../db/db_connect.php';
     
-        // Fetch avatar from database
-        $sql = "SELECT avatar FROM users WHERE user_id = '$user_id'";
-        $result = $conn->query($sql);
-        $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
-        
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
+        try {
+            // Fetch avatar from database
+            $stm = $_db->prepare("SELECT avatar FROM users WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $user_id]);
+            $row = $stm->fetch();
+            $imageUrl = __DIR__ . "/../../img/avatar/avatar.jpg"; // Default avatar
             
-        // If avatar exists, update the image URL
-            if (!empty($row["avatar"])) {
-                $imageUrl = $row["avatar"];
+            if ($row && !empty($row->avatar)) {
+                $imageUrl = $row->avatar;
             }
+
+            // Total active products
+            $stm = $_db->query("SELECT COUNT(*) AS total_products FROM products WHERE status = 'active'");
+            $total_products = $stm->fetchColumn();
+
+            // Total members
+            $stm = $_db->query("SELECT COUNT(*) AS total_members FROM users WHERE role = 'member'");
+            $total_members = $stm->fetchColumn();
+
+            // Total revenue from all completed orders
+            $stm = $_db->query("SELECT SUM(amount) AS total_revenue FROM payments WHERE payment_status IN ('Completed')");
+            $total_revenue = $stm->fetchColumn() ?? 0;
+
+            // Current month (YYYY-MM)
+            $currentMonth = date('Y-m');
+            $lastMonth = date('Y-m', strtotime('-1 month'));
+
+            // Total products sold this month
+            $stm = $_db->prepare("
+                SELECT SUM(oi.quantity) AS total_sold
+                FROM orders o
+                JOIN order_items oi ON o.order_id = oi.order_id
+                WHERE DATE_FORMAT(o.order_date, '%Y-%m') = :currentMonth
+                AND o.status NOT IN ('pending', 'cancelled')
+            ");
+            $stm->execute([':currentMonth' => $currentMonth]);
+            $total_sold = (int)($stm->fetchColumn() ?? 0);
+
+            // Total products sold last month
+            $stm = $_db->prepare("
+                SELECT SUM(oi.quantity) AS total_sold
+                FROM orders o
+                JOIN order_items oi ON o.order_id = oi.order_id
+                WHERE DATE_FORMAT(o.order_date, '%Y-%m') = :lastMonth
+                AND o.status NOT IN ('pending', 'cancelled')
+            ");
+            $stm->execute([':lastMonth' => $lastMonth]);
+            $last_month_sold = (int)($stm->fetchColumn() ?? 0);
+
+            // Revenue this month
+            $stm = $_db->prepare("
+                SELECT SUM(amount) AS total_revenue
+                FROM payments p
+                JOIN orders o ON p.order_id = o.order_id
+                WHERE DATE_FORMAT(o.order_date, '%Y-%m') = :currentMonth
+                AND p.payment_status = 'Completed'
+            ");
+            $stm->execute([':currentMonth' => $currentMonth]);
+            $revenue = (float)($stm->fetchColumn() ?? 0);
+
+            // Revenue last month
+            $stm = $_db->prepare("
+                SELECT SUM(amount) AS total_revenue
+                FROM payments p
+                JOIN orders o ON p.order_id = o.order_id
+                WHERE DATE_FORMAT(o.order_date, '%Y-%m') = :lastMonth
+                AND p.payment_status = 'Completed'
+            ");
+            $stm->execute([':lastMonth' => $lastMonth]);
+            $last_revenue = (float)($stm->fetchColumn() ?? 0);
+
+            // Percentage change helpers
+            function percentChange($current, $previous) {
+                if ($previous == 0) return $current > 0 ? 100 : 0;
+                return round((($current - $previous) / $previous) * 100, 1);
+            }
+
+            $sold_change = percentChange($total_sold, $last_month_sold);
+            $revenue_change = percentChange($revenue, $last_revenue);
+
+            // Members registered by month (last 6 months)
+            $members_per_month = [];
+            $sales_per_month = [];
+
+            for ($i = 5; $i >= 0; $i--) {
+                $month = date('Y-m', strtotime("-$i months"));
+                
+                // Members count
+                $stm = $_db->prepare("SELECT COUNT(*) AS count FROM users WHERE DATE_FORMAT(created_at, '%Y-%m') = :month");
+                $stm->execute([':month' => $month]);
+                $members_per_month[] = (int)$stm->fetchColumn();
+
+                // Products sold
+                $stm = $_db->prepare("
+                    SELECT SUM(order_items.quantity) AS sold 
+                    FROM orders 
+                    JOIN order_items ON orders.order_id = order_items.order_id 
+                    WHERE DATE_FORMAT(orders.order_date, '%Y-%m') = :month
+                    AND orders.status NOT IN ('pending', 'cancelled')
+                ");
+                $stm->execute([':month' => $month]);
+                $sales_per_month[] = (int)($stm->fetchColumn() ?? 0);
+            }
+
+            $month_labels = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month_labels[] = date('M', strtotime("-$i months"));
+            }
+        } catch (PDOException $e) {
+            die("Error: " . $e->getMessage());
         }
-
-        // Total active products
-        $result_products = $conn->query("SELECT COUNT(*) AS total_products FROM products WHERE status = 'active'");
-        $total_products = $result_products->fetch_assoc()['total_products'];
-
-        // Total members
-        $result_members = $conn->query("SELECT COUNT(*) AS total_members FROM users WHERE role = 'member'");
-        $total_members = $result_members->fetch_assoc()['total_members'];
-
-        // Total revenue from all completed orders
-        $result_revenue = $conn->query("SELECT SUM(amount) AS total_revenue FROM payments WHERE payment_status IN ('Completed')");
-        $total_revenue = $result_revenue->fetch_assoc()['total_revenue'] ?? 0;
-
-        // Current month (YYYY-MM)
-        $currentMonth = date('Y-m');
-        $lastMonth = date('Y-m', strtotime('-1 month'));
-
-        // Total products sold this month
-        $res = $conn->query("
-            SELECT SUM(oi.quantity) AS total_sold
-            FROM orders o
-            JOIN order_items oi ON o.order_id = oi.order_id
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
-            AND o.status NOT IN ('pending', 'cancelled')
-        ");
-        $total_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
-
-        // Total products sold last month
-        $res = $conn->query("
-            SELECT SUM(oi.quantity) AS total_sold
-            FROM orders o
-            JOIN order_items oi ON o.order_id = oi.order_id
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
-            AND o.status NOT IN ('pending', 'cancelled')
-        ");
-        $last_month_sold = (int)($res->fetch_assoc()['total_sold'] ?? 0);
-
-        // Revenue this month
-        $res = $conn->query("
-            SELECT SUM(amount) AS total_revenue
-            FROM payments p
-            JOIN orders o ON p.order_id = o.order_id
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$currentMonth'
-            AND p.payment_status = 'Completed'
-        ");
-        $revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
-
-        // Revenue last month
-        $res = $conn->query("
-            SELECT SUM(amount) AS total_revenue
-            FROM payments p
-            JOIN orders o ON p.order_id = o.order_id
-            WHERE DATE_FORMAT(o.order_date, '%Y-%m') = '$lastMonth'
-            AND p.payment_status = 'Completed'
-        ");
-        $last_revenue = (float)($res->fetch_assoc()['total_revenue'] ?? 0);
-
-        // Percentage change helpers
-        function percentChange($current, $previous) {
-            if ($previous == 0) return $current > 0 ? 100 : 0;
-            return round((($current - $previous) / $previous) * 100, 1);
-        }
-
-        $sold_change = percentChange($total_sold, $last_month_sold);
-        $revenue_change = percentChange($revenue, $last_revenue);
-
     ?>
     <div class="container">
         <div class="left">
             <div class="profile">
-                <img src="../../img/avatar/avatar.jpg" alt="User Avatar">
+                <img src="../../img/avatar/<?= htmlspecialchars($imageUrl) ?>" alt="Profile" class="profile-avatar" />
                 <div class="profile-text">
-                    <h3><?php echo ($name); ?></h3>
-                    <p><?php echo ($role); ?></p>
+                    <h3><?php echo htmlspecialchars($name); ?></h3>
+                    <p><?php echo htmlspecialchars($role); ?></p>
                 </div>
             </div>
 
@@ -130,7 +163,10 @@ $role = $user['role'];
                 <li><a href="admin_profile.php" class="active"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
                 <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
                 <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
-                <li><a href="#"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <hr>
+                <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
+                <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>
             </ul>
         </div>
 
@@ -177,7 +213,7 @@ $role = $user['role'];
                 </div>
 
                 <div class="chart">
-                    <canvas id="myChart"></canvas> <!-- Canvas to render the line chart -->
+                    <canvas id="myChart"></canvas>
                 </div>
             </div>
         </div>
@@ -252,7 +288,6 @@ for ($i = 5; $i >= 0; $i--) {
     });
 </script>
 
-
     </main>
     <footer>
         <?php
@@ -260,4 +295,5 @@ for ($i = 5; $i >= 0; $i--) {
         ?>
     </footer>
 </body>
+</html>
     

@@ -9,33 +9,35 @@ if (!$token) {
     die("Invalid activation link!");
 }
 
-// Fetch user from active_token table
-$stmt = $conn->prepare("SELECT user_id, expire FROM active_token WHERE token_id = ?");
-$stmt->bind_param("s", $token);
-$stmt->execute();
-$result = $stmt->get_result();
+try {
+    // Fetch user from active_token table
+    $stm = $_db->prepare("SELECT user_id, expire FROM active_token WHERE token_id = :token");
+    $stm->execute([':token' => $token]);
+    $row = $stm->fetch(PDO::FETCH_OBJ);
 
-if ($row = $result->fetch_assoc()) {
-    $current_time = date('Y-m-d H:i:s');
+    if ($row) {
+        $current_time = date('Y-m-d H:i:s');
 
-    if ($row['expire'] < $current_time) {
-        echo "Activation link expired!";
+        if ($row->expire < $current_time) {
+            echo "Activation link expired!";
+        } else {
+            // Activate user
+            $stm = $_db->prepare("UPDATE users SET is_active = 1 WHERE user_id = :user_id");
+            $stm->execute([':user_id' => $row->user_id]);
+
+            // Delete the used token
+            $stm = $_db->prepare("DELETE FROM active_token WHERE token_id = :token");
+            $stm->execute([':token' => $token]);
+
+            echo "Account activated successfully! Redirecting...";
+            redirect("../pages/member/activated.php");
+            exit();
+        }
     } else {
-        // Activate user
-        $stmt = $conn->prepare("UPDATE users SET is_active = 1 WHERE user_id = ?");
-        $stmt->bind_param("i", $row['user_id']);
-        $stmt->execute();
+        temp('info', 'Invalid / Expired activation token.');
 
-        // Delete the used token
-        $stmt = $conn->prepare("DELETE FROM active_token WHERE token_id = ?");
-        $stmt->bind_param("s", $token);
-        $stmt->execute();
-
-        echo "Account activated successfully! Redirecting...";
-        redirect("../pages/member/activated.php");
-        exit();
     }
-} else {
-    echo "Invalid token!";
+} catch (PDOException $e) {
+    temp('info', 'Activation failed. Please try again.');
 }
 ?>

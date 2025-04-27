@@ -3,7 +3,7 @@ require_once '../_base.php';
 require_once '../db/db_connect.php';
 
 // Check if user is already logged in
-if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'member') {
+if (isset($_SESSION['user']) && $_SESSION['user']->role === 'member') {
     redirect('member/member_profile.php');
 }
 
@@ -33,6 +33,7 @@ unset($_SESSION['form_data'], $_SESSION['errors']); // Clear after getting
 </head>
 
 <body>
+<div id="info"><?= temp('info')?></div>
     <main>
         <div class="login">
             <div class="left">
@@ -91,7 +92,7 @@ unset($_SESSION['form_data'], $_SESSION['errors']); // Clear after getting
                             <input type="password" id="signup_password" name="password">
                             <span id="signup_pwd_error" style="color:red;"><?php echo $errors['password'] ?? ''; ?></span>
                         </div>
-            
+                        
                         <button type="submit">Submit</button>
                     </form>
                     <p>Already have an account? <a href="javascript:void(0)" onclick="toggleForm()">Member Log In</a></p>
