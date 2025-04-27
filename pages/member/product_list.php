@@ -61,17 +61,14 @@ if (!empty($color_filter)) {
 
 // Handle sorting
 switch ($sort_by) {
+    case 'latest':
+        $sql .= " ORDER BY created_at DESC";
+        break;
     case 'price_asc':
         $sql .= " ORDER BY price ASC";
         break;
     case 'price_desc':
         $sql .= " ORDER BY price DESC";
-        break;
-    case 'stock_asc':
-        $sql .= " ORDER BY stock ASC";
-        break;
-    case 'stock_desc':
-        $sql .= " ORDER BY stock DESC";
         break;
     case 'rating_asc':
         $sql .= " ORDER BY rating ASC";
@@ -230,10 +227,9 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                         <label for="sortBy">Sort By:</label>
                         <select id="sortBy" name="sort">
                             <option value="">Default</option>
+                            <option value="latest" <?php echo $sort_by === 'latest' ? 'selected' : ''; ?>>Latest</option>
                             <option value="price_asc" <?php echo $sort_by === 'price_asc' ? 'selected' : ''; ?>>Price: Low to High</option>
                             <option value="price_desc" <?php echo $sort_by === 'price_desc' ? 'selected' : ''; ?>>Price: High to Low</option>
-                            <option value="stock_asc" <?php echo $sort_by === 'stock_asc' ? 'selected' : ''; ?>>Stock: Low to High</option>
-                            <option value="stock_desc" <?php echo $sort_by === 'stock_desc' ? 'selected' : ''; ?>>Stock: High to Low</option>
                             <option value="rating_asc" <?php echo $sort_by === 'rating_asc' ? 'selected' : ''; ?>>Rating: Low to High</option>
                             <option value="rating_desc" <?php echo $sort_by === 'rating_desc' ? 'selected' : ''; ?>>Rating: High to Low</option>
                         </select>
@@ -317,4 +313,9 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
            
     </div><!-- End of main-container -->
 </body>
+<footer>
+        <?php
+            include __DIR__ . '/../../_footer.php';
+        ?>
+    </footer>
 </html>
