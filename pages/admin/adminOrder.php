@@ -5,13 +5,6 @@ include_once '../../_base.php';
 auth_user(); // Assuming this function checks if the user is an admin
 
 try {
-    // Fetch all orders
-    $sql = "SELECT o.order_id, o.status, o.total_price, o.order_date, u.name AS user_name
-            FROM orders o
-            JOIN users u ON o.user_id = u.user_id";
-    $stm = $_db->query($sql);
-    $orders = $stm->fetchAll(PDO::FETCH_OBJ);
-
     // If the form has been submitted to update order status
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset($_POST['status'])) {
         // Update order status
@@ -23,7 +16,19 @@ try {
             ':status' => $new_status,
             ':order_id' => $order_id
         ]);
+
+        // Redirect to avoid form resubmission and ensure updated data is fetched
+        header("Location: adminOrder.php");
+        exit();
     }
+
+    // Fetch all orders
+    $sql = "SELECT o.order_id, o.status, o.total_price, o.order_date, u.name AS user_name
+            FROM orders o
+            JOIN users u ON o.user_id = u.user_id";
+    $stm = $_db->query($sql);
+    $orders = $stm->fetchAll(PDO::FETCH_OBJ);
+
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }

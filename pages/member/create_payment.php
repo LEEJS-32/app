@@ -182,7 +182,7 @@ try {
             $data = [
                 'userSecretKey' => $api_key,
                 'categoryCode' => $category_code,
-                'billName' => "Order Payment",
+                'billName' => "Order Payment to Furniture",
                 'billDescription' => "Payment for order $order_id",
                 'billAmount' => $bill_amount,
                 'billReturnUrl' => $return_url,
