@@ -63,13 +63,11 @@ function base($path = '') {
 // ============================================================================
 
 // Global PDO object
-$_db = new PDO('mysql:host=localhost;dbname=TESTING1', 'root', '',[
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
 
-]);
-
-
-
+    $_db = new PDO('mysql:host=localhost;dbname=TESTING1', 'root', '', [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+    ]);
 
 
 // ============================================================================
@@ -145,7 +143,7 @@ function err($key) {
 
 // Global user object
 session_start();
-require_once 'db/db_connect.php';
+require_once 'config/database.php';
 $_user = $_SESSION['user'] ?? null;
 
 // Login user
@@ -192,7 +190,7 @@ function auth(...$roles) {
 
 // Check session and 'remember me'
 function auth_user() {
-    global $_user, $conn;
+    global $_user, $_db; // Use the global $_db object
 
     // If session exists, keep user logged in
     if (isset($_SESSION['user'])) {
@@ -204,18 +202,19 @@ function auth_user() {
     if (isset($_COOKIE['remember_me'])) {
         $token = $_COOKIE['remember_me'];
 
-        $stmt = $conn->prepare("SELECT users.* FROM users INNER JOIN token ON users.user_id = token.user_id WHERE token.token_id = ? AND token.expire > NOW()");
-        $stmt->bind_param("s", $token);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        // Use PDO syntax
+        $stmt = $_db->prepare("SELECT users.* FROM users INNER JOIN token ON users.user_id = token.user_id WHERE token.token_id = :token AND token.expire > NOW()");
+        $stmt->execute([':token' => $token]); // Bind parameter using execute
 
-        if ($result->num_rows > 0) {
-            $_user = $result->fetch_assoc();
+        // Fetch the user
+        $user_data = $stmt->fetch(PDO::FETCH_ASSOC); // Use fetch with PDO::FETCH_ASSOC
+
+        if ($user_data) {
+            $_user = $user_data;
             $_SESSION['user'] = $_user; // Restore session
             return;
         }
     }
-
 }
 
 // ============================================================================

@@ -12,23 +12,87 @@ h1 {
     margin-bottom: 20px;
 }
 
-button, select, input[type="text"] {
-    margin: 10px 5px;
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
 
 button:hover {
     background-color: #0056b3;
 }
+
+/* General Button Styles */
+button, .action-buttons a {
+    display: inline-flex;
+    padding: 15px;
+    color: black;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 500;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+/* Update button styles */
+.update {
+    display: inline-block;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: black;
+    color: white;
+    border: 1px solid black;
+    margin-bottom: 15px;
+}
+
+.update:hover {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+}
+
+/* Disable button styles */
+.disable {
+    display: inline-block;
+    padding: 8px 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+}
+
+.disable:hover {
+    background-color: black;
+    color: white;
+    border: 1px solid black;
+}
+
+
+/* Hover and Active States */
+button:hover, .action-buttons a:hover {
+    background: black;
+    color: white;
+}
+
+/* Specific styles for the Show Details button */
+button#toggleAllDetails {
+    margin-left: auto; /* Push the button to the right */
+    display: block; /* Ensure it behaves as a block-level element */
+    text-align: right;
+    padding: 10px 20px;
+    margin-right: 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
 
 /* Table Styles */
 table {
@@ -44,8 +108,9 @@ table, th, td {
 }
 
 th {
-    background-color: #f4f4f4;
+    background-color: black;
     font-weight: bold;
+    color: white;
     text-align: left;
     padding: 10px;
     cursor: pointer;
@@ -75,15 +140,23 @@ th.sortable:hover {
 }
 
 .action-buttons a.update {
-    background-color: #28a745;
+    background: none;
+    color: black;
 }
 
 .action-buttons a.delete {
-    background-color: #dc3545;
+    background: none;
+    color: black;
 }
 
-.action-buttons a:hover {
-    opacity: 0.8;
+.action-buttons a.update:hover {
+    background: black;
+    color: white;
+}
+
+.action-buttons a.delete:hover {
+    background: black;
+    color: white;
 }
 
 /* Image Styles */
@@ -95,18 +168,40 @@ td img {
     border-radius: 4px;
 }
 
-/* Filters and Search */
-#search, #categoryFilter, #statusFilter {
-    margin: 10px 5px;
+/* Filters Container */
+.filters-container {
+    display: flex;
+    gap: 10px; /* Add spacing between elements */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 20px; /* Add spacing below the filters */
+    overflow-x: auto; /* Allow horizontal scrolling if needed */
+    white-space: nowrap; /* Prevent wrapping to the next row */
+}
+
+#search {
+    width: 280px; /* Slightly longer width for the search field */
     padding: 10px;
     font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: auto;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
 }
 
-#search {
-    width: 300px;
+/* Filters and Search Fields */
+#categoryFilter, #statusFilter, #sortOptions {
+    width: 160px; /* Set a fixed width for all fields */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+/* Add hover and focus effects for consistency */
+#search:hover, #categoryFilter:hover, #statusFilter:hover, #sortOptions:hover,
+#search:focus, #categoryFilter:focus, #statusFilter:focus, #sortOptions:focus {
+    border-color: black;
+    outline: none;
 }
 
 /* Scrollable Description */
@@ -149,25 +244,110 @@ th, td {
 .sortable {
     cursor: pointer;
 }
+/* Pagination Styles */
 .pagination {
     text-align: center;
     margin: 20px 0;
 }
+
 .pagination a {
     display: inline-block;
     margin: 0 5px;
     padding: 8px 12px;
     text-decoration: none;
-    color: #007bff;
-    border: 1px solid #ddd;
+    color: black; /* Default text color */
+    background-color: white; /* Default background color */
+    border: 1px solid black; /* Black border */
     border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .pagination a.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
+    background-color: black; /* Active background color */
+    color: white; /* Active text color */
+    border-color: black;
 }
+
 .pagination a:hover {
+    background-color: black; /* Hover background color */
+    color: white; /* Hover text color */
+    border-color: black;
+}
+
+.details-row {
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+}
+.details-row td {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+.toggle-details {
+    text-align: right;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+.toggle-details:hover {
     background-color: #0056b3;
+}
+
+/* Container for navigation and content */
+.container {
+    display: flex;
+    height: 100vh; /* Full height */
+}
+
+/* Navigation bar on the left */
+.left {
+    width: 250px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+}
+
+.left.collapsed {
+    width: 60px;
+}
+
+/* Content area on the right */
+.right {
+    flex: 1; /* Take up remaining space */
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Search Form */
+button .search-form {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between input and button */
+}
+
+button .search-form input[type="text"] {
+    width: 300px; /* Slightly longer width for the search field */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+button .search-form .search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px; /* Adjust icon size */
+    color: black;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button .search-form .search-button:hover {
+    background-color: black;
     color: white;
 }

@@ -1,6 +1,21 @@
 <?php
 include '../../_header.php';
+require_once '../../_base.php';
 ob_start();
+
+
+// ----------------------------------------------------------------------------
+
+// Member role
+auth_user();
+auth('admin');
+
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
+$name = $user['name'];
+$role = $user['role'];
+
+// ----------------------------------------------------------------------------
 
 // Initialize product array to prevent undefined variable warnings
 $product = [
@@ -20,36 +35,32 @@ $product = [
     'video_url' => ''
 ];
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "TESTING1";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
 // Fetch categories for the dropdown
-$categories_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
-if (!$categories_result) {
-    die("Error fetching categories: " . $conn->error);
+try {
+    $categories_stmt = $_db->query("SELECT id, name FROM categories ORDER BY name ASC");
+    $categories = $categories_stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Error fetching categories: " . $e->getMessage());
 }
 
+// Fetch product details for editing
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['product_id'])) {
-    $product_id = $_GET['product_id'];
-    $stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
-    $stmt->bind_param("i", $product_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $product = $result->fetch_assoc();
-    $stmt->close();
+    $product_id = intval($_GET['product_id']);
+    try {
+        $stm = $_db->prepare("SELECT * FROM products WHERE product_id = :product_id");
+        $stm->execute([':product_id' => $product_id]);
+        $product = $stm->fetch(PDO::FETCH_ASSOC);
+        if (!$product) {
+            die("Product not found.");
+        }
+    } catch (PDOException $e) {
+        die("Error fetching product: " . $e->getMessage());
+    }
 }
 
+// Handle form submission for updating the product
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
-    $product_id = (int)$_POST['product_id'];
+    $product_id = intval($_POST['product_id']);
     $product_name = $_POST['name'] ?? '';
     $description = $_POST['description'] ?? '';
     $price = (float)$_POST['price'] ?? 0.0;
@@ -104,8 +115,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
             $target_video_file = __DIR__ . "/../../videos/" . $uniqueVideoName;
 
             // Unlink the old video if it exists
-            if (!empty($product['video_url']) && file_exists(__DIR__ . "/../../" . $product['video_url'])) {
-                unlink(__DIR__ . "/../../" . $product['video_url']);
+            if (!empty($product['video_url'])) {
+                $videoPath = __DIR__ . "/../../videos/" . basename($product['video_url']);
+                if (file_exists($videoPath)) {
+                    if (unlink($videoPath)) {
+                        echo "Existing video deleted successfully.<br>";
+                    } else {
+                        echo "Failed to delete the existing video.<br>";
+                    }
+                } else {
+                    echo "Video file does not exist: " . $videoPath . "<br>";
+                }
             }
 
             if (move_uploaded_file($videoTmpName, $target_video_file)) {
@@ -123,48 +143,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     $image_urls_json = json_encode(array_values(array_unique($image_urls)), JSON_UNESCAPED_SLASHES);
 
     // Update database
-    $stmt = $conn->prepare("
-        UPDATE products SET
-            name = ?, description = ?, price = ?, stock = ?, category_id = ?, status = ?, discount = ?, 
-            discounted_price = ?, brand = ?, color = ?, rating = ?, reviews_count = ?, image_url = ?, 
-            video_url = ?, updated_at = NOW()
-        WHERE product_id = ?
-    ");
-    $stmt->bind_param(
-        "ssdiisddssiissi",
-        $product_name,
-        $description,
-        $price,
-        $stock,
-        $category_id,
-        $status,
-        $discount,
-        $discounted_price,
-        $brand,
-        $color,
-        $rating,
-        $reviews_count,
-        $image_urls_json,
-        $video_url,
-        $product_id
-    );
+    try {
+        $stm = $_db->prepare("
+            UPDATE products SET
+                name = :name, description = :description, price = :price, stock = :stock, category_id = :category_id, 
+                status = :status, discount = :discount, discounted_price = :discounted_price, brand = :brand, 
+                color = :color, rating = :rating, reviews_count = :reviews_count, image_url = :image_url, 
+                video_url = :video_url, updated_at = NOW()
+            WHERE product_id = :product_id
+        ");
 
-    if ($stmt->execute()) {
-        temp('info', 'Product updated successfully!');
-        echo json_encode([
-            'success' => true,
-            'redirect' => 'adminProduct.php',
-            'message' => temp('info') // Include the flash message in the response
+        $stm->execute([
+            ':name' => $product_name,
+            ':description' => $description,
+            ':price' => $price,
+            ':stock' => $stock,
+            ':category_id' => $category_id,
+            ':status' => $status,
+            ':discount' => $discount,
+            ':discounted_price' => $discounted_price,
+            ':brand' => $brand,
+            ':color' => $color,
+            ':rating' => $rating,
+            ':reviews_count' => $reviews_count,
+            ':image_url' => $image_urls_json,
+            ':video_url' => $video_url,
+            ':product_id' => $product_id,
         ]);
+
+        echo "Product updated successfully!";
+        header("Location: adminProduct.php");
         exit;
-    } else {
-        echo json_encode([
-            'success' => false,
-            'error' => $stmt->error
-        ]);
-        exit;
+    } catch (PDOException $e) {
+        die("Error updating product: " . $e->getMessage());
     }
-    $stmt->close();
 }
 ?>
 
@@ -174,87 +186,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Product</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../../css/adminUpdateProduct.css">
-<style>
-        #drop_zone {
-            border: 2px dashed #ccc;
-            border-radius: 10px;
-            width: 100%;
-            height: 200px;
-            text-align: center;
-            line-height: 200px;
-            color: #ccc;
-            font-size: 20px;
-            cursor: pointer;
-        }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        #drop_zone.dragover {
-            border-color: #000;
-            color: #000;
-        }
-
-        .image-preview {
-            display: inline-block;
-            margin: 10px;
-            position: relative;
-        }
-
-        .image-preview img {
-            max-width: 100px;
-            max-height: 100px;
-        }
-
-        .remove-image {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            cursor: pointer;
-            background: red;
-            color: white;
-            border-radius: 50%;
-            padding: 5px;
-            font-size: 12px;
-        }
-    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="Left">
+        <?php include __DIR__ . '/../../_nav.php'; ?>    
+        </div>
+    </div class ="divider"></div>
+        <div class="right">
+   
     <h1>Update Product</h1>
-
-    <form id="updateProductForm" action="adminUpdateProduct.php?product_id=<?php echo $product['product_id']; ?>" method="POST" enctype="multipart/form-data">
+    <form id="updateProductForm" action="adminUpdateProduct.php?product_id=<?php echo htmlspecialchars($product['product_id']); ?>" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['product_id']); ?>">
-        <input type="hidden" id="existing_video_url" name="existing_video_url" value="<?php echo htmlspecialchars($product['video_url']); ?>">
 
-        <label for="name">Name:</label><br>
-        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br><br>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required><br>
 
-        <label for="description">Description:</label><br>
-        <textarea id="description" name="description" required><?php echo htmlspecialchars($product['description']); ?></textarea><br><br>
+        <label for="brand">Brand:</label>
+        <input type="text" id="brand" name="brand" value="<?php echo htmlspecialchars($product['brand']); ?>" required><br>
 
-        <label for="price">Price:</label><br>
-        <input type="number" step="0.01" id="price" name="price" value="<?php echo htmlspecialchars($product['price']); ?>" required><br><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required><?php echo htmlspecialchars($product['description']); ?></textarea><br>
 
-        <label for="stock">Stock:</label><br>
-        <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product['stock']); ?>" required><br><br>
+        <label for="price">Price:</label>
+        <input type="number" step="0.01" id="price" name="price" value="<?php echo htmlspecialchars($product['price']); ?>" required><br>
 
-        <label for="category">Category:</label><br>
+        <label for="stock">Stock:</label>
+        <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product['stock']); ?>" required><br>
+
+        <label for="color">Color:</label>
+<input type="text" id="color" name="color" value="<?php echo htmlspecialchars($product['color']); ?>" required><br>
+
+        <label for="category">Category:</label>
         <select id="category" name="category" required>
             <option value="">Select a Category</option>
-            <?php
-            if ($categories_result->num_rows > 0) {
-                while ($row = $categories_result->fetch_assoc()) {
-                    $selected = ($product['category_id'] == $row['id']) ? 'selected' : '';
-                    echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['name']) . "</option>";
-                }
-            } else {
-                echo "<option value=''>No categories available</option>";
-            }
-            ?>
-        </select><br><br>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?php echo htmlspecialchars($category['id']); ?>" <?php echo ($product['category_id'] == $category['id']) ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($category['name']); ?>
+                </option>
+            <?php endforeach; ?>
+        </select><br>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status" required>
+            <option value="active" <?php echo ($product['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+            <option value="inactive" <?php echo ($product['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+            <option value="discontinued" <?php echo ($product['status'] == 'discontinued') ? 'selected' : ''; ?>>Discontinued</option>
+        </select><br>
 
         <label for="image_url">Images:</label><br>
         <input type="file" id="image_url" name="image_url[]" accept="image/*" multiple><br><br>
-        <div id="drop_zone">Click or drag images here</div>
+<div id="drop_zone">Click or drag images here</div>
         <div id="imagePreview">
             <?php
             $existing_images = json_decode($product['image_url'], true);
@@ -271,7 +256,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
 
         <label for="video_url">Product Video:</label><br>
         <input type="file" id="video_url" name="video_url" accept="video/*"><br><br>
-        <?php if (!empty($product['video_url'])): ?>
+<?php if (!empty($product['video_url'])): ?>
             <video controls style="max-width: 300px;">
                 <source src="/<?php echo htmlspecialchars($product['video_url']); ?>" type="video/mp4">
                 Your browser does not support the video tag.
@@ -279,77 +264,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
             <p>Current Video: <?php echo htmlspecialchars($product['video_url']); ?></p>
         <?php endif; ?>
 
-        <label for="status">Status:</label><br>
-        <select id="status" name="status" required>
-            <option value="active" <?php echo $product['status'] == 'active' ? 'selected' : ''; ?>>Active</option>
-            <option value="inactive" <?php echo $product['status'] == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
-            <option value="discontinued" <?php echo $product['status'] == 'discontinued' ? 'selected' : ''; ?>>Discontinued</option>
-        </select><br><br>
-
-        <label for="discount">Discount (%):</label><br>
-        <input type="number" step="0.01" id="discount" name="discount" value="<?php echo htmlspecialchars($product['discount']); ?>"><br><br>
-
-        <label for="brand">Brand:</label><br>
-        <input type="text" id="brand" name="brand" value="<?php echo htmlspecialchars($product['brand']); ?>"><br><br>
-
-        <label for="color">Color:</label><br>
-        <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($product['color']); ?>"><br><br>
-
-        <label for="rating">Rating:</label><br>
-        <input type="number" step="0.01" id="rating" name="rating" value="<?php echo htmlspecialchars($product['rating']); ?>"><br><br>
-
-        <label for="reviews_count">Reviews Count:</label><br>
-        <input type="number" id="reviews_count" name="reviews_count" value="<?php echo htmlspecialchars($product['reviews_count']); ?>"><br><br>
-
         <input type="submit" value="Update Product">
     </form>
     <button onclick="window.location.href='adminProduct.php'">Back to Product List</button>
+        </div> <!-- End of right div -->
+        </div><!-- End of container div -->
+
     <script>
         $(document).ready(function () {
             let existingImages = <?php echo !empty($product['image_url']) ? $product['image_url'] : '[]'; ?>;
             existingImages = typeof existingImages === 'string' ? JSON.parse(existingImages) : existingImages;
 
-            let uploadedFiles = new Set();
+            console.log('Initial existingImages:', existingImages); // Debugging line
 
-            function handleFiles(files) {
-                let uniqueFiles = Array.from(files).filter(file => {
-                    if (uploadedFiles.has(file.name)) {
-                        return false;
-                    }
-                    uploadedFiles.add(file.name);
-                    return true;
-                });
-
-                // Clear existing previews
-                $('#imagePreview').empty();
-
-                // Show existing images
-                existingImages.forEach(imagePath => {
-                    const preview = $('<div>').addClass('image-preview');
-                    const img = $('<img>').attr('src', "/" + imagePath);
-                    const removeBtn = $('<span>').addClass('remove-image').text('×').data('src', imagePath);
-                    preview.append(img).append(removeBtn);
-                    $('#imagePreview').append(preview);
-                });
-
-                // Add new image previews
-                uniqueFiles.forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const preview = $('<div>').addClass('image-preview');
-                        const img = $('<img>').attr('src', e.target.result);
-                        const removeBtn = $('<span>').addClass('remove-image').text('×');
-                        preview.append(img).append(removeBtn);
-                        $('#imagePreview').append(preview);
-                    };
-                    reader.readAsDataURL(file);
-                });
-
-                return uniqueFiles;
-            }
+            const dropZone = $('#drop_zone');
+            const fileInput = $('#image_url');
+            const previewContainer = $('#imagePreview');
 
             // Drag-and-drop functionality
-            const dropZone = $('#drop_zone');
+            dropZone.on('click', function () {
+                fileInput.click();
+            });
 
             dropZone.on('dragover', function (e) {
                 e.preventDefault();
@@ -369,33 +304,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
                 dropZone.removeClass('dragover');
 
                 const files = e.originalEvent.dataTransfer.files;
-                const uniqueFiles = handleFiles(files);
-
-                // Add files to the input element
-                const fileInput = $('#image_url')[0];
-                const dt = new DataTransfer();
-                uniqueFiles.forEach(file => dt.items.add(file));
-                fileInput.files = dt.files;
+                handleFiles(files);
             });
 
-            // Click to upload
-            dropZone.click(function () {
-                $('#image_url').click();
+            fileInput.on('change', function () {
+                const files = fileInput[0].files;
+                handleFiles(files);
             });
 
-            // File input change
-            $('#image_url').change(function () {
-                const uniqueFiles = handleFiles(this.files);
-                const dt = new DataTransfer();
-                uniqueFiles.forEach(file => dt.items.add(file));
-                this.files = dt.files;
-            });
+            function handleFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const imageUrl = e.target.result;
+                            const previewHtml = `
+                                <div class="image-preview">
+                                    <img src="${imageUrl}" alt="Uploaded Image">
+                                    <span class="remove-image" data-src="${imageUrl}">×</span>
+                                </div>
+                            `;
+                            previewContainer.append(previewHtml);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
 
             // Remove image
             $(document).on('click', '.remove-image', function () {
+                console.log('Remove button clicked'); // Debugging line
+                const removedSrc = $(this).siblings('img').attr('src');
+                console.log('Image to remove:', removedSrc); // Debugging line
                 $(this).parent('.image-preview').remove();
-                const removedSrc = $(this).data('src');
+
+                // Update the hidden input field for existing images
                 existingImages = existingImages.filter(src => src !== removedSrc);
+                console.log('Updated existingImages:', existingImages); // Debugging line
+                $('#existing_images').val(JSON.stringify(existingImages));
+                console.log('Updated hidden input value:', $('#existing_images').val()); // Debugging line
             });
 
             // Form submit
@@ -416,7 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
                         const jsonResponse = JSON.parse(response);
                         if (jsonResponse.success) {
                             alert(jsonResponse.message);
-                            window.location.href ("adminProduct.php");
+                            window.location.href = jsonResponse.redirect;
                         } else {
                             alert('Error: ' + jsonResponse.error);
                         }

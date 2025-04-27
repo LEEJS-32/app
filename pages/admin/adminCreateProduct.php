@@ -1,5 +1,6 @@
 <?php
 require_once '../../_base.php';
+include __DIR__ . '/../../_header.php';
 
 if (isset($_SESSION['form_errors'])) {
     foreach ($_SESSION['form_errors'] as $error) {
@@ -17,6 +18,12 @@ if (isset($_SESSION['form_data'])) {
 
 auth_user();
 auth('admin');
+
+$user = $_SESSION['user'];
+$user_id = $user['user_id'];
+$name = $user['name'];
+$role = $user['role'];
+
 
 // Fetch categories
 try {
@@ -146,6 +153,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         $_SESSION['success_message'] = "Product added successfully!";
+        temp('info', 'Product added successfully!');
+        // header('Location: adminProduct.php'); // Redirect to another page
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     } catch (PDOException $e) {
@@ -302,12 +311,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <h1>Add New Product</h1>
-    <?php
-    if (isset($_SESSION['success_message'])) {
-        echo "<p style='color: green;'>" . $_SESSION['success_message'] . "</p>";
-        unset($_SESSION['success_message']);
-    }
-    ?>
+<div class="container">
+    <div class="left">
+      <?php include __DIR__ . '/admin_nav.php'; ?>
+    </div>
+    <div class="divider"></div>
+
+    <div class="right">
+        <div class="form-container">
+
     <form action="adminCreateProduct.php" method="POST" enctype="multipart/form-data">
         <label for="name">Product Name:</label><br>
         <input type="text" id="name" name="name" value="<?php echo isset($form_data['name']) ? htmlspecialchars($form_data['name']) : ''; ?>" required><br><br>
@@ -366,5 +378,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <input type="submit" value="Add Product">
     </form>
     <button onclick="window.location.href='adminProduct.php'">Back to Product List</button>
+    </div>
+    </div>
+</div>
 </body>
+
+<footer>
+        <?php
+            include __DIR__ . '/../../_footer.php';
+        ?>
+    </footer>
 </html>
