@@ -71,12 +71,14 @@ try {
             </div>
 
             <ul class="nav">
-                <li><a href="member_profile.php"><i class='bx bxs-user-detail' ></i>My Profile</a></li>
-                <li><a href="reset_password.php" class="active"><i class='bx bx-lock-alt' ></i>Password </a></li>
-                <li><a href="member_address.php"><i class='bx bx-home-alt-2' ></i>My Address</a></li>
-                <li><a href="view_cart.php"><i class='bx bx-shopping-bag' ></i>Shopping Cart</a></li>
-                <li><a href="#"><i class='bx bx-heart' ></i>Wishlist</a></li>
-                <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>My Orders</a></li>
+                <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>DashBoard</a></li>
+                <li><a href="admin_members.php"><i class='bx bxs-user-account' ></i>Members</a></li>
+                <li><a href="adminProduct.php"><i class='bx bx-chair'></i>Products</a></li>
+                <li><a href="adminOrder.php" class="active"><i class='bx bx-food-menu'></i>Orders</a></li>
+                <li><a href="adminVoucher.php"><i class='bx bx-gift'></i>Vouchers</a></li>
+                <hr>
+                <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>
+                <li><a href="admin_reset_password.php"><i class='bx bx-lock-alt' ></i>Password</a></li>
             </ul>
         </div>
         <div class="divider"></div>

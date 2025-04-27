@@ -475,3 +475,13 @@ Voucher discount applied: 58.8
 Total amount before discount: 117.60
 Total amount after discount: 58.8
 2025-04-28 02:37:18 - API Response: 						[{"BillCode":"zq8mr8ue"}]
+Voucher code received: Raya
+Voucher type: percent
+Voucher discount applied: 217.7
+Total amount before discount: 435.40
+Total amount after discount: 217.7
+2025-04-28 04:06:11 - API Response: 						[{"BillCode":"6ajnjib2"}]
+Voucher code received: 
+Total amount before discount: 435.40
+Total amount after discount: 435.4
+2025-04-28 04:20:43 - API Response: 						[{"BillCode":"9g0tpe1v"}]
