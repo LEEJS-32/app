@@ -111,6 +111,22 @@ try {
         ':order_id' => $order_id
     ]);
 
+        if ($payment_status === "Completed") {
+        // Calculate reward points (10% of the payment amount)
+        $reward_points = intval($amount * 0.1);
+        
+        // Update user's reward points in users table
+        $stm = $_db->prepare("
+            UPDATE users 
+            SET reward_pt = reward_pt + :points 
+            WHERE user_id = :user_id
+        ");
+        $stm->execute([
+            ':points' => $reward_points,
+            ':user_id' => $user_id
+        ]);
+    }
+
     if ($stm->rowCount() > 0) {
         file_put_contents($logFile, "✅ Order status updated: Order ID $order_id, Status: $order_status\n", FILE_APPEND);
     } else {

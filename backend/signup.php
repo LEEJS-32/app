@@ -81,6 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $m = get_mail();
             $m->addAddress($email);
             $m->Subject = "Account Activation";
+            $mail->isHTML(true);
             $m->Body = "
                 <p>Dear $name,</p>
                 <h1>Account Activation</h1>

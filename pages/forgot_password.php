@@ -55,23 +55,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Forgot Password</title>
-    <style>
-        body { font-family: Arial; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
-        form { max-width: 400px; width: 100%; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        input[type="email"], button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
-        .message { color: red; margin-top: 10px; text-align: center; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Furniture.os</title>
+    <link rel="stylesheet" href="../css/password.css">
 </head>
 <body>
-    <h2>Forgot Password</h2>
-    <form method="post">
-        <label for="email">Enter your email:</label>
-        <input type="email" name="email" required>
-        <button type="submit">Send OTP</button>
-        <?php if ($message): ?>
-            <p class="message"><?= $message ?></p>
-        <?php endif; ?>
-    </form>
+    <div class="password-container">
+        <h2>Forgot Password</h2>
+        <form method="post" class="password-form">
+            <div class="form-group">
+                <label for="email">Enter your email address</label>
+                <input type="email" name="email" id="email" required placeholder="your@email.com">
+            </div>
+            <button type="submit">Send OTP</button>
+            <?php if ($message): ?>
+                <div class="message error-message"><?= $message ?></div>
+            <?php endif; ?>
+        </form>
+        <div class="back-link">
+            <a href="signup_login.php">Back to Login</a>
+        </div>
+    </div>
 </body>
 </html>

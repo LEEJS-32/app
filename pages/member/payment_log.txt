@@ -463,3 +463,15 @@ Voucher code received:
 Total amount before discount: 950.40
 Total amount after discount: 950.4
 2025-04-27 21:37:19 - API Response: 						[{"BillCode":"unh8prb8"}]
+Voucher code received: 
+Total amount before discount: 6393.00
+Total amount after discount: 6393
+2025-04-28 01:18:39 - API Response: 						[{"BillCode":"d7jy1p4e"}]
+Voucher code received: 
+Total amount before discount: 3936.00
+Total amount after discount: 3936
+2025-04-28 01:24:53 - API Response: 						[{"BillCode":"81w59kyc"}]
+Voucher code received: 
+Total amount before discount: 7872.00
+Total amount after discount: 7872
+2025-04-28 01:34:03 - API Response: 						[{"BillCode":"s7i1n867"}]
