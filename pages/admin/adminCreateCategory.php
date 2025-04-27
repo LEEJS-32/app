@@ -1,17 +1,17 @@
 <?php
 require_once '../../_base.php'; // Includes $_db and potentially session_start()
 // Authentication checks
+
+// Member role
 auth_user();
 auth('admin');
 
-// Fetch user details for nav bar
-if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
-    $_SESSION['user'] = ['name' => 'Admin', 'role' => 'Admin'];
-    error_log("Warning: User session data missing or invalid in adminCreateCategory.php after auth checks.");
-}
 $user = $_SESSION['user'];
-$name = htmlspecialchars($user['name'] ?? 'Admin User');
-$role = htmlspecialchars($user['role'] ?? 'Admin');
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
+
+
 
 // Initialize variables for form repopulation and messages
 $create_category_name = $_SESSION['form_data']['create_category_name'] ?? ''; // Use specific name for create form
@@ -46,8 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } else {
                     $stmt = $_db->prepare("INSERT INTO categories (name) VALUES (:name)");
                     $stmt->execute([':name' => $category_name]);
-                    $_SESSION['success_message'] = "Category '" . htmlspecialchars($category_name) . "' created successfully.";
-                    unset($_SESSION['form_data']); // Clear form data on success
+                    temp('info', "Category '" . htmlspecialchars($category_name) . "' created successfully!");                    unset($_SESSION['form_data']); // Clear form data on success
                     header("Location: " . $_SERVER['PHP_SELF']);
                     exit;
                 }
@@ -81,10 +80,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     // Check if any row was actually updated
                     if ($stmt->rowCount() > 0) {
-                         $_SESSION['success_message'] = "Category updated to '" . htmlspecialchars($new_category_name) . "' successfully.";
+                        temp('info', "Category updated to '" . htmlspecialchars($new_category_name) . "' successfully!");
                     } else {
                         // Optionally inform if the name was the same
-                         $_SESSION['success_message'] = "Category name was already '" . htmlspecialchars($new_category_name) . "'. No changes made.";
+                        temp('info', "Category name was already '" . htmlspecialchars($new_category_name) . "'. No changes made.");
                     }
                     header("Location: " . $_SERVER['PHP_SELF']);
                     exit;
@@ -214,6 +213,7 @@ include __DIR__ . '/../../_header.php';
             <?php include __DIR__ . '/admin_nav.php'; ?>
         </div>
 
+        <div class="divider"></div> <!-- Divider between left and right -->
         <!-- Right Content Area -->
         <div class="right">
             <h1>Manage Categories</h1>
@@ -274,12 +274,13 @@ include __DIR__ . '/../../_header.php';
                 <?php elseif (empty($_err['fetch_error'])): ?>
                     <p>No categories found.</p>
                 <?php endif; ?>
+                <button type="button" onclick="window.location.href='adminProduct.php'">Back to Product List</button>
+
             </div>
 
 
             <br><br>
             <!-- Consider linking back to a category management page if one exists -->
-            <button type="button" onclick="window.location.href='adminProduct.php'">Back to Product List</button>
         </div> <!-- /right -->
     </div> <!-- /container -->
 

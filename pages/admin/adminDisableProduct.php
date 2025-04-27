@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
         $stm->bindParam(':product_id', $product_id, PDO::PARAM_INT);
 
         if ($stm->execute()) {
-            echo "Product disabled successfully";
+            temp('info', 'Product disabled successfully!');
         } else {
             http_response_code(500);
             echo "Error disabling product.";
