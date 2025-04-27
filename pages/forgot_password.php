@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($mail->send()) {
             $_SESSION['otp_email'] = $email;
-            header("Location: verify_otp.php"); // redirect to OTP verification page
+            header("Location: verify_otp.php");
             exit();
         } else {
             $message = "Failed to send email. Please try again.";
@@ -55,23 +55,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Forgot Password</title>
-    <style>
-        body { font-family: Arial; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
-        form { max-width: 400px; width: 100%; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-        input[type="email"], button { width: 100%; padding: 10px; margin-top: 10px; font-size: 16px; }
-        .message { color: red; margin-top: 10px; text-align: center; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Furniture.os</title>
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/logo.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/password_reset.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h2>Forgot Password</h2>
-    <form method="post">
-        <label for="email">Enter your email:</label>
-        <input type="email" name="email" required>
-        <button type="submit">Send OTP</button>
-        <?php if ($message): ?>
-            <p class="message"><?= $message ?></p>
-        <?php endif; ?>
-    </form>
+    <div class="password-reset-container">
+        <h2>Forgot Password</h2>
+        <form method="post" class="password-reset-form">
+            <div class="form-group">
+                <label for="email">Enter your email address</label>
+                <input type="email" name="email" id="email" required placeholder="your@email.com">
+            </div>
+            <button type="submit">Send OTP</button>
+            <?php if ($message): ?>
+                <div class="message error"><?= htmlspecialchars($message) ?></div>
+            <?php endif; ?>
+        </form>
+    </div>
 </body>
 </html>

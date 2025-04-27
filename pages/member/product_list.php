@@ -61,14 +61,17 @@ if (!empty($color_filter)) {
 
 // Handle sorting
 switch ($sort_by) {
-    case 'latest':
-        $sql .= " ORDER BY created_at DESC";
-        break;
     case 'price_asc':
         $sql .= " ORDER BY price ASC";
         break;
     case 'price_desc':
         $sql .= " ORDER BY price DESC";
+        break;
+    case 'stock_asc':
+        $sql .= " ORDER BY stock ASC";
+        break;
+    case 'stock_desc':
+        $sql .= " ORDER BY stock DESC";
         break;
     case 'rating_asc':
         $sql .= " ORDER BY rating ASC";
@@ -108,53 +111,12 @@ $stm->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stm->execute();
 $result = $stm->fetchAll(PDO::FETCH_ASSOC);
 
-// Build the count SQL with the same filters
+// Count total products for pagination
 $count_sql = "SELECT COUNT(*) FROM products WHERE status IN ('active', 'discontinued')";
-if (!empty($search_query)) {
-    $count_sql .= " AND name LIKE :search_query";
-}
-if (!empty($brand_filter)) {
-    $count_sql .= " AND brand = :brand_filter";
-}
-if (!empty($category_filter)) {
-    $count_sql .= " AND category_id = :category_filter";
-}
-if (!empty($min_price) || !empty($max_price)) {
-    $count_sql .= " AND price BETWEEN :min_price AND :max_price";
-}
-if (!empty($color_filter)) {
-    $count_sql .= " AND color = :color_filter";
-}
-
 $count_stm = $_db->prepare($count_sql);
-
-// Bind parameters for count query
-if (!empty($search_query)) {
-    $count_stm->bindValue(':search_query', "%$search_query%", PDO::PARAM_STR);
-}
-if (!empty($brand_filter)) {
-    $count_stm->bindValue(':brand_filter', $brand_filter, PDO::PARAM_STR);
-}
-if (!empty($category_filter)) {
-    $count_stm->bindValue(':category_filter', $category_filter, PDO::PARAM_INT);
-}
-if (!empty($min_price) || !empty($max_price)) {
-    $count_stm->bindValue(':min_price', $min_price, PDO::PARAM_INT);
-    $count_stm->bindValue(':max_price', $max_price, PDO::PARAM_INT);
-}
-if (!empty($color_filter)) {
-    $count_stm->bindValue(':color_filter', $color_filter, PDO::PARAM_STR);
-}
-
 $count_stm->execute();
 $total_items = $count_stm->fetchColumn();
 $total_pages = ceil($total_items / $items_per_page);
-
-// Build query string for pagination links, excluding 'page'
-$query_params = $_GET;
-unset($query_params['page']);
-$query_string = http_build_query($query_params);
-$query_string = $query_string ? $query_string . '&' : '';
 
 // Get alert message from session if exists
 $alertMessage = isset($_SESSION['cart_message']) ? $_SESSION['cart_message'] : "";
@@ -167,7 +129,7 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
-    <link rel="stylesheet" href="../../css/product.css">
+    <link rel="stylesheet" href="../../css/product.css"> <!-- External CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -182,21 +144,10 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                     data: formData,
                     success: function (response) {
                         $('.product-container').html($(response).find('.product-container').html());
-                        $('.pagination').html($(response).find('.pagination').html());
                     },
                     error: function () {
                         alert('Error applying filters or sorting.');
                     }
-                });
-            });
-
-            // Handle pagination click (AJAX)
-            $(document).on('click', '.pagination a', function (e) {
-                e.preventDefault();
-                const url = $(this).attr('href');
-                $.get(url, function (response) {
-                    $('.product-container').html($(response).find('.product-container').html());
-                    $('.pagination').html($(response).find('.pagination').html());
                 });
             });
         });
@@ -209,22 +160,25 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
         <div id="successMessage" class="success-message"><?php echo htmlspecialchars($alertMessage); ?></div>
     <?php } ?>
 
+    <!-- Search Bar -->
+    <div class="search-container">
+        <form method="GET" action="product_list.php">
+            <input type="search" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
     <div class="main-container">
-        <form method="GET" action="product_list.php" class="filter-form">
-            <!-- Search Bar -->
-            <div class="search-container">
-                <input type="search" name="search" placeholder="Search products..." value="<?php echo htmlspecialchars($search_query); ?>">
-                <button type="submit">Search</button>
-            </div>
-            <div class="content-container">
-                <!-- Sidebar Filters -->
-                <div class="filter-section">
+        <div class="content-container"> <!-- Add this wrapper -->
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form class="filter-form">
                     <h3>Filters</h3>
+
                     <!-- Price Filter -->
                     <div class="filter-group">
                         <label for="minPrice">Price Range:</label>
                         <input type="number" id="minPrice" name="min_price" min="0" max="10000" step="1" value="<?php echo isset($_GET['min_price']) ? htmlspecialchars($_GET['min_price']) : 0; ?>" placeholder="Min Price">
-                        <span style="display:inline-block; width:20px; height:2px; background:#ccc; vertical-align:middle; margin:0 24px;"></span>
                         <input type="number" id="maxPrice" name="max_price" min="0" max="10000" step="1" value="<?php echo isset($_GET['max_price']) ? htmlspecialchars($_GET['max_price']) : 10000; ?>" placeholder="Max Price">
                     </div>
 
@@ -275,88 +229,91 @@ unset($_SESSION['cart_message']); // Remove message after displaying it
                         <label for="sortBy">Sort By:</label>
                         <select id="sortBy" name="sort">
                             <option value="">Default</option>
-                            <option value="latest" <?php echo $sort_by === 'latest' ? 'selected' : ''; ?>>Latest</option>
                             <option value="price_asc" <?php echo $sort_by === 'price_asc' ? 'selected' : ''; ?>>Price: Low to High</option>
                             <option value="price_desc" <?php echo $sort_by === 'price_desc' ? 'selected' : ''; ?>>Price: High to Low</option>
+                            <option value="stock_asc" <?php echo $sort_by === 'stock_asc' ? 'selected' : ''; ?>>Stock: Low to High</option>
+                            <option value="stock_desc" <?php echo $sort_by === 'stock_desc' ? 'selected' : ''; ?>>Stock: High to Low</option>
                             <option value="rating_asc" <?php echo $sort_by === 'rating_asc' ? 'selected' : ''; ?>>Rating: Low to High</option>
                             <option value="rating_desc" <?php echo $sort_by === 'rating_desc' ? 'selected' : ''; ?>>Rating: High to Low</option>
                         </select>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                <!-- Product Section -->
-                <div class="product-container">
-                    <ul class="product-list">
-                        <?php
-                        if (!empty($result)) {
-                            foreach ($result as $row) {
-                                $stock = intval($row['stock']);
-                                $is_discontinued = $row['status'] === 'discontinued';
-                                ?>
-                                <li class="product-item">
-                                    <a href="product_details.php?product_id=<?php echo htmlspecialchars($row['product_id']); ?>" class="product-link">
-                                        <div class="product-card <?php echo $is_discontinued ? 'discontinued' : ''; ?>">
-                                            <?php
-                                            $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
-                                            if (is_array($image_urls) && !empty($image_urls)) {
-                                                $image_path = $image_urls[0];
-                                                echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
-                                            } else {
-                                                echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
-                                            }
-                                            ?>
-                                            <div class="product-name">
-                                            <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                                            </div>
-                                            <div class="price-container">
-                                            <?php if ($row['price'] != $row['discounted_price']) { ?>
-                                                <p id="price" class="original-price">RM<?php echo number_format($row['price'], 2); ?></p>
-                                                <p id="discounted_price" class="discounted-price">RM<?php echo number_format($row['discounted_price'], 2); ?></p>
-                                            <?php } else { ?>
-                                                <p id="price" class="no-discount-price">RM<?php echo number_format($row['price'], 2); ?></p>
-                                            <?php } ?>
+            <!-- Product Section -->
+            <div class="product-container">
+                <ul class="product-list">
+                    <?php
+                    if (!empty($result)) {
+                        foreach ($result as $row) {
+                            $stock = intval($row['stock']);
+                            $is_discontinued = $row['status'] === 'discontinued';
+                            ?>
+                            <li class="product-item">
+                                <a href="product_details.php?product_id=<?php echo htmlspecialchars($row['product_id']); ?>" class="product-link">
+                                    <div class="product-card <?php echo $is_discontinued ? 'discontinued' : ''; ?>">
+                                        <?php
+                                        $image_urls = json_decode($row['image_url'], true); // Decode the JSON-encoded image URLs
+                                        if (is_array($image_urls) && !empty($image_urls)) {
+                                            $image_path = $image_urls[0];
+                                            echo "<img class='product-image' src='/" . htmlspecialchars($image_path) . "' alt='" . htmlspecialchars($row['name']) . "'>";
+                                        } else {
+                                            echo "<img class='product-image' src='/img/default-product.jpg' alt='Default Product Image'>";
+                                        }
+                                        ?>
+                                        <div class="product-name">
+                                        <h3><?php echo htmlspecialchars($row['name']); ?></h3>
                                         </div>
-                            
-                                        </div>
-                                    </a>
-                                </li>
-                                <?php
-                            }
-                        } else {
-                            echo "<li class='no-products'>No products found.</li>";
+                                        <div class="price-container">
+                                        <?php if ($row['price'] != $row['discounted_price']) { ?>
+                                            <p id="price" class="original-price">RM<?php echo number_format($row['price'], 2); ?></p>
+                                            <p id="discounted_price" class="discounted-price">RM<?php echo number_format($row['discounted_price'], 2); ?></p>
+                                        <?php } else { ?>
+                                            <p id="price" class="no-discount-price">RM<?php echo number_format($row['price'], 2); ?></p>
+                                        <?php } ?>
+                                    </div>
+                        
+                                    </div>
+                                </a>
+                            </li>
+                            <?php
                         }
-                        ?>
-                    </ul>
-                </div> <!-- End of product-container -->
-            </div> <!-- End of content-container -->
+                    } else {
+                        echo "<li class='no-products'>No products found.</li>";
+                    }
+                    ?>
+                </ul>
+
+
+
+            </div> <!-- End of product-container -->
+
+    </div>
 
             <!-- Pagination -->
             <div class="pagination">
-                <!-- Previous Button -->
-                <?php if ($current_page > 1): ?>
-                    <a href="?<?php echo $query_string; ?>page=<?php echo $current_page - 1; ?>" class="prev">&lt;</a>
-                <?php else: ?>
-                    <span class="prev disabled">&lt;</span>
-                <?php endif; ?>
+    <!-- Previous Button -->
+            <?php if ($current_page > 1): ?>
+                <a href="?page=<?php echo $current_page - 1; ?>" class="prev">&lt;</a>
+            <?php else: ?>
+                <span class="prev disabled">&lt;</span>
+            <?php endif; ?>
 
-                <!-- Page Numbers -->
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?<?php echo $query_string; ?>page=<?php echo $i; ?>"<?php if ($i == $current_page) echo ' class="active"'; ?>>
-                        <?php echo $i; ?>
-                    </a>
-                <?php endfor; ?>
+            <!-- Page Numbers -->
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?page=<?php echo $i; ?>" class="<?php echo $i == $current_page ? 'active' : ''; ?>">
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
 
-                <!-- Next Button -->
-                <?php if ($current_page < $total_pages): ?>
-                    <a href="?<?php echo $query_string; ?>page=<?php echo $current_page + 1; ?>" class="next">&gt;</a>
-                <?php else: ?>
-                    <span class="next disabled">&gt;</span>
-                <?php endif; ?>
-            </div><!-- End of pagination -->
-        </form>
+            <!-- Next Button -->
+            <?php if ($current_page < $total_pages): ?>
+                <a href="?page=<?php echo $current_page + 1; ?>" class="next">&gt;</a>
+            <?php else: ?>
+                <span class="next disabled">&gt;</span>
+            <?php endif; ?>
+        </div><!-- End of pagination -->
+           
     </div><!-- End of main-container -->
 </body>
-<footer>
-    <?php include __DIR__ . '/../../_footer.php'; ?>
-</footer>
 </html>
