@@ -18,23 +18,50 @@ try {
 
         if ($user_id > 0) {
             // Logged-in user: Update DB
-            if ($action === 'increase') {
-                $sql = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE user_id = :user_id AND product_id = :product_id";
-            } elseif ($action === 'decrease') {
-                $sql = "UPDATE shopping_cart SET quantity = quantity - 1 WHERE user_id = :user_id AND product_id = :product_id AND quantity > 1";
-            } elseif ($action === 'remove') {
-                $sql = "DELETE FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id";
+            $stm_stock = $_db->prepare("SELECT stock FROM products WHERE product_id = :product_id");
+            $stm_stock->execute(['product_id' => $product_id]);
+            $product = $stm_stock->fetch(PDO::FETCH_ASSOC);
+
+            if (!$product) {
+                die("Error: Product not found.");
             }
 
-            $stm = $_db->prepare($sql);
-            $stm->execute([
-                ':user_id' => $user_id,
-                ':product_id' => $product_id
-            ]);
+            $stock = intval($product['stock']);
+
+            if ($action === 'increase') {
+                // Check if the quantity exceeds stock
+                $stm_check = $_db->prepare("SELECT quantity FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id");
+                $stm_check->execute(['user_id' => $user_id, 'product_id' => $product_id]);
+                $cart_item = $stm_check->fetch(PDO::FETCH_ASSOC);
+
+                if ($cart_item && $cart_item['quantity'] < $stock) {
+                    $sql = "UPDATE shopping_cart SET quantity = quantity + 1 WHERE user_id = :user_id AND product_id = :product_id";
+                    $stm = $_db->prepare($sql);
+                    $stm->execute(['user_id' => $user_id, 'product_id' => $product_id]);
+                }
+            } elseif ($action === 'decrease') {
+                $sql = "UPDATE shopping_cart SET quantity = quantity - 1 WHERE user_id = :user_id AND product_id = :product_id AND quantity > 1";
+                $stm = $_db->prepare($sql);
+                $stm->execute(['user_id' => $user_id, 'product_id' => $product_id]);
+            } elseif ($action === 'remove') {
+                $sql = "DELETE FROM shopping_cart WHERE user_id = :user_id AND product_id = :product_id";
+                $stm = $_db->prepare($sql);
+                $stm->execute(['user_id' => $user_id, 'product_id' => $product_id]);
+            }
         } else {
             // Guest user: Update session
             if (isset($_SESSION['cart'][$product_id])) {
-                if ($action === 'increase') {
+                $stm_stock = $_db->prepare("SELECT stock FROM products WHERE product_id = :product_id");
+                $stm_stock->execute(['product_id' => $product_id]);
+                $product = $stm_stock->fetch(PDO::FETCH_ASSOC);
+
+                if (!$product) {
+                    die("Error: Product not found.");
+                }
+
+                $stock = intval($product['stock']);
+
+                if ($action === 'increase' && $_SESSION['cart'][$product_id] < $stock) {
                     $_SESSION['cart'][$product_id]++;
                 } elseif ($action === 'decrease' && $_SESSION['cart'][$product_id] > 1) {
                     $_SESSION['cart'][$product_id]--;
@@ -52,7 +79,7 @@ try {
     $cart_items = [];
     if ($user_id > 0) {
         $sql_cart = "SELECT shopping_cart.cart_id, shopping_cart.quantity, 
-                            products.product_id, products.name, products.discounted_price, products.image_url
+                            products.product_id, products.name, products.discounted_price, products.image_url, products.stock
                      FROM shopping_cart
                      JOIN products ON shopping_cart.product_id = products.product_id
                      WHERE shopping_cart.user_id = :user_id";
@@ -62,7 +89,7 @@ try {
     } else {
         if (!empty($_SESSION['cart'])) {
             foreach ($_SESSION['cart'] as $product_id => $quantity) {
-                $sql_product = "SELECT product_id, name, discounted_price, image_url FROM products WHERE product_id = :product_id";
+                $sql_product = "SELECT product_id, name, discounted_price, image_url, stock FROM products WHERE product_id = :product_id";
                 $stm_product = $_db->prepare($sql_product);
                 $stm_product->execute([':product_id' => $product_id]);
                 if ($product = $stm_product->fetch(PDO::FETCH_OBJ)) {
@@ -134,7 +161,7 @@ $total_cart_price = 0;
                         <div class="qty">
                             <button type="submit" name="action" value="decrease">−</button>
                             <span class="qty-number"><?= htmlspecialchars($quantity) ?></span>
-                            <button type="submit" name="action" value="increase">+</button>
+                            <button type="submit" name="action" value="increase" <?= $quantity >= $row->stock ? 'disabled' : '' ?>>+</button>
                         </div>
                         </td>
                         <td>

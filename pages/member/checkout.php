@@ -28,11 +28,12 @@ try {
         $address_info = $stm->fetch(PDO::FETCH_OBJ);
 
         // Fetch available vouchers
-        $stm = $_db->prepare("SELECT * FROM vouchers 
-                             WHERE user_id = :user_id 
-                             AND quantity > 0 
-                             AND start_date <= CURDATE() 
-                             AND end_date >= CURDATE()");
+        $stm = $_db->prepare("SELECT code, description, type, value, quantity 
+                              FROM vouchers 
+                              WHERE user_id = :user_id 
+                              AND quantity > 0 
+                              AND start_date <= CURDATE() 
+                              AND end_date >= CURDATE()");
         $stm->execute([':user_id' => $user_id]);
         $vouchers = $stm->fetchAll(PDO::FETCH_OBJ);
     } else {
@@ -126,13 +127,15 @@ try {
 
                 <label>Select Voucher:</label>
                 <select name="voucher_code" id="voucher_code" onchange="applyVoucher()">
-                    <option value="" data-type="" data-value="0">-- No Voucher --</option>
+                    <option value="" data-type="" data-value="0" data-quantity="0">-- No Voucher --</option>
                     <?php foreach ($vouchers as $voucher): ?>
                         <option value="<?= htmlspecialchars($voucher->code) ?>" 
                                 data-type="<?= htmlspecialchars($voucher->type) ?>" 
-                                data-value="<?= htmlspecialchars($voucher->value) ?>">
+                                data-value="<?= htmlspecialchars($voucher->value) ?>" 
+                                data-quantity="<?= htmlspecialchars($voucher->quantity) ?>">
                             <?= htmlspecialchars($voucher->description) ?> 
-                            (<?= $voucher->type === 'rm' ? 'RM' : '%' ?><?= htmlspecialchars($voucher->value) ?>)
+                            (<?= $voucher->type === 'rm' ? 'RM' : '%' ?><?= htmlspecialchars($voucher->value) ?>, 
+                            Quantity: <?= htmlspecialchars($voucher->quantity) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>

@@ -5,8 +5,8 @@ include '../../_header.php';
 
 // Check if the user is logged in
 $user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
-$user_id = $user ? $user['user_id'] : 'Guest';
-$user_name = $user ? $user['name'] : 'Guest';
+$user_id = $user ? $user->user_id : 'Guest';
+$user_name = $user ? $user->name : 'Guest';
 
 // Fetch filter values from GET parameters
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : "";

@@ -12,9 +12,9 @@ auth_user();
 auth('admin');
 
 $user = $_SESSION['user'];
-$user_id = $user['user_id'];
-$name = $user['name'];
-$role = $user['role'];
+$user_id = $user->user_id;
+$name = $user->name;
+$role = $user->role;
 
 // ----------------------------------------------------------------------------
 

@@ -92,7 +92,7 @@ try {
             <ul class="nav">
                 <li><a href="admin_profile.php"><i class='bx bxs-dashboard'></i>Dashboard</a></li>
                 <li><a href="admin_members.php" class="active"><i class='bx bxs-user-account' ></i>Members</a></li>
-                <li><a href="products.php"><i class='bx bx-chair'></i>Products</a></li>
+                <li><a href="adminProduct.php"><i class='bx bx-chair'></i>Products</a></li>
                 <li><a href="adminOrder.php"><i class='bx bx-food-menu'></i>Orders</a></li>
                 <hr>
                 <li><a href="admin_edit_profile.php"><i class='bx bxs-user-detail' ></i>Edit Profile</a></li>

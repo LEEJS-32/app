@@ -8,8 +8,9 @@ $user_name = htmlspecialchars($user->name);
 $user_email = htmlspecialchars($user->email);
 
 try {
-    // Fetch orders and payment details
+    // Fetch orders and payment details, including voucher_code
     $sql = "SELECT o.order_id, o.total_price, o.order_date, o.status, 
+                   o.voucher_code, 
                    p.payment_status, p.payment_method, p.amount, p.transaction_date 
             FROM orders o
             LEFT JOIN payments p ON o.order_id = p.order_id
@@ -27,7 +28,7 @@ try {
 ?>
 
 <head>
-    <title>Member Profile</title>
+    <title>Order History</title>
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../css/admin_profile.css">
     <link rel="stylesheet" href="../../css/member/order_history.css">
@@ -104,6 +105,7 @@ try {
                         <th>Payment Method</th>
                         <th>Amount Paid(RM)</th>
                         <th>Transaction Date</th>
+                        <th>Voucher Code</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -117,9 +119,10 @@ try {
                             <td><?= ucfirst(htmlspecialchars($order->payment_method ?? 'N/A')); ?></td>
                             <td><?= number_format($order->amount, 2); ?></td>
                             <td><?= htmlspecialchars($order->transaction_date ?? 'N/A'); ?></td>
+                            <td><?= htmlspecialchars($order->voucher_code ?? 'N/A'); ?></td> 
                         </tr>
                         <tr class="order-items" id="items-<?= htmlspecialchars($order->order_id); ?>" style="display: none;">
-                            <td colspan="8">
+                            <td colspan="9">
                                 <table>
                                     <thead>
                                         <tr>
