@@ -5,7 +5,17 @@ A full stack Web Design & Development course project that use a combination of f
 Install XAMPP server
 
 # Preview of Pages
+Home Page:
+![photo_2025-11-16_02-11-53](https://github.com/user-attachments/assets/f771cf3a-4a43-4bd1-b7a9-06aa64a4b061)
 
+Login Page:
+![photo_2025-11-16_02-20-05](https://github.com/user-attachments/assets/a23b97e0-d342-45ad-8e9d-8d52adcee9d5)
+
+Profile Page:
+![photo_2025-11-16_02-19-59](https://github.com/user-attachments/assets/48608b10-d4d6-458a-abcb-d25860be64cd)
+
+Product Page:
+![photo_2025-11-16_02-20-09](https://github.com/user-attachments/assets/c4e0e067-7943-4e8b-b703-a0e3bb4a9220)
 
 # Functions included
 Some functions are not included:
