@@ -2,7 +2,9 @@
 A full stack Web Design & Development course project that use a combination of frontend and backend programming languages such as HTML, CSS, Javascript and PHP.
 
 # Prequisite
-Install XAMPP server
+1. Install XAMPP server
+2. Start the server (first two)
+3. In VS code, type 'php -S localhost:8000' in terminal
 
 # Default config (for login):
 User:
