@@ -4,6 +4,15 @@ A full stack Web Design & Development course project that use a combination of f
 # Prequisite
 Install XAMPP server
 
+# Default config (for login):
+User:
+user@example.com
+User@123
+
+Admin:
+admin@example.com
+Admin@123
+
 # Preview of Pages
 Home Page:
 ![photo_2025-11-16_02-11-53](https://github.com/user-attachments/assets/f771cf3a-4a43-4bd1-b7a9-06aa64a4b061)
